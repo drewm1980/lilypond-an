@@ -1,29 +1,27 @@
 /*
-  rest.hh -- part of LilyPond
+  rest.hh -- declare Rest
 
-  (c) 1996,97 Han-Wen Nienhuys
+  source file of the GNU LilyPond music typesetter
+
+  (c) 1997 Han-Wen Nienhuys <hanwen@stack.nl>
 */
+
 
 #ifndef REST_HH
 #define REST_HH
-#include "item.hh"
 
-/** typeset a Rest. A "vanilla" item.
- */
-struct Rest : Item {
+#include "rhythmic-head.hh"
 
-    int dots;
-    int balltype;
-    
-    /// rests can be translated up and down.
-    int pos_i_;
-    /* *************** */
-
-
-    Rest(Duration);
-    void do_print()const;
-NAME_MEMBERS(Rest);
-    Molecule* brew_molecule_p()const;
+class  Rest : public Rhythmic_head
+{
+public:
+  DECLARE_MY_RUNTIME_TYPEINFO;
+  
+  int position_i_;
+  Rest ();
+  void add (Dots*);
+protected:
+  virtual void do_add_processing ();
+  virtual Molecule * brew_molecule_p () const;
 };
-#endif 
-
+#endif // REST_HH

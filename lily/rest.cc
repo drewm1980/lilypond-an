@@ -1,54 +1,46 @@
 /*
-  rest.cc -- implement Rest
+  rest.cc -- implement 
 
-  source file of the LilyPond music typesetter
+  source file of the GNU LilyPond music typesetter
 
   (c) 1997 Han-Wen Nienhuys <hanwen@stack.nl>
 */
-#include "duration.hh"
-#include "rest.hh"
-#include "dimen.hh" 
-#include "debug.hh"
+
+#include "molecule.hh"
 #include "paper-def.hh"
 #include "lookup.hh"
-#include "molecule.hh"
 #include "rest.hh"
-
-Rest::Rest(Duration d)
-{
-    balltype = d.type_i_;
-    dots = d.dots_i_;
-    pos_i_ = 0;
-}
-
-
-IMPLEMENT_STATIC_NAME(Rest);
+#include "dots.hh"
+#include "axis-group-element.hh"
+#include "p-score.hh"
 
 void
-Rest::do_print()const
+Rest::do_add_processing ()
 {
-#ifndef NPRINT
-    mtor << "Rest "<<balltype<< "dots " << dots;
-    Item::print();
-#endif
+  if (balltype_i_ == 0)
+    position_i_ += 6;
+  else if (balltype_i_ == 1)
+    position_i_ += 4;
+  Rhythmic_head::do_add_processing ();
+  if (dots_l_)
+      dots_l_->position_i_ = position_i_;
 }
 
-Molecule*
-Rest::brew_molecule_p()const
+Rest::Rest ()
 {
-    Paper_def *p =paper();
-
-    Symbol s;
-    s = p->lookup_l()->rest(balltype);
-    
-    Molecule *m = new Molecule(Atom(s));
-    if (dots) {
-	Symbol d =p->lookup_l()->dots(dots);
-	Molecule dm;
-	dm.add(Atom(d));
-	m->add_right(dm);
-    }
-    m->translate(Offset(0,pos_i_ * paper()->internote()));
-    return m;
+  position_i_ =0;
 }
 
+Molecule *
+Rest::brew_molecule_p () const
+{
+  int staff_size_i_ =8;
+  bool streepjes_b = (position_i_<-1) || (position_i_ > staff_size_i_+1);
+  
+  Symbol s(paper ()->lookup_l()->rest (balltype_i_, streepjes_b));
+  Molecule * m = new Molecule ( Atom (s));
+  m->translate (position_i_ *  paper ()->internote_f (), Y_AXIS);
+  return m;
+}
+
+IMPLEMENT_IS_TYPE_B1(Rest, Rhythmic_head);
