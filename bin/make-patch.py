@@ -41,7 +41,7 @@ def help():
 
 def untar(fn):
     # os.system('pwd');
-    sys.stderr.write('untarring ' + fn + '\n')
+    sys.stderr.write('untarring ' + fn)
 # can't seem to fix errors:
 # gzip: stdout: Broken pipe
 # tar: Child returned status 1
@@ -50,7 +50,7 @@ def untar(fn):
 # ugh, even this does not work, but one error message less :-)
     os.system ('gzip --quiet -dc ' + fn + '| tar xf - ')
 # so print soothing message:
-#    sys.stderr.write('make-patch:ugh: Please ignore error: gzip: stdout: Broken pipe\n');
+    sys.stderr.write('make-patch:ugh: Please ignore error: gzip: stdout: Broken pipe\n');
     sys.stderr.flush()
 
 
@@ -74,12 +74,7 @@ def remove_automatic(dirnames):
 def makepatch(fv, tv, patfile_nm):
     import tempfile
     prev_cwd = os.getcwd();
-    try:
-	os.mkdir ('/tmp/make-patch');
-    except:
-	pass
-	
-    os.chdir ('/tmp/make-patch');
+    os.chdir ('/tmp')
     untar(released_tarball(fv))
     untar(released_tarball(tv))
     remove_automatic([dirname(fv), dirname(tv)])
@@ -98,7 +93,7 @@ def makepatch(fv, tv, patfile_nm):
     sys.stderr.write('diffing to %s... ' % patfile_nm)
     os.system('diff -urN ../%s . >> %s' % (dirname(fv), patfile_nm))
     #os.system('gzip -9f %s' % patfile_nm)
-    os.chdir('/tmp/make-patch')
+    os.chdir('/tmp')
 
     sys.stderr.write('cleaning ... ')
     os.system('rm -fr %s %s' % (dirname(tv), dirname(fv)))
@@ -106,7 +101,6 @@ def makepatch(fv, tv, patfile_nm):
     os.chdir(prev_cwd)
     
 def main():
-    os.environ['GZIP'] = '-q'
     sys.stderr.write('This is make-patch version %s\n' % mp_version)
     (cl_options, files) = getopt.getopt(sys.argv[1:], 
 					'hf:o:t:', ['output=', 'help', 'from=', 'to='])
