@@ -7,43 +7,41 @@ TestedFeatures = "This file tests silly line shapes";
 
 \include "paper20.ly"
 
-\version "0.1.9";
+\version "1.1.52";
 
-oden = \lyric{ 
-	O8 |
-	den-8. ne-16 boom,4. o8 | 
-	den-8. ne-16 boom.4.  Wat8 |
-	zijn uw tak-4 ken | 
-	won-8. der-16 schoon4 _8
+oden = \lyrics{ 
+	O |
+	den- ne- boom, o | 
+	den- ne- boom  Wat |
+	zijn uw tak- ken | 
+	won- der- schoon 
 }
 
-ikheb = \lyric{
-	Ik8 | 
-	heb u laatst4. in_'t8 |
-	bos8. zien16 staan4 _8 toen8 |
-	zat- en er4. geen8 |
-	kaars-8. jes16 aan.4 _8
+ikheb = \lyrics{
+	Ik | 
+	heb u laatst in_'t |
+	bos zien staan  toen |
+	zat- en er geen |
+	kaars- jes aan 
 }
 
-ugloeit = \lyric{
-	U8 |
-	gloeit in bar-4. re8 | 
-	win-8. ter-16 tijd,4 r8 als8 |
-	sneeuw op aar-4. de8 | 
-	licht8. ge-16 spreid.4 _8
+ugloeit = \lyrics{
+	U |
+	gloeit in bar- re | 
+	win- ter- tijd, als |
+	sneeuw op aar- de | 
+	licht ge- spreid 
 }
 
-oboom = \melodic{
-	\octave c';
-	'g8 |
+oboom = \notes\transpose c''{
+	g,8 |
 	c8. c16 c4. d8 | 
 	e8. e16 e4. e8 | 
-	d  e f4 'b | 
+	d  e f4 b, | 
 	d8. c16 c4 r8
 }
 
-bos = \melodic{
-	\octave c';
+bos = \notes\transpose c''{
 	g8 | 
 	g e a4. g8 | 
 	g8. f16 f4 r8 f8 |
@@ -51,61 +49,50 @@ bos = \melodic{
 	f8. e16 e4 r8
 }
 
-global = \melodic{ 
-	\meter 3/4;
-    	\partial 8;
-	\skip 4*48;
-	\bar "|.";
-}
-melody = \melodic{
+
+melody = \notes{
 	\oboom
 	\oboom
 	\bos
 	\oboom
 }
 
-$melody_staff = \type Staff = melody <
-	\global
-	\melody
->
 
-$verse_one = \melodic{
+verse_one = \notes{
 	\oden
 	\oden
 	\ikheb
 	\oden
 }
 
-$verse_one_staff = \type Lyrics = one <
-	\global
-	\$verse_one
->
+verse_one_staff = \context Lyrics = one 
+	\verse_one
 
-$verse_two = \melodic{
+
+verse_two = \notes{
 	\oden
 	\oden
 	\ugloeit
 	\oden
 }
 
-$verse_two_staff = \type Lyrics = two <
-	\global
-	\$verse_two
->
+verse_two_staff = \context Lyrics = two 
+	\verse_two
 
-$denneboom_shape = \paper{ 
+
+denneboom_shape = \paper{ 
 	\paper_twenty
 	indent = 20. \mm;
-	\shape = 70. \mm 20. \mm
-		 65. \mm 30. \mm
-		 57.5 \mm 45. \mm
-		 50. \mm 60. \mm
-		 42.5 \mm 75. \mm
-		 35. \mm 90. \mm
-		 27.5 \mm 105. \mm
-		 20. \mm 120. \mm
-		 10. \mm 140. \mm
-		 65. \mm 30. \mm
+	\shape   70. \mm, 20. \mm,
+		 65. \mm, 30. \mm,
+		 57.5 \mm, 45. \mm,
+		 50. \mm, 60. \mm,
+		 42.5 \mm, 75. \mm,
+		 35. \mm, 90. \mm,
+		 27.5 \mm, 105. \mm,
+		 20. \mm, 120. \mm,
+		 10. \mm, 140. \mm,
+		 65. \mm, 30. \mm
 		 ;
 	gourlay_maxmeasures = 30.;
 % uhuh, loop if you comment these in
@@ -114,32 +101,32 @@ $denneboom_shape = \paper{
 }
 
 \score{
-	<
-		\$melody_staff
-		\$verse_one_staff
-	>
+	\addlyrics
+		\context Staff { \time 3/4; \melody }
+		\context Lyrics \verse_one
 	\paper{ 
 % huh?
-%		\$denneboom_shape 
+%		\denneboom_shape 
 	\paper_twenty
 	indent = 20. \mm;
-	\shape = 70. \mm 20. \mm
-		 65. \mm 30. \mm
-		 57.5 \mm 45. \mm
-		 50. \mm 60. \mm
-		 42.5 \mm 75. \mm
-		 35. \mm 90. \mm
-		 27.5 \mm 105. \mm
-		 20. \mm 120. \mm
-		 10. \mm 140. \mm
-%		 65. \mm 30. \mm
-		 65. \mm 40. \mm
+	\shape  70. \mm, 50. \mm,
+		 65. \mm, 30. \mm,
+		 57.5 \mm, 45. \mm,
+		 50. \mm, 60. \mm,
+		 42.5 \mm, 75. \mm,
+		 35. \mm, 90. \mm,
+		 27.5 \mm, 105. \mm,
+		 20. \mm, 120. \mm,
+		 10. \mm, 140. \mm,
+%		 65. \mm, 30. \mm,
+		 65. \mm, 40. \mm
 		 ;
 	gourlay_maxmeasures = 30.;
 % uhuh, loop if you comment these in
 		arithmetic_basicspace = 3.8;
 %		arithmetic_multiplier = 8.\pt;
 		arithmetic_multiplier = 7.5\pt;
+		casting_algorithm= \Wordwrap;
 	}
 	\midi{ \tempo 4 = 90; }
 }
@@ -147,10 +134,10 @@ $denneboom_shape = \paper{
 %{
 \score{
 	<
-		\$melody_staff
-		\$verse_two_staff
+		\melody_staff
+		\verse_two_staff
 	>
-	\paper{ \$denneboom_shape }
+	\paper{ \denneboom_shape }
 	\midi{ \tempo 4 = 90; }
 }
 %}
