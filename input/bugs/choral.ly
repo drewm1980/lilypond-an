@@ -1,9 +1,4 @@
 
-% TODO:
-% Copyright, Header etc.
-% Begleitsatz
-% Tempo
-
 \include "deutsch.ly"
 
 global = \notes {
@@ -83,12 +78,21 @@ themeFinalEndRightHand = \notes \relative c' {
 }
 
 themeLeftHand =	\notes \relative c {
-	<d2 g h> | <f a h> <g c> | <g cis> c | <g2 {a4 c4}> <a2 c2> <g2 {b4 a4}> |
-	<a,1 fis'1 a1> <d2 g2 b2> | <g2 b2 e2> <f2 a2 d2> | <a2 h2> <a2 cis2> |
-	<g2 b2> a2 | h2
+	< \context Voice = one { \stemup
+		h'2 | h c | cis c | a4 c c2 b4 a ~ | a1 \breathe
+		b2 | e d | h cis | b a | h \breathe
 
-	g2 | <g a> <g c> | <g cis> c | <g2 {a4 c4}> <a2 c2> <g2 {b4 a4}> |
-	<a,1 fis'1 a1> <d2 g2 b2> | <g2 b2 e2> <f2 a2 d2> |
+		g | a c | cis c | a4 c c2 b4 a ~ | a1 \breathe
+		b2 | e d |
+	  }
+          \context Voice = two { \stemdown
+		<d,2 g> | <f a> g ~ | g c | g a g | <a,1 fis'>
+		<d2 g> | <g b> <f a> | a a | g a | h
+
+		g | g g ~ | g c | g a g | <a,1 fis'>
+		<d2 g> | <g b> <f a> |
+	  }
+	>
 }
 
 themeBeforeBreak1EndLeftHand = \notes \relative c' {
@@ -101,11 +105,11 @@ themeFinalEndLeftHand = \notes \relative c' {
 
 themePedal = \notes \relative c' {
 	g4 fis | f2 c | a' d, |
-	h c es | d ~ d b |
-	e, g | a a | d, f4 a | h2
+	h c es | d ~ d \breathe b |
+	e, g | a a | d, f4 a | h2 \breathe
 
 	c2 | e2 c | a' d, |
-	h c es | d ~ d b |
+	h c es | d ~ d \breathe b |
 	e, g |
 }
 
@@ -153,7 +157,7 @@ break2RightHand = \notes \relative c'' {
 	d' r f, r <f b> r f r d' r <fis, a> r |
 	d' r g, r <g b> r g r d' r g, r |
 	es' r g, r <g b> r g b es r <a, c> r |
-	d8 r b r d8 f d b a r <a cis> r |
+	d8 r b r d8 f d b a4-. <a-. cis-.> |
 	<fis1 a d1> \breathe
 }
 
@@ -164,8 +168,8 @@ break2LeftHand = \notes \relative c' {
 	r d r d r d r d r d r d |
 	r d r d r d r d r c r c |
 	r <b es> r <b es> r <b es> r <g es'> r f' r <a, f'> |
-	r <b f'> r <b f'> r <g f'> r <g f'> r <a e'> r <a e'> |
-	<d,1 d'1>
+	r <b f'> r <b f'> r4 <g4-. f'-.> <a4-. e'-.> <a-. e'-.> |
+	<d,1 d'1> \breathe
 }
 
 break2Pedal = \notes \relative c {
@@ -177,6 +181,7 @@ break2Pedal = \notes \relative c {
 \score {
 	<
 		\context PianoStaff <
+			\property PianoStaff.instrument = "Manual"
 			\context Staff = treble <
 				\global
 				\context Voice = melody {
@@ -185,7 +190,7 @@ break2Pedal = \notes \relative c {
 					\stemboth \break2RightHand
 					\stemup \themeMelody \themeFinalEndMelody
 				}
-				\context Voice = firstdown {
+				\context Voice = righthand {
 					\stemdown \themeRightHand \themeBeforeBreak1EndRightHand
 					\break1RightHand
 					\notes {
@@ -198,7 +203,7 @@ break2Pedal = \notes \relative c {
 			\context Staff = bass <
 				\clef "bass";
 				\global
-				{
+				\context Voice = lefthand {
 					\themeLeftHand \themeBeforeBreak1EndLeftHand
 					\break1LeftHand
 					\break2LeftHand
@@ -207,14 +212,14 @@ break2Pedal = \notes \relative c {
 			>
 		>
 		\context Staff = pedal {
+			\property Staff.instrument = "Pedal"
 			\clef "bass";
 			<
 				\global
-				{
+				\context Voice = pedal {
 					\themePedal \themeBeforeBreak1EndPedal
 					\notes {
-						s1. | s1. | s1. | s1. |
-						s1. | s1. | s1. | s1. |
+						R1. R1. R1. R1. R1. R1. R1. R1.
 					}
 					\break2Pedal
 					\themePedal \themeFinalEndPedal
@@ -224,18 +229,15 @@ break2Pedal = \notes \relative c {
 	>
 
 	\header {
-		title = "Choral I";
-		subtitle = "(über ``Aus meines Herzens Grunde'')";
-		composer = "Michael Krause 1999 (*1977)";
-		enteredby = "Michael Krause";
-		copyright = "dunno";
+		tagline = "";
 	}
 
 	\paper {
-		linewidth = 18.0 \cm;
+		linewidth = 18.8 \cm;
 		textheight = 28.0 \cm;
 
-		indent = 0.0 \mm;
 		\translator { \OrchestralScoreContext }
+%		\translator { \StaffContext \consists "Staff_margin_engraver"; }
+%		\translator { \PianoStaffContext \consists "Staff_margin_engraver"; }
 	}
 }
