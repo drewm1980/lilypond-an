@@ -1,5 +1,5 @@
 #!@PYTHON@
-# 
+# -*-python-*-
 # make-website.py --  implement The lilypond WWW site
 # 
 # source file of the GNU LilyPond music typesetter
@@ -41,22 +41,22 @@ import glob
 
 depth = ''
 makewebsite_id = "<!make_website!>";
-id_str = "make-website 0.8";
+id_str = "make-website 0.9";
 tar = "tar";
-make = "make";
+make = "make -f Makefile";
 mailaddress = "unknown"
 fullname = "unknown"
 footstr = ""
 lilyversion= ''
 
-include_path=[ 'input', 'mutopia' , 'mutopia/J.S.Bach', 
+include_path=[ 'input', 'mutopia' , 'mutopia/J.S.Bach', 'mutopia/Coriolan',
 	       'mutopia/J.S.Bach/out' ]
 
 def set_vars():
     __main__.lilyversion =  version_tuple_to_str(lilydirs.version_tuple())
     os.environ["TEXINPUTS"] = os.environ["TEXINPUTS"] + ":%s/input/:" % depth;
     
-    os.environ["LILYINCLUDE"] = join (':', __main__.include_path)
+    os.environ["LILYINCLUDE"] = join (':', __main__.include_path) +':'+ os.environ["LILYINCLUDE"];
     os.environ["LILYTOP"] = depth;
     __main__.mailaddress= os.environ['MAILADDRESS']
     pw = pwd.getpwuid (os.getuid());
@@ -87,7 +87,7 @@ def my_system(cmds):
 	ret = os.system (cmd)
 	if ret:
 	    if ignoreret: 
-		sys.stderr.write( "ignoring failed command \`%s\' (status %d)\n" % (cmd, ret))
+		sys.stderr.write( "ignoring failed command `%s\' (status %d)\n" % (cmd, ret))
 	    else:
 		sys.stderr.write( 'make-website: failed on command %s (status %d)\n' % (cmd, ret))
 		sys.exit (2)
@@ -102,13 +102,15 @@ examples=["twinkle-pop",
 	  "font16",
 	  "font20",
 	  #"scales", 
-	  "rhythm", 
+	  "rhythm",
+	  "coriolan",
 	  "multi"]
 
 mutopia_examples = [ "wtk1-fugue2",
 		     "standje",
 		     "preludes-1",
 		     "preludes-2",
+		     
 		     "wtk1-prelude1",
 		     "gallina",	  
 		     "scsii-menuetto"]
@@ -116,7 +118,7 @@ mutopia_examples = [ "wtk1-fugue2",
 
 def gen_html():
     print 'generating HTML'
-    my_system (["make -kC .. html"]);
+    my_system (["make -f Makefile -kC .. html"]);
     
 
 def gen_examples(inputs):
@@ -185,7 +187,7 @@ def gen_list(inputs, filename):
     list.write( "</BODY></HTML>");
     list.close()
 
-texstuff = ["mudela-man", "mudela-course"]
+texstuff = ["mudela"]
 
 def gen_manuals():
     print 'generating TeX doco manuals'
@@ -214,7 +216,7 @@ def copy_files():
     
 #    my_system ("ln -s depth/out ./docxx" )
     my_system([ "cp %s/TODO ./TODO.txt" % depth,
-    "cp %s/ANNOUNCE-0.1 ./ANNOUNCE.txt" % depth,
+    "cp %s/ANNOUNCE-0.1 ./ANNOUNCE-0.1.txt" % depth,
     "cp %s/NEWS ./NEWS.txt" % depth,
     "cp %s/DEDICATION ./DEDICATION.txt" % depth]);
     my_system([ "make -C .. gifs"]);
@@ -249,7 +251,7 @@ def identify():
     print 'This is %s\n' % id_str
     
 def clean_tmp():
-    my_system(['rm -f /tmp/gs*'])
+    my_system(['-rm -f /tmp/gs*'])
     
 def get_top_of_NEWS():
     i = open('NEWS.txt')
@@ -288,7 +290,11 @@ def do_examples (examples, filename):
 def main():
     identify();
 
-    os.chdir (lilydirs.topdir + 'Documentation/out')
+    os.chdir (lilydirs.topdir + 'Documentation')
+    
+#    my_system (['-rm ../WWW/*.pod ../WWW/*.xpm ../WWW/*.doc',
+#		'ln ../Documentation/*.pod ../Documentation/*.doc ../Documentation/*.xpm .']);
+    os.chdir (lilydirs.topdir + 'Documentation/out/')
     __main__.depth = "../../";
     __main__.include_path = map(lambda p: __main__.depth + '/' + 
 				p, __main__.include_path)
