@@ -3,10 +3,9 @@ This file documents bugs which were "re-introduced" in various pl's
 pl 70 
 	* r^"simile"
 
+	* hairpin pos.
 
 pl69
-	* scales.ly
-
 	* slurs.ly
 
 pl68:
