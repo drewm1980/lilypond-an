@@ -1,27 +1,19 @@
-# Makefile.in generated automatically by automake 1.2 from Makefile.am
+# Makefile.in generated automatically by automake 1.2f from Makefile.am
 
-# Copyright (C) 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
-# gives unlimited permission to copy, distribute and modify it.
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
-# Automatically generated from ./flower/test/Makefile.am.wild by bin/autowild
-# Do not edit
-#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+# Generated automatically by wild-perl 0.1
 # project  LilyPond -- the musical typesetter
-# title	   makefile for flowertest
-# file	   flower/test/Makefile.am.wild
-#
-# Copyright (c) 1997 by
-#   	Jan Nieuwenhuizen <jan@digicash.com>
-#	Han-Wen Nienhuys <hanwen@stack.nl>
-#
-
-# bin_PROGRAMS = test
-
-# TEST = test
-
-# can't link to libflower: has not been created yet...
-# test_SOURCES = main.cc mat-test.cc pqtest.cc rattest.cc stringtest.cc
+# title	   makefile for test
+# file	   test/Makefile.am.wild
 
 
 SHELL = /bin/sh
@@ -62,40 +54,72 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 transform = @program_transform_name@
 
-NORMAL_INSTALL = true
-PRE_INSTALL = true
-POST_INSTALL = true
-NORMAL_UNINSTALL = true
-PRE_UNINSTALL = true
-POST_UNINSTALL = true
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
+AGE = @AGE@
+AUTOGENERATE = @AUTOGENERATE@
+BISON = @BISON@
 CC = @CC@
+COMPILEINFO = @COMPILEINFO@
+CPPFLAGS = @CPPFLAGS@
+CURRENT = @CURRENT@
 CXX = @CXX@
-LIB_SUFFIX = @LIB_SUFFIX@
+CXXFLAGS = @CXXFLAGS@
+DIR_DATADIR = @DIR_DATADIR@
+EXTRA_LIBES = @EXTRA_LIBES@
+FIND = @FIND@
+FLEX = @FLEX@
+ICFLAGS = @ICFLAGS@
+ILDFLAGS = @ILDFLAGS@
+LD = @LD@
+LDFLAGS = @LDFLAGS@
+LEX = @LEX@
+LIBTOOL = @LIBTOOL@
+LN = @LN@
+LN_S = @LN_S@
+MAKE = @MAKE@
 MAKEINFO = @MAKEINFO@
-MODULE_CXXFLAGS = @MODULE_CXXFLAGS@
-MODULE_LDFLAGS = @MODULE_LDFLAGS@
+MFDIR = @MFDIR@
+NM = @NM@
 PACKAGE = @PACKAGE@
+PERL = @PERL@
+POD2HTML = @POD2HTML@
+POD2MAN = @POD2MAN@
+PYTHON = @PYTHON@
 RANLIB = @RANLIB@
+REVISION = @REVISION@
+TAR = @TAR@
+TEXDIR = @TEXDIR@
+TEXPREFIX = @TEXPREFIX@
 VERSION = @VERSION@
+YACC = @YACC@
+ZIP = @ZIP@
+absolute_builddir = @absolute_builddir@
 
-EXTRA_SOURCES = main.cc mat-test.cc pqtest.cc rattest.cc stringtest.cc
+TEST_SCHRIFTEN = check-lily-midi.sh check-lily-paper.sh check-mi2mu.sh
 
-EXTRA_DIST = result Makefile.am.wild $(EXTRA_SOURCES)
+# ugh ugh
+TESTS = $(top_srcdir)/test/check-lily-midi.sh $(top_srcdir)/test/check-lily-paper.sh $(top_srcdir)/test/check-mi2mu.sh
 
-noinst_HEADERS = flower-test.hh
+INPUTS = test.midi
 
-INCLUDES = -I../include
-mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
-CONFIG_HEADER = ../config.hh
+RESULTS = ok.midi ok.tex ok.ly
+
+EXTRA_DIST = Makefile.am.wild GNUmakefile $(TEST_SCHRIFTEN) $(INPUTS) $(RESULTS)
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+CONFIG_HEADER = ../flower/config.hh
 CONFIG_CLEAN_FILES = 
-HEADERS =  $(noinst_HEADERS)
-
 DIST_COMMON =  Makefile.am Makefile.in
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
 GZIP = --best
 default: all
 
@@ -107,26 +131,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
-
 tags: TAGS
+TAGS:
 
-ID: $(HEADERS) $(SOURCES)
-	here=`pwd` && cd $(srcdir) && mkid -f$$here/ID $(SOURCES) $(HEADERS)
-
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES)
-	tags=; \
-	here=`pwd`; \
-	test -z "$(ETAGS_ARGS)$(SOURCES)$(HEADERS)$$tags" \
-	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $(SOURCES) $(HEADERS) -o $$here/TAGS)
-
-mostlyclean-tags:
-
-clean-tags:
-
-distclean-tags:
-	rm -f TAGS ID
-
-maintainer-clean-tags:
 
 distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
 
@@ -139,10 +146,35 @@ distdir: $(DISTFILES)
 	  || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
 	  || cp -p $$d/$$file $(distdir)/$$file; \
 	done
+check-TESTS: $(TESTS)
+	@failed=0; all=0; \
+	srcdir=$(srcdir); export srcdir; \
+	for tst in $(TESTS); do \
+	  if test -f $$tst; then dir=.; \
+	  else dir="$(srcdir)"; fi; \
+	  if $(TESTS_ENVIRONMENT) $$dir/$$tst; then \
+	    all=`expr $$all + 1`; \
+	    echo "PASS: $$tst"; \
+	  elif test $$? -ne 77; then \
+	    all=`expr $$all + 1`; \
+	    failed=`expr $$failed + 1`; \
+	    echo "FAIL: $$tst"; \
+	  fi; \
+	done; \
+	if test "$$failed" -eq 0; then \
+	  banner="All $$all tests passed"; \
+	else \
+	  banner="$$failed of $$all tests failed"; \
+	fi; \
+	dashes=`echo "$$banner" | sed s/./=/g`; \
+	echo "$$dashes"; \
+	echo "$$banner"; \
+	echo "$$dashes"; \
+	test "$$failed" -eq 0
 info:
 dvi:
 check: all
-	$(MAKE)
+	$(MAKE) check-TESTS
 installcheck:
 install-exec: 
 	@$(NORMAL_INSTALL)
@@ -155,7 +187,7 @@ install: install-exec install-data all
 
 uninstall: 
 
-all: Makefile $(HEADERS)
+all: Makefile
 
 install-strip:
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
@@ -163,37 +195,45 @@ installdirs:
 
 
 mostlyclean-generic:
-	test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
+	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
-	test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
-	rm -f Makefile $(DISTCLEANFILES)
-	rm -f config.cache config.log stamp-h stamp-h[0-9]*
-	test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
+	-rm -f Makefile $(DISTCLEANFILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 
 maintainer-clean-generic:
-	test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
-	test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
-mostlyclean:  mostlyclean-tags mostlyclean-generic
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
+mostlyclean:  mostlyclean-generic
 
-clean:  clean-tags clean-generic mostlyclean
+clean:  clean-generic mostlyclean
 
-distclean:  distclean-tags distclean-generic clean
-	rm -f config.status
+distclean:  distclean-generic clean
+	-rm -f config.status
+	-rm -f libtool
 
-maintainer-clean:  maintainer-clean-tags maintainer-clean-generic \
-		distclean
+maintainer-clean:  maintainer-clean-generic distclean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
-.PHONY: default tags mostlyclean-tags distclean-tags clean-tags \
-maintainer-clean-tags distdir info dvi installcheck install-exec \
-install-data install uninstall all installdirs mostlyclean-generic \
-distclean-generic clean-generic maintainer-clean-generic clean \
-mostlyclean distclean maintainer-clean
+.PHONY: default tags distdir check-TESTS info dvi installcheck \
+install-exec install-data install uninstall all installdirs \
+mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
+
+# override default target for all-am: to get an extra dependency
+all-am: Makefile $(PROGRAMS) wild-check
+
+# dummy target for non-GNU makes; is overridden in GNUmakefile
+wild-check:
+
+$(srcdir)/Makefile.am: $(srcdir)/Makefile.am.wild
+	$(PERL) $(top_srcdir)/bin/wild-perl < $< > $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
