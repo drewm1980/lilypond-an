@@ -4,58 +4,46 @@
 #   by Anthony Fok <foka@debian.org>
 #   This is free software; see the GNU General Public Licence
 #   version 2 or later for copying conditions.  There is NO warranty.
-#   Last modified:  Mon,  5 Jan 1998 18:39:30 -0700
+#   Last modified:  Tue, 10 Nov 1998 23:47:00 -0700
 
 set -e
 
 package=lilypond
 font_supplier=public
 font_typeface=lilypond
-std_TEXMF=/usr/lib/texmf
+std_TEXMFMAIN=/usr/lib/texmf
+std_VARTEXFONTS=/var/spool/texmf
 
 #DEBHELPER#
 
-if [ "`which kpsetool`" ]; then
-    TEXMF=`kpsetool -v '$TEXMF'`
-fi
-: ${TEXMF:=$std_TEXMF}
+TEXMFMAIN=`/usr/bin/kpsewhich -expand-var '$TEXMFMAIN'`
+: ${TEXMFMAIN:=$std_TEXMFMAIN}
+VARTEXFONTS=`/usr/bin/kpsewhich -expand-var '$VARTEXFONTS'`
+: ${VARTEXFONTS=$std_VARTEXFONTS}
 
+LILYTEXINPUTS=$TEXMFMAIN/tex/$package
+LILYMFINPUTS=$TEXMFMAIN/fonts/source/$font_supplier/$font_typeface
 
 case "$1" in
+    install|upgrade)
+	# Clear out the old TFM and PK files in case the fonts were
+	# left-over from previous installations
+	rm -rf $VARTEXFONTS/tfm/$font_supplier/$font_typeface
+	rm -rf $VARTEXFONTS/pk/*/$font_supplier/$font_typeface
 
-    install | upgrade)
+	# Fix a silly bug in Debian's lilypond 1.0.17-1.  :-)
+	if [ "$2" = "1.0.17-1" ]; then
+	    rm -rf $VARTEXFONTS/tfm/$font_supplier/mf
+	    rm -rf $VARTEXFONTS/pk/*/$font_supplier/mf
+	fi
 
-	# Prior to the Debian release of the lilypond_0.1.29-1 package,
-	# LilyPond's fonts were not added to teTeX's special.map,
-	# and so the automatically generated TFM and PK files were placed
-	# in the wrong directory under /var/spool/texmf (or $MT_DESTROOT).
-	# So, now I have to clean up after my mess to make sure those fonts
-	# do not interfere with the new fonts!  :)
-
-	: ${MAKETEXDIR=$TEXMF/maketex}
-	test -r $MAKETEXDIR/maketex.site && . $MAKETEXDIR/maketex.site
-	: ${MT_DESTROOT=$TEXMF/fonts}
-
-	# Remove the "stray" old LilyPond TFM and PK files.
-	for i in tfm pk
-	do
-	    find $MT_DESTROOT/$i \( -name 'dyn10.*'$i -o -name 'font-en-tja*.*'$i \
-		-o -name 'vette-beams*.*'$i \) -print0 |
-		xargs --null --no-run-if-empty rm -f
-	done
-
-	# Remove empty directories.
-	# A note to myself or the future maintainer:
-	#   Why the "for i in 1 2" loop?  Well, it seems that either
-	#   "find some_path -depth" isn't working properly, or I
-	#   (Anthony) don't know its proper behaviour.  Please look
-	#   into it and see if this ugly hack could be removed.
-	for i in 1 2
-	do
-	    find $MT_DESTROOT/tfm -depth -mindepth 1 -type d -empty -print0 2> /dev/null |
-		xargs -0r --null --no-run-if-empty rmdir
-	    find $MT_DESTROOT/pk -depth -mindepth 2 -type d -empty -print0 2> /dev/null |
-		xargs -0r --null --no-run-if-empty rmdir
+	# Since 1.0.17-1, /usr/lib/texmf/tex/lilypond has been changed
+        # to a symbolic directory.  Remove the old real directory to
+        # prevent problems during upgrade.
+	for i in $LILYTEXINPUTS $LILYMFINPUTS; do
+	    if [ -d $i -a ! -L $i ]; then
+		rm -rf $i
+	    fi
 	done
     ;;
 
@@ -63,8 +51,8 @@ case "$1" in
     ;;
 
     *)
-        echo "$0 called with unknown argument \`$1'" >&2
-        exit 0
+	echo "$0 called with unknown argument \`$1'" >&2
+	exit 0
     ;;
 
 esac
