@@ -1,21 +1,23 @@
 
+	- design macro for penstroke with rounded endings
 	- y-refpoint for rests should be the 4th staffline (gclef: b')
 	- more symbols
 	  * flags
 	  * clefs
 	  * some scripts:
-	    - {up, down}bow
 	    - toe/heel
 	    - piano pedals,
-	    - braces.
-	    - trills
+	  * braces.
+	  * trills
+	  * maxima notehead
 	  * coda signs.
-	  * 0 - 9
+	  * 0 - 9: bold and italic
 
-	- move to OpusTeX fonts ?  (no!)
-	- include important spacing dims in TFM? 
+	- include important spacing dims in fetalog 
 	- lilyrules.mf for different rules (lines) ?
 	- check out Adobe Sonata/Petrucci font layout.  They are the
 standard for Music fonts
-	- hack up GS to do round pixels iso. square pixels.
+
+	- hack up GS to do round pixels iso. square pixels.  (Printers
+don't do square pixels.)
 
