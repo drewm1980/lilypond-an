@@ -23,15 +23,13 @@ public:
   Bow ();
   Offset center () const;  
 
-  
-
   int dash_i_;
   Real interstaff_f_;
   Drul_array<Real> vertical_align_drul_;
 
 protected:
   virtual Molecule* do_brew_molecule_p () const;
-  virtual Interval do_width () const;    
+  //  virtual Interval do_width () const;    
   Array<Offset> get_controls () const;
   virtual Array<Offset> get_encompass_offset_arr () const;
   virtual Interval do_height () const;

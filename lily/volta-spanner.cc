@@ -81,7 +81,8 @@ Volta_spanner::do_add_processing ()
       set_bounds (RIGHT, column_arr_.top ());  
     }
 
-  number_p_->style_str_ = "number";
+  // number_p_->style_str_ = "number-1";
+  number_p_->style_str_ = "volta";
 }
   
 Interval
@@ -102,7 +103,7 @@ Volta_spanner::do_post_processing ()
 }
 
 void
-Volta_spanner::do_substitute_dependency (Score_element* o, Score_element* n)
+Volta_spanner::do_substitute_element_pointer (Score_element* o, Score_element* n)
 {
   if (Note_column* c = dynamic_cast <Note_column*> (o))
     note_column_arr_.substitute (c, dynamic_cast<Note_column*> (n));

@@ -1,6 +1,5 @@
-
 /*   
-  direction.cc --  implement 
+  direction.cc --  implement Direction
   
   source file of the GNU LilyPond music typesetter
   
@@ -10,6 +9,7 @@
 
 #include "direction.hh"
 
+#if 0 
 String direction_str (Direction d, Axis a)
 {
   String s("center");
@@ -23,3 +23,4 @@ String direction_str (Direction d, Axis a)
     }
   return s;
 }
+#endif
