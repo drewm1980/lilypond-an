@@ -1,20 +1,14 @@
-%{
-16-point version of "leise flehen meine lieder"
-%}
+\header{
+filename	standchen.ly
+title		St\"andchen (Serenade) "Leise flehen meine Lieder"
+opus		D. 957 No. 4
+composers	Franz Schubert (1797-1828)
+		Text by Ludwig Rellstab (1799-1860)
+enteredby	JCN
+copyright	public domain
 
-\include "standchen-part.ly"
+} 
 
-\score{
-	\themusic
-	\paper{
-		% 16pt mustn't use whole page width
-		linewidth= 160.\mm;
-		% we want gourlay, don't set geometric
-		% geometric= 1.4;
-		gourlay_maxmeasures = 9.;
-		\output "standchen.out";
-	}
-	\midi{
-		\tempo 4 = 54;
-	}
-}
+
+% just a silly file to satisfy the make-website script
+\include "standchen.ly"
