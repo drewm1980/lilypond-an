@@ -6,12 +6,12 @@
   (c) 2001--2004  Han-Wen Nienhuys <hanwen@cs.uu.nl>
 
  */
-#include <stdio.h>
+
+#include "scm-option.hh"
+
+#include <cstdio>
 
 #include "parse-scm.hh"
-#include "string.hh"
-#include "lily-guile.hh"
-#include "scm-option.hh"
 #include "warn.hh"
 #include "main.hh"
 
@@ -163,9 +163,16 @@ LY_DEFINE (ly_get_option, "ly:get-option", 1, 0, 0, (SCM var),
     o = ly_bool2scm (lily_1_8_relative);
   else if (var == ly_symbol2scm ("verbose"))
     o = ly_bool2scm (verbose_global_b);
-  else if ( var == ly_bool2scm ("resolution"))
+  else if ( var == ly_symbol2scm ("resolution"))
     o = scm_from_int (preview_resolution_global);
   else
-    warning (_f ("No such internal option: %s", ly_scm2string (var)));
+    {
+      if (scm_is_symbol (var))
+	var = scm_symbol_to_string (var);
+
+      String s = ly_scm2string (var);
+      
+      warning (_f ("No such internal option: %s", s.to_str0() ));
+    }
   return o;
 }
