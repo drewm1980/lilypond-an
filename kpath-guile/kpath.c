@@ -10,6 +10,9 @@
 #include <libguile.h>
 
 #include "config.hh"
+
+#if KPATHSEA
+
 #include "guile-compatibility.hh"
 
 #include <dlfcn.h>
@@ -30,24 +33,20 @@ I found a somewhat more elegant patch for this: Just #include
 
 #include <unistd.h>	
 
+#if !HAVE_DYNAMIC_LIBKPATHSEA
+
 #define popen REALLYUGLYKLUDGE
 #define pclose ANOTHERREALLYUGLYKLUDGE
 #define getopt YAKLUDGE
 
-#if HAVE_KPATHSEA_KPATHSEA_H
 #include <kpathsea/kpathsea.h>
 #include <kpathsea/tex-file.h>
 #endif
 
-
-#if KPATHSEA
-
-
-#if HAVE_KPATHSEA_KPATHSEA_H
 static  void *kpathsea_handle = 0;
 static  char *(*dl_kpse_find_file) (char const*, kpse_file_format_type, boolean) = 0;
 static  void (*dl_kpse_maketex_option) (char const*, boolean) = 0;
-static  void (*dl_kpse_set_program_name) (char const*) = 0;
+static  void (*dl_kpse_set_program_name) (char const*, char const*) = 0;
 static  char const *(*dl_kpse_init_format) (kpse_file_format_type) = 0;
 static  char *(*dl_kpse_var_expand) (char const*) = 0;
 static  kpse_format_info_type (*dl_kpse_format_info)[kpse_last_format] = 0;
@@ -75,7 +74,6 @@ kpathsea_find_format (const char* name)
     }
   return kpse_last_format;
 }
-#endif
 
 //	   "Return the absolute file name of @var{name}, "
 //	   "or @code{#f} if not found.")
@@ -111,7 +109,7 @@ static char const* LIBKPATHSEA = "libkpathsea.so";
 int
 open_library ()
 {
-#if KPATHSEA && HAVE_KPATHSEA_KPATHSEA_H
+#if HAVE_DYNAMIC_LIBKPATHSEA
   struct
   {
     void **func_pointer;
@@ -154,7 +152,14 @@ open_library ()
 	  return 1;
 	}
     }
-
+  return 0;
+#else
+  dl_kpse_find_file = &kpse_find_file;
+  dl_kpse_set_program_name = &kpse_set_program_name;
+  dl_kpse_format_info = &kpse_format_info;
+  dl_kpse_init_format = &kpse_init_format;
+  dl_kpse_maketex_option = &kpse_maketex_option;
+  dl_kpse_var_expand = &kpse_var_expand;
   return 0;
 #endif
 }
@@ -168,7 +173,7 @@ initialize_kpathsea ()
       exit (1);
     }
 
-  (*dl_kpse_set_program_name) ("lilypond");
+  (*dl_kpse_set_program_name) ("lilypond", "lilypond");
   (*dl_kpse_maketex_option) ("tfm", TRUE);
   
   SCM find = scm_c_define_gsubr ("ly:kpathsea-find-file", 1, 0, 0, ly_kpathsea_find_file);
