@@ -59,6 +59,13 @@
         "upedaltoe"	"\\upedaltoe"	-2.38\pt	2.38\pt	0.00\pt	7.12\pt	
         "dpedaltoe"	"\\dpedaltoe"	-2.38\pt	2.38\pt	-7.12\pt	0.00\pt	
         "flageolet"	"\\flageolet"	-2.53\pt	2.53\pt	-2.53\pt	2.53\pt	
+        "trilelement"	"\\trilelement"	-2.38\pt	1.24\pt	-2.61\pt	2.61\pt	
+        "prall"	"\\prall"	-4.18\pt	4.18\pt	-2.61\pt	2.61\pt	
+        "mordent"	"\\mordent"	-4.18\pt	4.18\pt	-2.61\pt	2.61\pt	
+        "prallprall"	"\\prallprall"	-5.99\pt	5.99\pt	-2.61\pt	2.61\pt	
+        "prallmordent"	"\\prallmordent"	-5.99\pt	5.99\pt	-2.61\pt	2.61\pt	
+        "upprall"	"\\upprall"	-5.99\pt	5.99\pt	-2.61\pt	2.61\pt	
+        "downprall"	"\\downprall"	-5.99\pt	5.99\pt	-2.61\pt	2.61\pt	
         }
     "flags"	 = \table {
         "u3"	"\\eighthflag"	-0.24\pt	5.86\pt	-14.56\pt	0.24\pt	
