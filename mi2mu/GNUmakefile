@@ -1,55 +1,25 @@
-# mi2mu/GNUmakefile
+# title	   makefile for mi2mu
+# file	   mi2mu/Makefile 
+
+depth = ..
+
+NAME = mi2mu
+MODULE_NAME = mi2mu
+
+SUBDIRS = include
+EXTRA_DIST_FILES += TODO
+MODULE_LIBS=$(depth)/lib $(depth)/flower
+
+STEPMAKE_TEMPLATES=c++ executable
+
+include $(depth)/make/stepmake.make 
+
+# explicit dependencies: (how to do auto?)
 #
-# This file helps maintainers to keep their Makefile.am automatically
-# up to date using GNU make features.
-# If you don't have (or run) GNU make, Makefile.am will not be updated
-# automatically when source files are added/removed.
+midi-lexer.l:	$(outdir)/midi-parser.hh
 
-# automake/wild-make should generate this file from Makefile.am.wild
 
-#ugh
-Makefile=$(wildcard Makefile)
-# are we configured here, or are we using --srcdir
-ifeq ($(Makefile),Makefile)
+$(outdir)/mi2mu-version.o: $(outdir)/version.hh
 
-include Makefile
-
-biltdir=.
-
-else
-
-#ugh
-#ugh
-biltdir=../../build/mi2mu
-
-make-in-build: wild-check
-	exec $(MAKE) -C $(biltdir)
-
-# include Makefile
-include $(biltdir)/Makefile
-
-clean: wild-check
-	exec $(MAKE) -C $(biltdir) $@
-
-dist: wild-check
-	exec $(MAKE) -C $(biltdir) $@
-
-distclean: wild-check
-	exec $(MAKE) -C $(biltdir) $@
-
-endif
-
-# Makefile.am.wild: mi2mu_SOURCES = $(wildcard *.cc)
-CURRENT_mi2mu_SOURCES = $(wildcard *.cc)
-
-wild-check: check-mi2mu-sources
-
-check-mi2mu-sources:
-ifneq ($(mi2mu_SOURCES),$(CURRENT_mi2mu_SOURCES))
-	@echo \"$(mi2mu_SOURCES)\"
-	@echo \"$(CURRENT_mi2mu_SOURCES)\"
-	@echo  mi2mu_SOURCES changed: rerunning make-wild.
-	@-rm -f Makefile.am
-	$(PERL) $(top_srcdir)/bin/wild-perl < Makefile.am.wild > Makefile.am
-endif
-
+VERSION: $(depth)/VERSION
+	cp $< $@
