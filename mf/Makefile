@@ -12,26 +12,23 @@ include ./$(depth)/make/Include.make
 # 
 TEXFILES = $(wildcard *.tex)
 MFFILES = $(wildcard *.mf)
-MFDEPS = $(outdir)/mf.dep
-EXTRA_DISTFILES = $(MFFILES) $(TEXFILES) TODO README
+EXTRA_DISTFILES =   TODO README  $(MFFILES)
 #
+lyout = $(depth)/init
+texout = $(depth)/tex
 
 FONT_FILES = $(wildcard *[0-9].mf)
 FET_FILES = $(wildcard feta[0-9]*.mf)
 
-lyout = $(depth)/init
-texout = $(depth)/tex
 LYTABLES = $(addprefix $(lyout)/, $(FET_FILES:.mf=.ly))
+LOGFILES = $(addprefix $(outdir)/, $(FET_FILES:.mf=.log))
 TEXTABLES = $(addprefix $(texout)/, $(FET_FILES:.mf=.tex))
 #
 
-all: $(LYTABLES) $(TEXTABLES)
+default: $(LYTABLES) $(TEXTABLES) $(LOGFILES)
 
 localclean:
-	rm -f $(LYTABLES) $(TEXTABLES) 
-
-localrealclean: 
-	rm -f $(MFDEPS)
+	rm -f $(LYTABLES) $(TEXTABLES)
 
 $(outdir)/%.dvi: %.mf
 	mf $<
@@ -44,34 +41,11 @@ $(outdir)/%.log: %.mf
 	mv $(@F) $@
 	rm $(basename $< ).*gf
 
-$(lyout)/%.ly $(texout)/%.tex: $(outdir)/%.log
-	$(PYTHON) $(depth)/bin/mf-to-table.py --ly $(lyout)/$(<F:.log=.ly) --tex $(texout)/$(<F:.log=.tex) $<
+$(lyout)/%.ly $(texout)/%.tex $(outdir)/%.dep: $(outdir)/%.log
+	$(PYTHON) $(depth)/bin/mf-to-table.py --outdir=$(outdir) --dep $(outdir)/$(<F:.log=.dep) --ly $(lyout)/$(<F:.log=.ly) --tex $(texout)/$(<F:.log=.tex) $<
 
-localinstall:
-	$(INSTALL) -d $(MFDIR)/public/lilypond
-	$(INSTALL) -m 644 $(MFFILES) $(MFDIR)/public/lilypond/
 
-localuninstall:
-	for i in $(MFFILES) ; do rm -f $(MFDIR)/lilypond/$$i; done
-	-rmdir $(MFDIR)/public/lilypond/
+INSTALLATION_DIR=$(MFDIR)/public/lilypond
+INSTALLATION_FILES=$(MFFILES)
 
-$(MFDEPS): $(FONT_FILES)
-# do something silly to avoid barfs if python not installed.
-	echo > $@
-	$(PYTHON) $(depth)/bin/mf-deps.py  $^ >> $@
-
-# dependencies:
-#
-include $(MFDEPS)
-#
-
-# silly workaround for stupid TeXs
-systempks:
-# irix 5.3
-#	MakeTeXPK feta16 300 300 magstep\(0.0\)
-	set -e ; for a in $(FONT_FILES); do \
-	MakeTeXPK `basename $$a .mf` 300 300 magstep\(0.0\) ; \
-	mf "\mode=ljfour; input `basename $$a .mf`"  ;\
-	mv -f `find . -name '*.tfm' -print -o -name '*gf' -print`  out/ ; \
-	done
-
+include $(depth)/make/Installfiles.make
