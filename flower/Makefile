@@ -27,21 +27,24 @@ include ./$(depth)/flower/VERSION
 include ./$(depth)/make/Variables.make
 include ./$(depth)/make/Files.make 
 
-include $(flowerout)/Flower-flags.make
+#include $(flowerout)/Flower-flags.make
 
 
 #
 # descent order into subdirectories:
 #
-SUBDIRS = include test 
+SUBDIRS = include 
 #
 
 # list of distribution files:
 #
 SCRIPTS = 
 README_FILES = ONEWS NEWS README TODO
-EXTRA_DISTFILES= aclocal.m4 configure config.hh.in configure.in VERSION $(README_FILES) $(SCRIPTS) Flower-flags.make.in
-#
+EXTRA_DISTFILES= VERSION $(README_FILES) $(SCRIPTS)
+#Flower-flags.make.in
+# aclocal.m4 configure config.hh.in configure.in
+
+
 
 
 # generic targets and rules:
@@ -58,7 +61,7 @@ the-lib: $(THE_LIB)
 # version:
 #
 
-localdist: configure
+localdist: 
 
 -include /dev/null $(DEPFILES)
 #
@@ -70,8 +73,8 @@ localinstall: $(LIBFLOWER)
 ifeq ($(LIB_SUFFIX),.so)
 	$(INSTALL) -d $(libdir)
 	$(INSTALL) $(LIBFLOWER).$(VERSION) $(libdir)
-	ln -sf $(LIB_PREFIX)flower$(LIB_SUFFIX).$(VERSION) $(libdir)/$(LIB_PREFIX)flower$(LIB_SUFFIX).$(MAJOR_VERSION)
-	ln -sf $(LIB_PREFIX)flower$(LIB_SUFFIX).$(VERSION) $(libdir)/$(LIB_PREFIX)flower$(LIB_SUFFIX)
+	ln -s $(LIB_PREFIX)flower$(LIB_SUFFIX).$(VERSION) $(libdir)/$(LIB_PREFIX)flower$(LIB_SUFFIX).$(MAJOR_VERSION)
+	ln -s $(LIB_PREFIX)flower$(LIB_SUFFIX).$(VERSION) $(libdir)/$(LIB_PREFIX)flower$(LIB_SUFFIX)
 endif
 
 localuninstall:
