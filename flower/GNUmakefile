@@ -1,54 +1,23 @@
-# flower/GNUmakefile
-#
-# This file helps maintainers to keep their Makefile.am automatically
-# up to date using GNU make features.
-# If you don't have (or run) GNU make, Makefile.am will not be updated
-# automatically when source files are added/removed.
+# title	   top level makefile for FlowerLib
+# file	   flower/Makefile
 
-# automake/wild-make should generate this file from Makefile.am.wild
+# should reinstate versioning if shared libs are enabled.
 
-#ugh
-Makefile=$(wildcard Makefile)
-# are we configured here, or are we using --srcdir
-ifeq ($(Makefile),Makefile)
+depth = ..
 
-include Makefile
+NAME = flower
+MODULE_NAME = flower
+SUBDIRS = include 
 
-biltdir=.
+SCRIPTS = 
+README_FILES = NEWS-1.0 NEWS-1.1.46 README TODO
+EXTRA_DIST_FILES= VERSION $(README_FILES) $(SCRIPTS)
+STEPMAKE_TEMPLATES=library c++
 
-else
 
-#ugh
-biltdir=../../build/flower
 
-make-in-build: wild-check
-	exec $(MAKE) -C $(biltdir)
+include $(depth)/make/stepmake.make 
 
-# include Makefile
-include $(biltdir)/Makefile
-
-clean: wild-check
-	exec $(MAKE) -C $(biltdir) $@
-
-dist: wild-check
-	exec $(MAKE) -C $(biltdir) $@
-
-distclean: wild-check
-	exec $(MAKE) -C $(biltdir) $@
-
-endif
-
-# Makefile.am.wild: libflower_la_SOURCES = $(wildcard *.cc)
-CURRENT_libflower_la_SOURCES = $(wildcard *.cc)
-
-wild-check: check-flower-la-sources
-
-check-flower-la-sources:
-ifneq ($(libflower_la_SOURCES),$(CURRENT_libflower_la_SOURCES))
-	@echo \"$(libflower_la_SOURCES)\"
-	@echo \"$(CURRENT_libflower_la_SOURCES)\"
-	@echo  libflower_la_SOURCES changed: rerunning make-wild.
-	@-rm -f Makefile.am
-	$(PERL) $(top_srcdir)/bin/wild-perl < Makefile.am.wild > Makefile.am
-endif
+foo:
+	echo $(DIST_FILES) $(O_FILES) $(OBJECT_FILES)
 
