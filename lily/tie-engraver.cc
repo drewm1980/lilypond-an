@@ -1,132 +1,145 @@
-/*
-  tie-reg.cc -- implement Tie_engraver
-
-  source file of the GNU LilyPond music typesetter
-
-  (c)  1997--1998 Han-Wen Nienhuys <hanwen@cs.uu.nl>
-
+/*   
+  ctie-engraver.cc --  implement Tie_engraver
   
-  essentially obsolete.
-*/
+  source file of the GNU LilyPond music typesetter
+  
+  (c) 1998 Han-Wen Nienhuys <hanwen@cs.uu.nl>
+  
+ */
 
 #include "tie-engraver.hh"
-#include "tie.hh"
+#include "command-request.hh"
 #include "note-head.hh"
 #include "musical-request.hh"
-#include "music-list.hh"
+#include "tie.hh"
 
 Tie_engraver::Tie_engraver()
 {
-  end_tie_p_ = 0;
-  tie_p_ = 0;
-  req_l_ =0;
-  end_req_l_ =0;
-  end_mom_ = -1;
-  melodic_req_l_ = 0;
-  end_melodic_req_l_ =0;
-  dir_ = CENTER;
+  req_l_ = 0;
 }
 
-void
-Tie_engraver::do_post_move_processing()
-{
-  if (tie_p_ && now_moment () == end_mom_)
-    {
-      end_tie_p_ = tie_p_;
-      end_req_l_ = req_l_;
-      end_melodic_req_l_ = melodic_req_l_;
-      tie_p_ =0;
-      req_l_ =0;
-      end_mom_ = -1;
-    }
-}
 
 bool
-Tie_engraver::do_try_request (Request*r)
+Tie_engraver::do_try_music (Music *m)
 {
-  if (! (r->access_Musical_req () && r->access_Musical_req ()->access_Tie_req ()))
-    return false;
-  
-  if (req_l_)
+  if (Tie_req * c = dynamic_cast<Tie_req*> (m))
     {
-      return false;
+      req_l_ = c;
+      return true;
     }
-  req_l_ = r->access_Musical_req ()->access_Tie_req ();
-  end_mom_ = r->parent_music_l_->time_int().length ()
-    + now_moment ();
-  return true;
-}
-
-void
-Tie_engraver::do_process_requests()
-{
-  Scalar dir (get_property ("tieydirection"));
-  Scalar dir2 (get_property ("ydirection"));
-  if (!dir.length_i () && dir2.length_i ())
-    {
-        dir_ = (Direction) int(dir2);
-    }
-  else if (dir.length_i ())
-    dir_ = (Direction) int (dir);
-  
-  if (req_l_ && ! tie_p_)
-    {
-      tie_p_ = new Tie;
-      Scalar prop = get_property ("tiedash");
-      if (prop.isnum_b ()) 
-	tie_p_->dash_i_ = prop;
-    }
+  return false;
 }
 
 void
 Tie_engraver::acknowledge_element (Score_element_info i)
 {
-  if (i.elem_l_->is_type_b (Note_head::static_name ()))
+  if (Note_head *nh = dynamic_cast<Note_head *> (i.elem_l_))
     {
-      if (tie_p_)
-	{
-	  tie_p_->set_head (LEFT, (Note_head*)i.elem_l_->access_Item ());
-	  melodic_req_l_ = i.req_l_->access_Musical_req ()->access_Melodic_req ();
-	}
+      Note_req * m = dynamic_cast<Note_req* > (i.req_l_);
+      now_heads_.push (CHead_melodic_tuple (nh, m, now_moment()+ m->duration ()));
+    }
+}
 
-      if (end_tie_p_)
+void
+Tie_engraver::do_process_requests ()
+{
+  if (req_l_)
+    {
+      Moment now = now_moment ();
+      Link_array<Note_head> nharr;
+      
+      stopped_heads_.clear ();
+      while (past_notes_pq_.size ()
+	     && past_notes_pq_.front ().end_ == now)
+	stopped_heads_.push (past_notes_pq_.get ());
+
+    }
+}
+
+void
+Tie_engraver::process_acknowledged ()
+{
+  if (req_l_)
+    {
+      if (now_heads_.size () != stopped_heads_.size ())
 	{
-	  end_tie_p_->set_head (RIGHT, (Note_head*)i.elem_l_->access_Item ());
-	  if (!Melodic_req::compare (*end_melodic_req_l_, *melodic_req_l_))
-	    end_tie_p_->same_pitch_b_ = true;
-	  announce_element (Score_element_info (end_tie_p_,end_req_l_));
+	  req_l_->warning ("Unequal number of note heads for tie");
+	}
+      int sz = now_heads_.size () <? stopped_heads_.size ();
+
+      // hmm. Should do something more sensible.
+      // because, we assume no more noteheads come along after the 1st pass.
+      if (sz > tie_p_arr_.size ())
+	{
+	  now_heads_.sort (CHead_melodic_tuple::pitch_compare);
+	  stopped_heads_.sort(CHead_melodic_tuple::pitch_compare);
+
+	  for (int i=0; i < sz; i++)
+	    {
+	      Tie * p = new Tie;
+	      p->set_head (LEFT, stopped_heads_[i].head_l_);
+	      p->set_head (RIGHT, now_heads_[i].head_l_);
+	      tie_p_arr_.push (p);
+	      announce_element (Score_element_info (p, req_l_));
+	    }
 	}
     }
 }
 
 void
-Tie_engraver::do_pre_move_processing()
+Tie_engraver::do_pre_move_processing ()
 {
-  if (end_tie_p_)
+  for (int i=0; i < now_heads_.size (); i++)
     {
-      if (dir_)
-	end_tie_p_->dir_ =  dir_;
-
-      typeset_element (end_tie_p_);
-      end_tie_p_ =0;
-      end_req_l_ =0;
+      past_notes_pq_.insert (now_heads_[i]);
     }
+  now_heads_.clear( );
+  
+  for (int i=0; i<  tie_p_arr_.size (); i++)
+    {
+      typeset_element (tie_p_arr_[i]);
+    }
+  tie_p_arr_.clear ();
 }
 
 void
-Tie_engraver::do_removal_processing ()
+Tie_engraver::do_post_move_processing ()
 {
-  do_pre_move_processing ();
-  if (tie_p_)
-    {
-      req_l_->warning (_ ("lonely tie"));
-      tie_p_->unlink ();
-      delete tie_p_;
-      tie_p_ =0;
-    }
+  req_l_ =0;
+  Moment now = now_moment ();
+  while (past_notes_pq_.size () && past_notes_pq_.front ().end_ < now)
+    past_notes_pq_.delmin ();
 }
 
 
 
-IMPLEMENT_IS_TYPE_B1(Tie_engraver,Engraver);
 ADD_THIS_TRANSLATOR(Tie_engraver);
+
+
+CHead_melodic_tuple::CHead_melodic_tuple ()
+{
+  head_l_ =0;
+  mel_l_ =0;
+  end_ = 0;
+}
+
+CHead_melodic_tuple::CHead_melodic_tuple (Note_head *h, Melodic_req*m, Moment mom)
+{
+  head_l_ = h;
+  mel_l_ = m;
+  end_ = mom;
+}
+
+int
+CHead_melodic_tuple::pitch_compare (CHead_melodic_tuple const&h1,
+			     CHead_melodic_tuple const &h2)
+{
+  return Melodic_req::compare (*h1.mel_l_, *h2.mel_l_);
+}
+
+int
+CHead_melodic_tuple::time_compare (CHead_melodic_tuple const&h1,
+			     CHead_melodic_tuple const &h2)
+{
+  return (h1.end_ - h2.end_ ).sign ();
+}
