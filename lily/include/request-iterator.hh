@@ -1,41 +1,24 @@
-/*
-  request-iter.hh -- declare Request_chord_iterator
-
+/*   
+  request-iterator.hh -- declare Request_iterator
+  
   source file of the GNU LilyPond music typesetter
+  
+  (c) 2000 Han-Wen Nienhuys <hanwen@cs.uu.nl>
+  
+ */
 
-  (c)  1997--1999 Han-Wen Nienhuys <hanwen@cs.uu.nl>
-*/
-
-
-#ifndef REQUEST_ITER_HH
-#define REQUEST_ITER_HH
+#ifndef REQUEST_ITERATOR_HH
+#define REQUEST_ITERATOR_HH
 
 #include "music-iterator.hh"
 
-/**
-   Walk through a Request_chord
- */
-class Request_chord_iterator : public Music_iterator {
-  Request_chord * elt_l () const;
-  /**
-     cache elt_l ()->length_mom ().
-   */
-  Moment elt_length_mom_;
-  bool last_b_;
-  Cons<Music>* cursor_;
-
+class Request_iterator : public Music_iterator
+{
 public:
-  Request_chord_iterator ();
-  
-
+  Request_iterator ();
 protected:
-  virtual void do_process_and_next (Moment);
-  virtual Moment next_moment() const;
-  virtual Music* next_music_l ();
-  virtual void construct_children();
-  virtual bool ok() const;
-  virtual void do_print() const;
+  virtual void do_process_and_next (Moment );
 };
 
+#endif /* REQUEST_ITERATOR_HH */
 
-#endif // REQUEST_ITER_HH
