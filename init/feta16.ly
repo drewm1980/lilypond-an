@@ -1,5 +1,5 @@
 % generated automatically by mf-to-table.py version 0.4
-% on Tue Nov 11 13:31:20 1997
+% on Wed Nov 19 11:44:45 1997
 % Do not edit
 % input from out/feta16.log
 % name=\symboltables {
@@ -24,6 +24,7 @@
         }
     "dots"	 = \table {
         "dot"	"\\dot"	-0.00\pt	1.80\pt	-0.90\pt	0.90\pt	
+        "repeatcolon"	"\\repeatcolon"	-0.00\pt	1.80\pt	-2.00\pt	2.00\pt	
         }
     "balls"	 = \table {
         "-1"	"\\brevisball"	-0.00\pt	8.00\pt	-2.20\pt	2.20\pt	
@@ -66,10 +67,12 @@
         "d5"	"\\dthirtysecondflag"	-0.20\pt	4.54\pt	-0.20\pt	15.66\pt	
         "d6"	"\\dsixtyfourthflag"	-0.20\pt	4.54\pt	-0.20\pt	17.66\pt	
         }
-    "klef"	 = \table {
+    "clefs"	 = \table {
+        "alto"	"\\altoclef"	-0.00\pt	10.00\pt	-8.00\pt	8.00\pt	
+        "alto_change"	"\\caltoclef"	-0.00\pt	8.00\pt	-6.40\pt	6.40\pt	
         "bass"	"\\bassclef"	1.20\pt	12.80\pt	-10.00\pt	4.00\pt	
         "bass_change"	"\\cbassclef"	0.96\pt	10.24\pt	-8.00\pt	3.20\pt	
-        "violin"	"\\violinclef"	0.11\pt	10.55\pt	-12.00\pt	20.00\pt	
-        "violin_change"	"\\cviolinclef"	-0.23\pt	8.12\pt	-9.60\pt	16.00\pt	
+        "violin"	"\\violinclef"	-0.11\pt	10.95\pt	-12.00\pt	20.00\pt	
+        "violin_change"	"\\cviolinclef"	-0.33\pt	8.52\pt	-9.60\pt	16.00\pt	
         }
     %  } % $name
