@@ -1,15 +1,5 @@
-\header{
-enteredby =	 "jcn";
-copyright =	 "PD";
-TestedFeatures =	 "simple abbreviations";
-}
 
-\version "0.1.7";
-
-\score{
-	\melodic{ 
-		\octave c'';
-		\meter 4/4;
+\score{\melodic {
 		% default abbreviations
 		c4 c4: c4:32 c4: c4 c2.
 		'a1
@@ -28,11 +18,5 @@ TestedFeatures =	 "simple abbreviations";
 		[:16 e4 g]
 		[:16 e2 g]
 		[:16 e1 g]
-	}
-	\paper{ 
-	    gourlay_maxmeasures =5.;
-	}
-% oeps
-	\midi{ }
-}
 
+}}
