@@ -1,5 +1,3 @@
+DISTFILES=Makefile
 dist:
-	ln Makefile $(DDIR)/objects/
-	
-clean:
-	rm -f *.o
+	ln $(DISTFILES) $(DDIR)/$(SUBDIR)
