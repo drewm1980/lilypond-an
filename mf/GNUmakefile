@@ -1,46 +1,49 @@
-# mf/GNUmakefile
-#
-# This file helps maintainers to keep their Makefile.am automatically
-# up to date using GNU make features.
-# If you don't have (or run) GNU make, Makefile.am will not be updated
-# automatically when source files are added/removed.
+# mf/Makefile
 
-# automake/wild-make should generate this file from Makefile.am.wild
+depth = ..
 
-#ugh
-Makefile=$(wildcard Makefile)
-# are we configured here, or are we using --srcdir
-ifeq ($(Makefile),Makefile)
+STEPMAKE_TEMPLATES=metafont
 
-include Makefile
+EXTRA_DIST_FILES += TODO README
 
-biltdir=.
+FET_FILES = $(wildcard feta[0-9]*.mf)
 
-else
+LYTABLES = $(addprefix $(outdir)/, $(FET_FILES:.mf=.ly))
+LOG_FILES = $(addprefix $(outdir)/, $(FET_FILES:.mf=.log))
+TEXTABLES = $(addprefix $(outdir)/, $(FET_FILES:.mf=.tex))
+AFM_FILES = $(addprefix $(outdir)/, $(FET_FILES:.mf=.afm))
 
-#ugh
-#ugh
-biltdir=../../build/mf
+ALL_GEN_FILES=$(LYTABLES) $(TEXTABLES) $(LOG_FILES) $(AFM_FILES)
 
-make-in-build: wild-check
-	exec $(MAKE) -C $(biltdir)
+OUT_DIST_FILES += $(AFM_FILES)
 
-# include Makefile
-include $(biltdir)/Makefile
+include $(depth)/make/stepmake.make 
 
-clean: wild-check
-	exec $(MAKE) -C $(biltdir) $@
+default: $(ALL_GEN_FILES)
 
-dist: wild-check
-	exec $(MAKE) -C $(biltdir) $@
 
-distclean: wild-check
-	exec $(MAKE) -C $(biltdir) $@
+$(outdir)/%.afm $(outdir)/%.ly $(outdir)/%.tex $(outdir)/%.dep: $(outdir)/%.log
+	$(PYTHON) $(buildscripts)/mf-to-table.py --package=$(topdir) --outdir=$(outdir) --dep $(outdir)/$(<F:.log=.dep) --ly $(outdir)/$(<F:.log=.ly) --afm $(outdir)/$(<F:.log=.afm) --tex $(outdir)/$(<F:.log=.tex) $<
 
-endif
 
-# Makefile.am.wild: mi2mu_SOURCES = $(wildcard *.cc)
-# CURRENT_mi2mu_SOURCES = $(wildcard *.cc)
+TEXINSTALL=$(MAKE) INSTALLATION_OUT_DIR=$(TEXDIR)/lilypond depth=.. INSTALLATION_OUT_FILES="$(TEXTABLES)" -f $(stepdir)/install-outfiles.sub.make $@
 
-wild-check: 
+AFMINSTALL=$(MAKE) depth=.. INSTALLATION_OUT_DIR=$(datadir) INSTALLATION_OUT_FILES="$(AFM_FILES)" -f $(stepdir)/install-outfiles.sub.make $@
+
+LYINSTALL=$(MAKE) depth=.. INSTALLATION_OUT_DIR=$(datadir) INSTALLATION_OUT_FILES="$(LYTABLES)" -f $(stepdir)/install-outfiles.sub.make $@
+
+localinstall: $(ALL_GEN_FILES)
+	$(TEXINSTALL)
+	$(LYINSTALL)
+	$(AFMINSTALL)
+
+localuninstall:
+	$(TEXINSTALL)
+	$(LYINSTALL)
+	$(AFMINSTALL)
+
+INSTALLATION_DIR=$(MFDIR)/public/lilypond
+INSTALLATION_FILES=$(MF_FILES)
+
+include $(stepdir)/installfiles.make
 
