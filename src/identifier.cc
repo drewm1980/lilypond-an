@@ -1,28 +1,11 @@
 #include <assert.h>
-#include "identifier.hh"
-#include "staff.hh"
+
+#include "identparent.hh"
 #include "lexer.hh"
-#include "inputmusic.hh"
 
-
-Identifier::Identifier(String n)
-    :name  (n)
+void
+Identifier::error()
 {
-    data = 0;
-}
-
-
-Identifier::~Identifier()
-{    
-}
-
-Staff_id::~Staff_id()
-{
-    delete staff();
-}
-
-Voices_id::~Voices_id()
-{
-    voices()->junk();
-    delete voices();
+    String e("Wrong identifier type: ");
+    yyerror(e + classname());
 }
