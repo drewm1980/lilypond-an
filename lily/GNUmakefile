@@ -1,72 +1,30 @@
-# lilypond/GNUmakefile
-#
-# This file helps maintainers to keep their Makefile.am automatically
-# up to date using GNU make features.
-# If you don't have (or run) GNU make, Makefile.am will not be updated
-# automatically when source files are added/removed.
+# title	   makefile for lilypond
+# file	   lily/Makefile 
 
-# automake/wild-make should generate this file from Makefile.am.wild
+depth = ..
 
-#ugh
-Makefile=$(wildcard Makefile)
-# are we configured here, or are we using --srcdir
-ifeq ($(Makefile),Makefile)
+NAME = lilypond
+SUBDIRS = include
 
-include Makefile
+EXTRA_DIST_FILES = VERSION 
+MODULE_LIBS=$(depth)/lib $(depth)/flower
 
-biltdir=.
+STEPMAKE_TEMPLATES= c++ executable 
 
-else
+include $(depth)/make/stepmake.make 
 
-#ugh
-biltdir=../../build/lily
+# force these: Make can't know these have to be generated in advance
+$(outdir)/my-lily-parser.o: $(outdir)/parser.hh
+$(outdir)/my-lily-lexer.o: $(outdir)/parser.hh
+$(outdir)/lexer.o: $(outdir)/parser.hh
 
-make-in-build: wild-check
-	echo exec $(MAKE) -C $(biltdir)
-	exec $(MAKE) -C $(biltdir)
 
-include $(biltdir)/Makefile
+$(outdir)/lily-version.o: $(outdir)/version.hh
 
-clean: wild-check
-	exec $(MAKE) -C $(biltdir) $@
+$(outdir)/main.o: $(outdir)/BLURB.hh $(outdir)/COPERTINA.hh $(outdir)/FLAPTEKST.hh
 
-dist: wild-check
-	exec $(MAKE) -C $(biltdir) $@
 
-distclean: wild-check
-	exec $(MAKE) -C $(biltdir) $@
-
-lexer.cc: wild-check
-	exec $(MAKE) -C $(biltdir) $@
-
-parser.hh: wild-check
-	exec $(MAKE) -C $(biltdir) $@
-
-parser.cc: wild-check
-	exec $(MAKE) -C $(biltdir) $@
-
-#ugh OMIT_DEPENDENCIES does not seem to work
-.deps/lexer.P:
-	exec $(MAKE) -C $(biltdir) $@
-
-.deps/parser.P:
-	exec $(MAKE) -C $(biltdir) $@
-
-endif
-
-# Makefile.am.wild: lilypond_SOURCES = $(wildcard *.cc *.ll *.yy)
-# ugh
-CURRENT_lilypond_SOURCES = $(wildcard *.cc lexer.ll parser.yy)
-
-# ugh: stupid lexer.cc/parser.cc cluttering sourcedir!
-wild-check: check-lilypond-sources
-
-check-lilypond-sources:
-ifneq ($(lilypond_SOURCES),$(filter-out $(IGNORE_WILDCARDS), $(CURRENT_lilypond_SOURCES)))
-	@echo \"$(lilypond_SOURCES)\"
-	@echo \"$(CURRENT_lilypond_SOURCES)\"
-	@echo  lilypond_SOURCES changed: rerunning make-wild.
-	@-rm -f Makefile.am
-	$(PERL) $(top_srcdir)/bin/wild-perl < Makefile.am.wild > Makefile.am
-endif
+# ugh . -> $(outdir)
+VERSION: $(depth)/VERSION
+	cp $< $@
 
