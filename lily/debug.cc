@@ -1,6 +1,6 @@
 #include <fstream.h>
 #include <signal.h>
-#include <new.h>
+#include <std/new.h>
 #include <stdlib.h>
 #include "debug.hh"
 #include "dstream.hh"
@@ -9,7 +9,7 @@
 
 Dstream *monitor=0;
 ostream * nulldev =0;
-static void (*rat_printer)(Moment const&);
+
 
 // ugh
 struct _Dinit {
@@ -41,10 +41,13 @@ float_handler(int)
     assert(false);
 }
 
+/// just to make sure print_rat is linked in
+static void (*rat_printer)(Moment const&);
+
 void
 debug_init()
 {
-    rat_printer = printm;	// make sure this is linked in
+    rat_printer = print_rat;	
 #ifndef NDEBUG
     set_new_handler(&mynewhandler);
 #endif
