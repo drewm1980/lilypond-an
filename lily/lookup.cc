@@ -101,6 +101,7 @@ Lookup::afm_find (String s, bool warn) const
 	{
 	  warning (_f("Can't open `%s'\n", font_name_));
 	  warning (_f("Search path %s\n", global_path.str ().ch_C()));
+	  error (_f("Aborting"));
 	}
     }
   Adobe_font_char_metric cm = afm_l_->find_char (s, warn);
@@ -382,14 +383,19 @@ static Dict_initialiser<char const*> cmr_init[] = {
   {"bold", "cmbx"},
   {"dynamic", "feta-din"},
   {"finger", "feta-nummer"},
+  {"typewriter", "cmtt"},
   {"italic", "cmti"},
   {"roman", "cmr"},
   {"large", "cmbx"},
   {"Large", "cmbx"},
   {"mark", "feta-nummer"},
   {"number", "feta-nummer"},
+  {"volta", "feta-nummer"},
   {0,0}
 };
+
+// Magic numbers from Knuths plain.tex:
+static Real mag_steps[] = {1, 1, 1.200, 1.440, 1.7280,  2.074, 2.488};
 
 static Dictionary<char const *> cmr_dict (cmr_init);
 
@@ -398,13 +404,18 @@ Lookup::text (String style, String text) const
 {
   Molecule m;
   
-
+  int font_mag = 1;
   Real font_h = paper_l_->get_var ("font_normal");
   if (paper_l_->scope_p_->elem_b ("font_" + style))
     {
       font_h = paper_l_->get_var ("font_" + style);
     }
    
+  if (paper_l_->scope_p_->elem_b ("magnification_" + style))
+    {
+      font_mag = (int)paper_l_->get_var ("magnification_" + style);
+    }
+
   if (cmr_dict.elem_b (style))
     {
       style = String (cmr_dict [style]) + to_str  ((int)font_h); // ugh
@@ -427,6 +438,13 @@ Lookup::text (String style, String text) const
 	  w += c->dimensions()[X_AXIS].length ();
 	  ydims.unite (c->dimensions()[Y_AXIS]);
 	}
+    }
+
+  if (font_mag > 1 && font_mag < 7 )
+    {
+      style = style + String(" scaled \\magstep ") + to_str (font_mag);
+      w *= mag_steps[font_mag];
+      ydims *= mag_steps[font_mag];
     }
 
   DOUT << "\n" << to_str (w) << "\n";
