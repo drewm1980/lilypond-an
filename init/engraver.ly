@@ -61,7 +61,6 @@ lyric_engraver = \requesttranslator {
 		\consists "Swallow_engraver";
 	}
 	\consists "Vertical_align_engraver";
-	\consists "Line_group_engraver";
 }
 
 orchestral_score_translator = \requesttranslator {
