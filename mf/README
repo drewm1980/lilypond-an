@@ -1,43 +1,42 @@
-This is from the package MusixTeX, version T.73 (Taupin version.)
 
-The documentation states:
+This is a font of music symbols.  All MF sources are original.  The
+symbols are modelled after various editions of music, notably
 
-	\begin{center}
+	- Baerenreiter
+	- Hofmeister
+	- Breitkopf
+	- Durand & C'ie
 
-	Although one of the authors contested that point once the
-	common work had begun, \musixtex{} may be freely copied,
-	duplicated and used. However, since it is intended to be a
-	\ital{freeware} you are not allowed to sell it, and the fee
-	you may ask for distributing it must be limited to
-	maintenance, support and duplication costs. You may take parts
-	of it to include in other packages, but no packages called
-	\musixtex{} may be distributed under this name if different
-	from the original distribution (except obvious bug corrections
-	or text font adaptations for specific implementations).
+The best references on Music engraving are [Wanske] and [Ross], some
+of their insights have also been used.  Although a matter of taste,
+I'd say that Baerenreiter has the finest typography of all.
 
-	\musixtex{} may be included in further commercial packages,
-	provided that no fee is charged for \musixtex{} itself.
+Traditional engraving uses a set of 9 standardised sizes for Staffs
+(running from 0 to 8).  
 
-	\end{center}
+I tried measuring those (helped by a magnifying glass), and I get the
+staffsizes in the following table.  One should note that these are
+estimates, so I think there could be a measuring error of ~ .5 pt.
+Moreover [Ross] states that not all engravers use exactly those sizes.
+
+Staffsize	Numbers		Name
+
+26.2pt		No. 0
+22.6pt		No. 1		Giant/English
+21.3pt		No. 2		Giant/English
+19.9pt		No. 3		Regular, Ordinary, Common
+19.1pt		No. 4		Peter
+17.1pt		No. 5		Large middle
+15.9pt		No. 6		Small middle
+13.7pt		No. 7		Cadenza
+11.1pt		No. 8		Pearl
 
 
-A part (the fonts) are included in this package, which is not called
-\musixtex, so this not a copyright infringement.
+This table is partially taken from [Ross].  Most music is set in No.3,
+but the papersizes usually are bigger than standard printer paper
+(such as A4).
+
+[Ross] states that the dies (the stamps to make the symbols) come in
+12 different sizes.
 
 
-MusixTeX is copyright 19?? by:
-
-	Daniel Taupin, 
-
-	Laboratoire de Physique des Solides (associ\'e au CNRS),
-	b\^atiment 510, Centre Universitaire, F-91405 ORSAY Cedex
-	<taupin@lps.u-psud.fr>
-
-	Ross Mitchell 
-
-	CSIRO Division of Atmospheric Research, Private Bag No.1,
-	Mordialloc, Victoria 3195, Australia
-
-	Andreas Egler
-
-	(Ruhr--Uni--Bochum) Ursulastr. 32 D-44793 Bochum
