@@ -1,41 +1,22 @@
 /*
-  textspanner.hh -- part of GNU LilyPond
+  text-spanner.hh -- declare Text_spanner
 
-  (c) 1996--1999 Han-Wen Nienhuys
+  source file of the GNU LilyPond music typesetter
+
+  (c) 2000 Jan Nieuwenhuizen <janneke@gnu.org>
 */
 
-#ifndef TEXTSPANNER_HH
-#define TEXTSPANNER_HH
 
-#include "string.hh"
-#include "directional-spanner.hh"
-#include "text-def.hh"
+#ifndef TEXT_SPANNER_HH
+#define TEXT_SPANNER_HH
 
-/** a spanner which puts texts on top of other spanners.  Use for
-  triplets, volta, ottava, etc.
+#include "lily-guile.hh"
 
-  (does anyone use  this? Junkme?)
-*/
-class Text_spanner : public Spanner {
+class Text_spanner
+{
 public:
-  Directional_spanner * support_span_l_;
-  General_script_def * spec_p_;
-  Offset text_off_;
-  
-
-  void set_support (Directional_spanner*);
-  Text_spanner();
-  Text_spanner (Text_spanner const&);
-protected:
-  VIRTUAL_COPY_CONS(Score_element);
-  ~Text_spanner();
-  virtual void do_add_processing ();
-  virtual void do_substitute_element_pointer (Score_element*,Score_element*);
-  virtual void do_pre_processing();
-  virtual void do_post_processing();
-  virtual Interval height() const ;
-  virtual Molecule* do_brew_molecule_p() const;
-  virtual void do_print() const;
+  DECLARE_SCHEME_CALLBACK (brew_molecule, (SCM));
+  static bool has_interface (Score_element*);
 };
-#endif // TEXTSPANNER_HH
 
+#endif /* TEXT_SPANNER_HH */
