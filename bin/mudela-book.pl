@@ -81,7 +81,7 @@ sub close_mudela
     if ($center_b) {
 	print BOOK "\\begin{minipage}[c]{.5\\textwidth}\n";
     }
-    print BOOK "\\input " . gen_texfile . "%\n";
+    print BOOK "\\input " . gen_texfile . "\n";
     if ($center_b) {
 	print BOOK "\\end{minipage}";
 	$center_b = 0;
@@ -97,15 +97,18 @@ sub open_mudela
     print BOOK "\\preexample%\n";
     if ($center_b) {
 	print BOOK "\\begin{minipage}[c]{.5\\textwidth}\n";
+	print MUDELA "default_paper = \\paper { \\paper_sixteen ";
+	print MUDELA "linewidth = 7.\\cm;}";
     }
     if ($verbatim_b) {
 	print BOOK "\\begin{verbatim}\n";
     }
     if ($fragment_b) {
-	print MUDELA "\\score { \\melodic {\\octave c';";
+	print MUDELA "\\score { \\melodic { ";
     } else {
 	print MUDELA "default_paper = \\paper { \\paper_sixteen ";
-	print MUDELA "linewidth = 7.\\cm;}";
+	print MUDELA "linewidth = 15.\\cm;}";
+
     }
 
 }
