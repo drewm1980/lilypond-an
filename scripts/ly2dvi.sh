@@ -5,7 +5,7 @@
 # Written by Jan Arne Fagertun <Jan.A.Fagertun@energy.sintef.no>
 #  Sat Nov 22 22:26:43 CET 1997
 #
-# $Id: ly2dvi.sh,v 1.4 1998/08/24 20:25:17 fred Exp $
+# $Id: ly2dvi.sh,v 1.6 1998/09/15 17:22:43 fred Exp $
 #
 #  Original LaTeX file made by Mats Bengtsson, 17/8 1997
 #
