@@ -1,5 +1,6 @@
-%The sharp is printet too far to the left.
-
+\header {
+texidoc="The sharp is printed too far to the left."
+}
 
 \version "1.4.0"
 \score {
