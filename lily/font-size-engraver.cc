@@ -1,45 +1,42 @@
 /*   
-  font-size-grav.cc --  implement Font_size_engraver
+  font-size-engraver.cc --  implement 
   
   source file of the GNU LilyPond music typesetter
   
-  (c) 1998--1999 Han-Wen Nienhuys <hanwen@cs.uu.nl>
+  (c) 2001 Han-Wen Nienhuys <hanwen@cs.uu.nl>
   
  */
 
-#include "font-size-engraver.hh"
-#include "score-element.hh"
-#include "lily-guile.hh"
+#include "grob.hh"
+#include "engraver.hh"
+
+class Font_size_engraver : public Engraver
+{
+public:
+  VIRTUAL_COPY_CONS(Translator);
+  Font_size_engraver ();
+protected:
+  virtual void acknowledge_grob (Grob_info gi);
+private:
+};
+
 
 Font_size_engraver::Font_size_engraver ()
 {
-  size_ = SCM_EOL;
+
 }
 
 void
-Font_size_engraver::do_process_requests ()
+Font_size_engraver::acknowledge_grob (Grob_info gi)
 {
-  SCM s (get_property ("fontSize", 0));
-  
-  if (gh_number_p(s))
+  SCM sz = get_property ("fontSize");
+
+  if (gh_number_p (sz)
+      && gh_scm2int (sz)
+      && !gh_number_p (gi.elem_l_->get_grob_property ("font-relative-size")))
     {
-      size_ = gh_scm2int (s);
-    }
-  else
-    {
-      size_ = SCM_EOL;
+      gi.elem_l_->set_grob_property ("font-relative-size", sz);
     }
 }
 
-void
-Font_size_engraver::acknowledge_element (Score_element_info e)
-{
-  if (size_ != SCM_EOL
-      && e.elem_l_->get_elt_property (fontsize_scm_sym) == SCM_BOOL_F)
-    {
-      e.elem_l_->set_elt_property (fontsize_scm_sym, size_);
-    }
-}
-
-ADD_THIS_TRANSLATOR (Font_size_engraver);
-
+ADD_THIS_TRANSLATOR(Font_size_engraver);
