@@ -10,9 +10,6 @@
 #include <libguile.h>
 
 #include "config.hh"
-
-#if KPATHSEA
-
 #include "guile-compatibility.hh"
 
 #include <dlfcn.h>
@@ -37,12 +34,16 @@ I found a somewhat more elegant patch for this: Just #include
 #define pclose ANOTHERREALLYUGLYKLUDGE
 #define getopt YAKLUDGE
 
+#if HAVE_KPATHSEA_KPATHSEA_H
 #include <kpathsea/kpathsea.h>
 #include <kpathsea/tex-file.h>
+#endif
 
 
+#if KPATHSEA
 
 
+#if HAVE_KPATHSEA_KPATHSEA_H
 static  void *kpathsea_handle = 0;
 static  char *(*dl_kpse_find_file) (char const*, kpse_file_format_type, boolean) = 0;
 static  void (*dl_kpse_maketex_option) (char const*, boolean) = 0;
@@ -74,6 +75,7 @@ kpathsea_find_format (const char* name)
     }
   return kpse_last_format;
 }
+#endif
 
 //	   "Return the absolute file name of @var{name}, "
 //	   "or @code{#f} if not found.")
@@ -107,9 +109,9 @@ SCM ly_kpathsea_expand_variable(SCM var)
 static char const* LIBKPATHSEA = "libkpathsea.so";
 
 int
-open_dynamic_library ()
+open_library ()
 {
-#if HAVE_DYNAMIC_LIBKPATHSEA
+#if KPATHSEA && HAVE_KPATHSEA_KPATHSEA_H
   struct
   {
     void **func_pointer;
@@ -160,7 +162,7 @@ open_dynamic_library ()
 void
 initialize_kpathsea ()
 {
-  if (open_dynamic_library ())
+  if (open_library ())
     {
       fprintf (stderr, "Error opening kpathsea library. Aborting");
       exit (1);
