@@ -1,6 +1,9 @@
-%
-% multi-measure-rests should collide with notes, just as normal rests.
-%
+\version "1.3.148"
+\header {
+texidoc="multi-measure-rests (bar 2) should `collide' (ie, not clash)
+ with notes, just as normal rests (bar 1)."
+}
+
 \score {
   \notes\context Staff <
      \context Voice=one \relative c''{
