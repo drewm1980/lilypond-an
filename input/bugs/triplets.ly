@@ -1,18 +1,17 @@
+\version "1.3.148"
 
 \header {
-texidoc="Simple beams.  This broke somewhere < 1.3.110
-";
-  title = "Gammes Chromatiques";
-  composer = "";
-  filename = "gammes_chromatiques.ly";
+texidoc = "Simple beams.  This broke somewhere < 1.3.110
+"
+  title = "Gammes Chromatiques"
+  composer = ""
+  filename = "gammes_chromatiques.ly"
 }
 
 %{
 	    - At bar 3 of 2nd score, stems are too big (or the beams are
           badly positionned)
 %}
-
-linebreak = \penalty -1000;
 
 exI = \notes \relative c' {
   \repeat "volta" 2 {
@@ -27,7 +26,7 @@ exI = \notes \relative c' {
     \times 2/3 {c b bes} \times 2/3 {a aes g}
     \times 2/3 {fis f e} \times 2/3 {ees d )des}
   }
-  c1 || \linebreak
+  c1 || \break
 }
 
 \score { \context Staff { \notes { \exI } } }
