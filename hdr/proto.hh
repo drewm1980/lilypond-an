@@ -2,7 +2,7 @@
 /*
   proto.hh -- part of LilyPond
 
-  (c) 1996 Han-Wen Nienhuys
+  (c) 1996,97 Han-Wen Nienhuys
 */
 
 #ifndef PROTO_HH
@@ -15,6 +15,7 @@
 struct Absdynamic_req;
 struct Accidental;
 struct Atom;
+struct Barcheck_req;
 struct Beam;
 struct Beam_req;
 struct Box;
@@ -41,8 +42,11 @@ struct Local_key;
 struct Local_key_item;
 struct Lookup;
 struct Lyric_req;
+struct Mark_req;
 struct Mixed_qp;
 struct Molecule;
+struct Rational;
+typedef Rational Moment;
 struct Note_req;
 struct Notehead;
 struct Offset;
@@ -65,6 +69,7 @@ struct Slur_req;
 struct Span_req;
 struct Spanner;
 struct Staff;
+struct Col_configuration;
 struct Staff_column;
 struct Stem;
 struct Stem_req;
@@ -95,5 +100,8 @@ struct Rhythmic_grouping;
 struct Staff_commands_at ;
 struct Commands_at ;
 struct Time_description;
-
+struct Script_def;
+struct Text_def;
+struct Text_req;
+struct Melodic_req;
 #endif // PROTO_HH
