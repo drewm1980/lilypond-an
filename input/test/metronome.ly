@@ -1,5 +1,5 @@
 
-\version "1.3.117";
+
 
 % Test scm markup text and kerning
 
@@ -16,17 +16,15 @@
 #(define eight-note `(rows ,note ((kern . -0.1) (music ((raise . 3.5) "flags-u3")))))
 #(define dotted-eight-note `(rows ,eight-note (music "dots-dot")))
 
-
-\score{
-	\notes\relative c''{
-		a1-#`(rows ,dotted-eight-note " = 64")
-		}
-	\paper{
-		linewidth = -1.\mm;
-		\translator{
-			\ScoreContext
-			TextScript \override #'font-shape = #'upright
-			TextScript \override #'direction = #1
-		}
-	}
+\score {
+  \notes\relative c'' {
+    a1^#`((rows (font-relative-size . -1)) ,dotted-eight-note " = 64")
+  }
+  \paper {
+    linewidth = -1.;
+    \translator{
+      \ScoreContext
+      TextScript \override #'font-shape = #'upright
+    }
+  }
 }

@@ -1,9 +1,9 @@
 
 
 fragment = \notes {
-  \property Voice.Beam \set #'staff-position = #2
-  \property Voice.Beam \set #'height = #-2
-  [c'8 c]
+  [b''8 b]
+  \property Voice.Beam \set #'default-neutral-direction = #-1
+  [b b]
 }
 
 \paper { linewidth = -1.; } 

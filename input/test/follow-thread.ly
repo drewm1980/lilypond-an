@@ -1,36 +1,30 @@
+
 \header{
 texidoc="
 Theads can be traced automagically when they switch staffs by setting
-property @code{followThread}.
+property @code{followVoice}.
 ";
 }
-% followThread: connect note heads with line when thread switches staff 
 
-\score{
-    \context PianoStaff <
-        \context Staff=one \notes\relative c''{
-	    \context Thread	    
-            d,
-	    \translator Staff=two
-	    c
-%{
-	    b
-	    \translator Staff=one
-	    a'
+\version "1.3.139"
+% followVoice: connect note heads with line when thread switches staff 
 
-	    [c,8
-	    \translator Staff=two
-	    c]
-	    s2.
-%}
-	}
-	\context Staff=two { \clef bass; \skip 1*2; }
-    >
-    \paper{
-        linewidth = 90.\mm;
-	\translator {
-	    \ScoreContext
-	    followThread = ##t
-	}
+fragment = \notes {
+  \context PianoStaff <
+    \property PianoStaff.followVoice = ##t
+    \property Voice.VoiceFollower \set #'type = #'dashed-line
+    \context Staff \context Voice {
+      c'1
+      \translator Staff=two
+      b2 a
     }
+    \context Staff=two {\clef bass; \skip 1*2;}
+  >
+}
+
+\paper { linewidth = -1.; } 
+
+\score {
+  \notes\relative c \fragment
+  \paper { }  
 }

@@ -1,9 +1,9 @@
 
 
 fragment = \notes {
-  \property Voice.Beam \set #'staff-position = #2
-  \property Voice.Beam \set #'height = #-2
-  [c'8 c]
+    \outputproperty #(make-type-checker 'note-head-interface)
+      #'extra-offset = #'(2 . 3)
+    c''2 c
 }
 
 \paper { linewidth = -1.; } 
