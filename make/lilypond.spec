@@ -1,40 +1,40 @@
-Description: LilyPond is a program which converts a music-script (mudela) into\
-TeX output, or MIDI to produce multi-staff scores. Feature include multiple\
-meters, clefs, keys, lyrics, versatile input-language, cadenzas\
-beams, slurs, triplets\
-multiple voices within one staff.
 Name: lilypond
-Version: 0.0.39.hwn2
+Version: 0.0.52
 Release: 1
 Copyright: GPL
 Group: Applications/Publishing
-Source0: pcnov095.win.tue.nl:/pub/lilypond/lilypond-0.0.39.hwn2.tar.gz
+Source0: pcnov095.win.tue.nl:/pub/lilypond/lilypond-0.0.52.tar.gz
 Summary: A preprocessor to make TeX typeset music.
+URL: http://www.stack.nl/~hanwen/lilypond
+Packager: Han-Wen Nienhuys <hanwen@stack.nl>
+Icon: lelie_icon.gif
+Buildroot: /tmp/lilypond_build
+
+%description
+LilyPond is a program which converts a music-script (mudela) into
+TeX output, or MIDI to produce multi-staff scores. Features include multiple
+meters, clefs, keys, lyrics, versatile input-language, cadenzas
+beams, slurs, triplets, multi voices.
 
 %prep
 %setup
 %build
-PREFIX=/usr/lib ./configure
-make all OPTIFLAG="-O2" 
+configure --enable-checking --enable-printing --prefix=/usr --enable-optimise
+make all
 %install
-make install
+strip bin/lilypond bin/mi2mu
+make prefix="$RPM_BUILD_ROOT/usr" install
 %files
-%doc Documentation/README.txt Documentation/CodingStyle.txt
-%doc Documentation/lilygut.txt Documentation/lilyinput.txt
-%doc Documentation/error.txt Documentation/faq.txt Documentation/index.txt
-%doc Documentation/language.txt Documentation/lelie_logo.png
+%doc Documentation/out/CodingStyle.text Documentation/out/INSTALL.text Documentation/out/MANIFESTO.text Documentation/out/error.text Documentation/out/examples.text Documentation/out/faq.text Documentation/out/index.text Documentation/out/language.text Documentation/out/lilygut.text Documentation/out/lilypond.text Documentation/out/mudela.text Documentation/lelie_logo.gif
 /usr/bin/lilypond
 /usr/bin/mi2mu
-/usr/lib/lilypond/init/bare.ini
-/usr/lib/lilypond/init/dutch.ini
-/usr/lib/lilypond/init/english.ini
-/usr/lib/lilypond/init/script.ini
-/usr/lib/lilypond/init/swedish.ini
-/usr/lib/lilypond/init/symbol.ini
-/usr/lib/lilypond/init/table_sixteen.ini
-/usr/lib/lilypond/init/table_twenty.ini
-/usr/lib/lilypond/titledefs.tex
-/usr/lib/lilypond/lilyponddefs.tex
+/usr/man/man1/lilypond.1
+/usr/man/man5/mudela.5
+/usr/lib/texmf/texmf/tex/lilypond/
+/usr/share/lilypond/
 
-
+%post
+texhash
+%post
+texhash
 
