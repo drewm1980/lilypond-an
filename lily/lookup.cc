@@ -3,7 +3,7 @@
 
   source file of the GNU LilyPond music typesetter
 
-  (c)  1997--1998 Han-Wen Nienhuys <hanwen@cs.uu.nl>
+  (c)  1997--1999 Han-Wen Nienhuys <hanwen@cs.uu.nl>
 
   Jan Nieuwenhuizen <janneke@gnu.org>
 
@@ -101,6 +101,7 @@ Lookup::afm_find (String s, bool warn) const
 	{
 	  warning (_f("Can't open `%s'\n", font_name_));
 	  warning (_f("Search path %s\n", global_path.str ().ch_C()));
+	  error (_f("Aborting"));
 	}
     }
   Adobe_font_char_metric cm = afm_l_->find_char (s, warn);
@@ -382,12 +383,14 @@ static Dict_initialiser<char const*> cmr_init[] = {
   {"bold", "cmbx"},
   {"dynamic", "feta-din"},
   {"finger", "feta-nummer"},
+  {"typewriter", "cmtt"},
   {"italic", "cmti"},
   {"roman", "cmr"},
   {"large", "cmbx"},
   {"Large", "cmbx"},
   {"mark", "feta-nummer"},
   {"number", "feta-nummer"},
+  {"volta", "feta-nummer"},
   {0,0}
 };
 
