@@ -28,6 +28,7 @@
 #include "string-convert.hh"
 #include "my-lily-lexer.hh"
 #include "varray.hh"
+#include "interval.hh"
 #include "parser.hh"
 #include "debug.hh"
 #include "parseconstruct.hh"
@@ -72,7 +73,9 @@ NATIONAL  [\001-\006\021-\027\031\036\200-\377]
 TEX		{AA}|-|{PUNCT}|{ACCENT}|{NATIONAL}
 WORD		{A}{AN}*
 ALPHAWORD	{A}+
-INT		-?{N}+
+DIGIT		{N}
+UNSIGNED	{N}+
+INT		-?{UNSIGNED}
 REAL		({INT}\.{N}*)|(-?\.{N}+)
 KEYWORD		\\{WORD}
 WHITE		[ \n\t\f]
@@ -187,9 +190,14 @@ TELP		\\\]
 		return scan_escaped_word (YYText ()+1);
 	}
 
-	{INT}		{
+	{DIGIT}		{
 		yylval.i = String_convert::dec2_i (String (YYText ()));
-		return INT;
+		return DIGIT;
+	}
+
+	{UNSIGNED}		{
+		yylval.i = String_convert::dec2_i (String (YYText ()));
+		return UNSIGNED;
 	}
 
 	\" {
@@ -222,9 +230,9 @@ TELP		\\\]
 	\" {
 		start_quote ();
 	}
-	{INT}		{
+	{UNSIGNED}		{
 		yylval.i = String_convert::dec2_i (String (YYText ()));
-		return INT;
+		return UNSIGNED;
 	}
 	{NOTECOMMAND}	{
 		return scan_escaped_word (YYText ()+1);
@@ -271,9 +279,9 @@ TELP		\\\]
 	return REAL;
 }
 
-{INT}	{
+{UNSIGNED}	{
 	yylval.i = String_convert::dec2_i (String (YYText ()));
-	return INT;
+	return UNSIGNED;
 }
 
 [{}]	{
