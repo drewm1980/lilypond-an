@@ -25,15 +25,13 @@ lyrics don't collide with barlines.
 		linewidth = -1.0\cm;
 		\translator {
 			\LyricsContext
-			\consists "Span_bar_engraver";
 			\accepts "LyricsVoiceWithBars";
 		}
 		\translator {
 			\LyricsVoiceContext
+			\consists "Bar_engraver";
 			\name "LyricsVoiceWithBars";
 		}
-		\translator {
-			\LyricsVoiceContext
-		}
+		
 	}
 }
