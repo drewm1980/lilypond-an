@@ -23,8 +23,10 @@ Staff_margin_engraver::Staff_margin_engraver ()
 }
 
 
+
 /*
     TODO
+    fix alignment/support
 
     should be able to set whole paragraph (multiple lines, centre) to
     left (right?) of staff, e.g.:
@@ -35,10 +37,13 @@ Staff_margin_engraver::Staff_margin_engraver ()
 	           |______________
 */
 void
-Staff_margin_engraver::acknowledge_element (Score_element_info inf)
+Staff_margin_engraver::acknowledge_element (Score_element_info i)
 {
-  Item *i = cast_to_interesting_item (inf.elem_l_);
-  if (!i || inf.origin_grav_l_arr_.size() != 1)
+  Bar * b =dynamic_cast<Bar *> (i.elem_l_);
+  if (!b)
+    return ;
+
+  if (i.origin_grav_l_arr_.size() != 1)
     return;
 
 
@@ -53,7 +58,7 @@ Staff_margin_engraver::acknowledge_element (Score_element_info inf)
   create_items (0);
   text_p_->text_str_ = long_str;
   staff_side_p_->dir_ = LEFT;
-  Bar_script_engraver::do_acknowledge_element (i);
+  Bar_script_engraver::acknowledge_element(i);
 }
 
 

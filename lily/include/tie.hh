@@ -21,6 +21,8 @@ class Tie : public Bow
 public:
   Tie ();
   void set_head (Direction, Note_head*head_l);
+  
+  
   VIRTUAL_COPY_CONS(Score_element);
   
   bool same_pitch_b_;
@@ -31,7 +33,8 @@ protected:
   virtual void do_post_processing ();
   virtual void set_default_dir();
   virtual void do_substitute_dependency (Score_element*,Score_element*);
-  virtual Array<Rod> get_rods () const;
+  virtual Interval do_width () const;
+  Array<Rod> get_rods () const;
 
   Array<Offset> get_controls () const;
 };
