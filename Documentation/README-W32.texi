@@ -9,6 +9,8 @@
 
 FIXME: remove yodl refs. 
 
+[FIXME: THIS DOCUMENTED IS OUTDATED]
+
 No, there's no reason to be concered, Lily should work in
 Windows-NT(/95/98?) too.  The setup may not be easy or smooth.  This
 document will help you getting started.
