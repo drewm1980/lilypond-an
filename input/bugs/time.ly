@@ -1,5 +1,7 @@
-
-% Uses old style
+\version "1.3.148"
+\header {
+texidoc="Should use old style."
+}
 
 \score {
   \notes { 
