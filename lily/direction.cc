@@ -1,10 +1,9 @@
-
 /*   
-  direction.cc --  implement 
+  direction.cc --  implement Direction
   
   source file of the GNU LilyPond music typesetter
   
-  (c) 1998 Han-Wen Nienhuys <hanwen@cs.uu.nl>
+  (c) 1998--1999 Han-Wen Nienhuys <hanwen@cs.uu.nl>
   
  */
 
