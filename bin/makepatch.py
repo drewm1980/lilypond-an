@@ -21,6 +21,7 @@ def help():
 	'  --to=TO, -t TO          to version TO\n'  
 	
 	)
+    sys.exit();
 
 
 
