@@ -1,7 +1,7 @@
 % Creator: mf-to-table.py version 0.5
 % Automatically generated on
 % Do not edit
-% input from feta20.log
+% input from ../mf/feta20.log
 % name=\symboltables {
     "rests"	 = \table {
         "0"	"\\wholerest"	0.00\pt	7.50\pt	-3.12\pt	0.00\pt	
@@ -59,13 +59,13 @@
         "upedaltoe"	"\\upedaltoe"	-2.50\pt	2.50\pt	0.00\pt	7.50\pt	
         "dpedaltoe"	"\\dpedaltoe"	-2.50\pt	2.50\pt	-7.50\pt	0.00\pt	
         "flageolet"	"\\flageolet"	-2.67\pt	2.67\pt	-2.67\pt	2.67\pt	
-        "trilelement"	"\\trilelement"	-2.50\pt	1.31\pt	-2.75\pt	2.75\pt	
-        "prall"	"\\prall"	-4.40\pt	4.40\pt	-2.75\pt	2.75\pt	
-        "mordent"	"\\mordent"	-4.40\pt	4.40\pt	-2.75\pt	2.75\pt	
-        "prallprall"	"\\prallprall"	-6.31\pt	6.31\pt	-2.75\pt	2.75\pt	
-        "prallmordent"	"\\prallmordent"	-6.31\pt	6.31\pt	-2.75\pt	2.75\pt	
-        "upprall"	"\\upprall"	-6.31\pt	6.31\pt	-2.75\pt	2.75\pt	
-        "downprall"	"\\downprall"	-6.31\pt	6.31\pt	-2.75\pt	2.75\pt	
+        "trilelement"	"\\trilelement"	-3.33\pt	1.31\pt	-2.50\pt	2.50\pt	
+        "prall"	"\\prall"	-5.65\pt	5.65\pt	-2.50\pt	2.50\pt	
+        "mordent"	"\\mordent"	-5.65\pt	5.65\pt	-2.50\pt	2.50\pt	
+        "prallprall"	"\\prallprall"	-7.97\pt	7.97\pt	-2.50\pt	2.50\pt	
+        "prallmordent"	"\\prallmordent"	-7.97\pt	7.97\pt	-2.50\pt	2.50\pt	
+        "upprall"	"\\upprall"	-7.97\pt	7.97\pt	-2.50\pt	2.50\pt	
+        "downprall"	"\\downprall"	-7.97\pt	7.97\pt	-2.50\pt	2.50\pt	
         }
     "flags"	 = \table {
         "u3"	"\\eighthflag"	-0.25\pt	6.17\pt	-15.33\pt	0.25\pt	
