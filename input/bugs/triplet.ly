@@ -1,30 +1,10 @@
-
-%
-% huh? wat gaat er nu fout in os-score.ly, hier issie okede?
-%
-global = {
-  \time 2/4;
-  \skip 2*4; \bar "|.";
+\header {
+texidoc="manual beam override is ignored in first triplet"
 }
-Key = \notes \key as \major;
 
 \score {
-    <
-    \global
-    \context StaffGroup = timpani <
-      \context Staff = timpani <
-    \Key
-    \notes\relative c {
-    \times 2/3 { f4 f f }
-    \times 4/5 { as8 as as as as }
-    R1
-  }
-  > >
-  >
-  \paper {
-    linewidth = -1.;
-    \translator {
-      \HaraKiriStaffContext
-    }
+  \context Voice \notes\relative c'' {
+    \times 2/3 { < [ a8 c > < a c > < a c ] > }
+    \times 2/3 < { [ a8 a a ] } { c c c ] } >
   }
 }
