@@ -6,18 +6,18 @@ composers	Franz Schubert (1797-1828)
 		Text by Ludwig Rellstab (1799-1860)
 enteredby	JCN
 copyright	public domain
-}
-%{
- Tested Features: multivoice, accents, lyrics, chords, piano music
+} 
 
-EndMudelaHeader
+%{
+ Tested Features: multivoice, accents, lyrics, chords, piano music,
+multiple \paper{}s in one \score 
 %}
 
 \version "0.1.1";
 
 commands = \melodic{
 	\skip 2.*4;
-	\bar ":|";
+	\bar "|:";
 	\skip 2.*24;
 %	volta1
 	\skip 2.*8;
@@ -205,16 +205,17 @@ begeleiding = \melodic{
  	< \multi 2; { \stem \up;	
 		[ 'f 'a d 'a d 'a ] 
 		[ 'd 'e 'g 'e 'g 'e ] 
-		[ 'cis 'e 'g 'e 'g e ]
+		[ 'cis 'e 'g 'e 'g 'e ]
 		[ 'd 'a d 'a d 'a ]
 		}
 	{ \stem \down; 
 		'd2 r4 
 		 ''bes2 r4 
 		 ''a2 r4
-		 'd2 r4 	
+		'd2 r4
 	} >
 %%9
+	\stem 0;
 	[ 'a e g e g e ] |
 %%10
 	[ 'd 'a d 'a d 'a ] |
@@ -232,6 +233,7 @@ begeleiding = \melodic{
 		 'f2 r4 } 
 	>
 %%15
+	\stem 0;
 	[ 'c 'g 'bes 'g 'bes 'g ] |
 %%16
 	[ ''f 'c 'f 'c 'f 'c ] |
@@ -246,6 +248,7 @@ begeleiding = \melodic{
 		''f2 r4 
 	} > 
 %%21
+	\stem 0;
 	< [ 'e 'c > 'g c 'g c 'g ] |
 %%22
 	[ 'f 'a c 'a 'f 'c ] |
@@ -263,6 +266,7 @@ begeleiding = \melodic{
 		'd2 r4 
 	}
 	>
+	\stem 0;
 	< [ 'cis ''a > 'e 'a 'e 'a 'e ] |
 %%28
 	[ 'd 'a d 'a d 'a ] |
@@ -311,6 +315,7 @@ begeleiding = \melodic{
 	} >
 
 %%47
+	\stem 0;
 	< [ 'cis ''a > 'e 'a 'e 'a 'e ] |
 %%48
 	[ 'd 'fis 'a 'fis 'a 'fis ] |
@@ -466,8 +471,8 @@ tekstII = \lyric{
 	_ _ _ _ _ _ 
 	
 }
-
-\score{
+ 
+themusic = 
 	<	
 		< 	\id "Lyric" "1";
 			\tekstI
@@ -479,13 +484,27 @@ tekstII = \lyric{
 			\melodic < \begeleiding \commands >
 		>
 	>
-	\paper{
-		linewidth= 150.\mm;
 
-		gourlay_maxmeasures = 8.;
-		% on two pages...
-		unitspace= 9.\mm;
-		\output "standchen.out";
+
+\score{
+	\themusic
+	\paper{
+		\paper_twenty
+		% 20pt music uses whole pagewidth
+		linewidth= 195.\mm;
+
+		% we want gourlay, don't set geometric
+		% geometric= 1.4;
+		gourlay_maxmeasures = 9.;
+		\output "standchen-20.out";
+	}
+	\paper{
+		% 16pt mustn't use whole page width
+		linewidth= 160.\mm;
+		% we want gourlay, don't set geometric
+		% geometric= 1.4;
+		gourlay_maxmeasures = 9.;
+		\output "standchen-16.out";
 	}
 	\midi{
 		\tempo 4 = 54;
