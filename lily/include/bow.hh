@@ -3,7 +3,7 @@
 
   source file of the GNU LilyPond music typesetter
 
-  (c)  1997--1998 Han-Wen Nienhuys <hanwen@cs.uu.nl>
+  (c)  1997--1999 Han-Wen Nienhuys <hanwen@cs.uu.nl>
 */
 
 
@@ -31,7 +31,7 @@ public:
 
 protected:
   virtual Molecule* do_brew_molecule_p () const;
-  virtual Interval do_width () const;    
+  //  virtual Interval do_width () const;    
   Array<Offset> get_controls () const;
   virtual Array<Offset> get_encompass_offset_arr () const;
   virtual Interval do_height () const;

@@ -3,7 +3,7 @@
 
   source file of the GNU LilyPond music typesetter
 
-  (c)  1997--1998 Han-Wen Nienhuys <hanwen@cs.uu.nl>
+  (c)  1997--1999 Han-Wen Nienhuys <hanwen@cs.uu.nl>
       Jan Nieuwenhuizen <janneke@gnu.org>
 */
 
@@ -92,6 +92,7 @@ Bow::do_height () const
   return iv;
 }
 
+#if 0
 Interval
 Bow::do_width () const    
 {
@@ -99,6 +100,7 @@ Bow::do_width () const
   Real dx = i.length();
   return Interval (0, dx);
 }
+#endif
 
 Array<Offset>
 Bow::get_controls () const

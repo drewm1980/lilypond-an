@@ -3,7 +3,7 @@
 
   source file of the GNU LilyPond music typesetter
 
-  (c)  1997--1998 Han-Wen Nienhuys <hanwen@cs.uu.nl>
+  (c)  1997--1999 Han-Wen Nienhuys <hanwen@cs.uu.nl>
 */
 #ifndef MOLECULE_HH
 #define MOLECULE_HH
@@ -20,7 +20,7 @@
     to the top, to the right, etc.  */
 class Molecule {
   //  Protected_scm atom_list_;	// change to List<Atom>?
-  Killing_cons<Atom> *atom_list_;
+  Cons<Atom> *atom_list_;
   friend class Paper_outputter;
 public:
   Box dim_;

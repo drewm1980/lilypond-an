@@ -3,7 +3,7 @@
 
   source file of the GNU LilyPond music typesetter
 
-  (c) 1996, 1997--1998 Han-Wen Nienhuys <hanwen@cs.uu.nl>
+  (c) 1996, 1997--1999 Han-Wen Nienhuys <hanwen@cs.uu.nl>
 */
 
 #include "debug.hh"
@@ -146,9 +146,13 @@ Spanner::output_processing ()
 Interval
 Spanner::do_width() const
 {
+  
+  
   Real l = spanned_drul_[LEFT]->absolute_coordinate (X_AXIS);
   Real r = spanned_drul_[RIGHT]->absolute_coordinate (X_AXIS);
-  assert (r>=l);
+
+  if (r< l)
+    warning ("Spanner with negative length");
 	
   return Interval (0, r-l);
 }

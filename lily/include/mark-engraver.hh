@@ -3,7 +3,7 @@
 
   source file of the GNU LilyPond music typesetter
 
- (c) 1998 Jan Nieuwenhuizen <janneke@gnu.org>
+ (c) 1998--1999 Jan Nieuwenhuizen <janneke@gnu.org>
 */
 
 
@@ -12,7 +12,7 @@
 
 #include "bar-script-engraver.hh"
 
-/**
+/**Print rehearsal marks.
   */
 class Mark_engraver : public Bar_script_engraver 
 {

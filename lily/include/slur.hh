@@ -1,7 +1,7 @@
 /*
   slur.hh -- part of GNU LilyPond
 
-  (c) 1996--1998 Han-Wen Nienhuys
+  (c) 1996--1999 Han-Wen Nienhuys
 */
 
 #ifndef SLUR_HH
@@ -31,7 +31,6 @@ protected:
   virtual void do_add_processing ();
   virtual void do_pre_processing ();
   virtual void do_substitute_dependency (Score_element*, Score_element*);
-  virtual Interval do_width () const;
   Array<Rod> get_rods () const;
 };
 

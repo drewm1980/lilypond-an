@@ -3,7 +3,7 @@
 
   source file of the GNU LilyPond music typesetter
 
-  (c)  1997--1998 Han-Wen Nienhuys <hanwen@cs.uu.nl>
+  (c)  1997--1999 Han-Wen Nienhuys <hanwen@cs.uu.nl>
 */
 
 #include <math.h>
@@ -248,11 +248,14 @@ Paper_def::paper_outputter_p (Paper_stream* os_p, Header* header_l, String origi
   if (scope_p_)
     p->output_scope (scope_p_, "mudelapaper");
   
+#if 0
   if (output_global_ch == String("tex"))
     {
       *p->outstream_l_ << *scope_p_->elem ("texsetting")->access_content_String (false);
     }
-  
+#endif
+
+  *p->outstream_l_  << *scope_p_->elem (String (output_global_ch) + "setting")->access_content_String (false);
 
   SCM scm = gh_list (ly_symbol ("experimental-on"), SCM_UNDEFINED);
   p->output_scheme (scm);
