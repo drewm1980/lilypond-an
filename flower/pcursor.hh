@@ -1,3 +1,4 @@
+
 /*
   pcursor.hh -- part of flowerlib
 
@@ -7,24 +8,18 @@
 #ifndef PCURSOR_HH
 #define PCURSOR_HH
 
-#include "plist.hh"
-#include "cursor.hh"
 
-/**  cursor to go with PointerList. 
-  don't create PointerList<void*>'s.
-  This cursor is just an interface class for Cursor. It takes care of the
-  appropriate type casts
- */
+/// cursor to go with PointerList
 template<class T>
-class PCursor : private Cursor<void *> {
+struct PCursor : private Cursor<void *> {
     friend class IPointerList<T>;
 
     /// delete contents
     void junk();
 public:
     Cursor<void*>::ok;
-    Cursor<void*>::del;
-    Cursor<void*>::backspace;
+    void del() { junk(); Cursor<void*>::del(); }
+    void backspace() { junk(); Cursor<void*>::backspace(); }
     T get() {
 	T p = ptr();
 	Cursor<void*>::del();
@@ -45,7 +40,7 @@ public:
     PCursor<T> operator +( int no) const {return Cursor<void*>::operator+(no);}    PCursor(const PointerList<T> & l) : Cursor<void*> (l) {}
 
     PCursor( const Cursor<void*>& cursor ) : Cursor<void*>(cursor) { }
-    void* vptr() const { return *((Cursor<void*> &) *this); }
+    void* vptr() const { return  * ((Cursor<void*> &) *this); }
 
     // should return T& ?
     T ptr() const { return (T) vptr(); }
@@ -58,6 +53,11 @@ public:
 	return Cursor<void*>::compare(a,b);
     }
 };
+/**
+  don't create PointerList<void*>'s.
+  This cursor is just an interface class for Cursor. It takes care of the
+  appropriate type casts
+ */
 
 
 
