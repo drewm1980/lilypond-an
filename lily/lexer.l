@@ -73,9 +73,7 @@ NATIONAL  [\001-\006\021-\027\031\036\200-\377]
 TEX		{AA}|-|{PUNCT}|{ACCENT}|{NATIONAL}
 WORD		{A}{AN}*
 ALPHAWORD	{A}+
-DIGIT		{N}
-UNSIGNED	{N}+
-INT		-?{UNSIGNED}
+INT		-?{N}+
 REAL		({INT}\.{N}*)|(-?\.{N}+)
 KEYWORD		\\{WORD}
 WHITE		[ \n\t\f]
@@ -190,14 +188,9 @@ TELP		\\\]
 		return scan_escaped_word (YYText ()+1);
 	}
 
-	{DIGIT}		{
+	{INT}		{
 		yylval.i = String_convert::dec2_i (String (YYText ()));
-		return DIGIT;
-	}
-
-	{UNSIGNED}		{
-		yylval.i = String_convert::dec2_i (String (YYText ()));
-		return UNSIGNED;
+		return INT;
 	}
 
 	\" {
@@ -230,9 +223,9 @@ TELP		\\\]
 	\" {
 		start_quote ();
 	}
-	{UNSIGNED}		{
+	{INT}		{
 		yylval.i = String_convert::dec2_i (String (YYText ()));
-		return UNSIGNED;
+		return INT;
 	}
 	{NOTECOMMAND}	{
 		return scan_escaped_word (YYText ()+1);
@@ -279,9 +272,9 @@ TELP		\\\]
 	return REAL;
 }
 
-{UNSIGNED}	{
+{INT}	{
 	yylval.i = String_convert::dec2_i (String (YYText ()));
-	return UNSIGNED;
+	return INT;
 }
 
 [{}]	{
