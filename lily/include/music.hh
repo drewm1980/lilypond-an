@@ -15,19 +15,7 @@
 
 #define is_mus_type(x) internal_is_music_type (ly_symbol2scm (x))
 
-/** Music is anything that has duration and supports both time compression and
-  transposition.
-  
-  In Lily, everything that can be thought to have a length and a pitch
- (which has a duration which can be transposed) is considered "music",
 
-  Music is hierarchical: 
-
-  @see Music_sequence
-
-
-  TODO: make a equalp function for general music. 
-  */
 class Music
 {
 public:
@@ -44,6 +32,7 @@ public:
   bool internal_is_music_type (SCM) const;
   int duration_log () const;
   
+  DECLARE_SCHEME_CALLBACK(relative_callback,(SCM,SCM));
   virtual Pitch to_relative_octave (Pitch);
   String name () const;
   Moment get_length () const;
