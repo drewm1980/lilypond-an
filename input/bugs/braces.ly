@@ -1,8 +1,11 @@
-% this bug apparently caused by dvips + mf rounding.
+\version "1.3.148"
 
 
 \header {
-texidoc="Run this through ly2dvi to show differerent brace sizes"
+texidoc = "Braces at different sizes don't attach exactly to the staffs.
+Previously, some braces were too small, while others were too big; this was
+apparently caused by dvips + mf rounding.  Now, braces are just a bit
+too big."
 }
 
 \include "paper11.ly"
