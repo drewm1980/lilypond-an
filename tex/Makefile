@@ -14,10 +14,7 @@ TEXFILES = $(wildcard *.tex)
 DISTFILES = Makefile $(TEXFILES)
 #
 
-localinstall:
-	$(INSTALL) -d $(TEXDIR)/lilypond
-	$(INSTALL) -m 644 $(TEXFILES) $(TEXDIR)/lilypond/
+INSTALLATION_DIR=$(TEXDIR)/lilypond
+INSTALLATION_FILES=$(TEXFILES)
 
-localuninstall:
-	for i in $(TEXFILES) ; do rm -f $(TEXDIR)/lilypond/$$i; done
-	-rmdir $(TEXDIR)/lilypond/
+include $(depth)/make/Installfiles.make
