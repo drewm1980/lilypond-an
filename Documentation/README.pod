@@ -123,7 +123,7 @@ add F<FILE> to the search path for input files.
 
 =item B<-M,--midi>
 
-Do midi output only.
+do midi output only
 
 =item B<-d,--debug>,
 
@@ -139,11 +139,11 @@ Show the warranty with which LilyPond comes. (It comes with B<NO WARRANTY>!)
 
 Set the default output file to F<FILE>.
 
-=item 	B<-h,--help>,
+=item B<-h,--help>,
 
 Show a summary of usage
 
-=item 	B<-i,--init=>F<FILE>
+=item B<-i,--init=>F<FILE>
 
 set init file to F<FILE> (default: F<symbol.ini>)
 
@@ -177,18 +177,17 @@ GNU C++ v2.7 or better, with libg++ installed.  Version 2.7.2
 or better recommended. I doubt if it will compile with AT&T CC.
 
 =item *
+Bash. Most scripts will continue to work with a stock sh, but they
+will generate (harmless) syntax errors
+
+=item *
 GNU make.
 
 =item *
-Flex (2.5.1 or better)
+Flex (2.5.1 or better). 
 
 =item *
 Bison.
-
-=item *
-The "Flower" library, which should be available from the same
-source you got this from. The version of flower lib should match the
-one which is found in the F<configure> script.
 
 =item *
 Perl.  The Makefile uses Perl for trivial operations, and you
@@ -201,7 +200,7 @@ LilyPond does use a lot of resources. For operation you need the following:
 =over 5
 
 =item *
-A fast computer (a full page of music typically takes 1 minute
+a fast computer (a full page of music typically takes 1 minute
 on my 486/66, using the DEBUG compile. It's lot slower than most
 MusiXTeX preprocessors)
 
@@ -226,7 +225,7 @@ Do:
 
 You probably want to edit Variables.make to tailor the compilation
 flags. If you're not into debugging C++, then you should go for no
-debugging and C<-O2>.
+debugging and C<-O2>
 
 =head1 AUTHORS
 
@@ -236,11 +235,11 @@ debugging and C<-O2>.
 Han-Wen Nienhuys <hanwen@stack.nl>, Main author
 
 =item *
-Jan C. Nieuwenhuizen <jan@digicash.com>, Context errors, Lyrics, Midi
-output, m2m, bits of FlowerLib, general comments.
+Jan Nieuwenhuizen <jan@digicash.com>, Context errors, Lyrics,
+bits of FlowerLib, general comments.
 
 =item *
-Mats Bengtsson <matsb@s3.kth.se>, bugfixes, testing, criticism, general comments.
+Mats Bengtsson <matsb@s3.kth.se>, bugfixes, testing, general comments.
 
 =back
 
@@ -326,10 +325,8 @@ includes files from the directory F<init/>.
 
 =head1 SEE ALSO
 
-There are some documentation files in the subdirectory
-F<Documentation/>, among others: lilygut, lilyinput, error, faq. There
-is a rudimentary webpage at the following URL:
-http://www.stack.nl/~hanwen/lilypond/index.html
+There are some documentation files  in the subdirectory F<Documentation/>,
+among others: lilygut, lilyinput, error, faq, 
 
 =head1  REMARKS
 
