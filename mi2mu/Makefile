@@ -65,22 +65,8 @@ include ./$(depth)/make/Rules.make
 #
 midi-lexer.l:	$(outdir)/midi-parser.hh
 
-# list of depend files:
-#
-DEPFILES = $(wildcard $(depdir)/*.dep)
-#
-
-# auto dependencies:
-#
--include /dev/null $(DEPFILES)
-#
-localclean:
-# obsoliet
-#	rm -f $(outdir)/{midi-parser,midi-lexer}.*
-
-localinstall: installexe
-
-localuninstall: uninstallexe
-
 $(outdir)/mi2mu-version.o: $(outdir)/version.hh
 
+EXECUTABLES=mi2mu
+
+include $(depth)/make/Executable.make
