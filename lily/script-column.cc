@@ -1,121 +1,76 @@
-/*
-  script-column.cc -- implement Script_column
-
+/*   
+  g-script-column.cc --  implement Script_column
+  
   source file of the GNU LilyPond music typesetter
-
-  (c)  1997--1999 Han-Wen Nienhuys <hanwen@cs.uu.nl>
-*/
-
+  
+  (c) 1999 Han-Wen Nienhuys <hanwen@cs.uu.nl>
+  
+ */
 #include "script-column.hh"
-#include "debug.hh"
-#include "script.hh"
-#include "note-head.hh"
-#include "stem.hh"
-#include "general-script-def.hh"
+#include "staff-side.hh"
 
-
-
-
-void
-Script_column::add_script (Script*s_l)
+static Staff_side_item *
+get_Staff_side (Item *i)
 {
-  script_l_arr_.push (s_l);
-  add_dependency (s_l);
-  add_element (s_l);
+  Graphical_element *e1 = i->dim_cache_[Y_AXIS]->parent_l_->element_l ();
+
+  return dynamic_cast<Staff_side_item*>(e1);
 }
 
-
 void
-Script_column::do_print() const
+Script_column::add_staff_sided (Item *i)
 {
-#ifndef NPRINT
-  DOUT << "scripts: " << script_l_arr_.size() << '\n'; 
-#endif
+  SCM p = get_Staff_side (i)->get_elt_property (script_priority_scm_sym);
+  if (p == SCM_BOOL_F)
+    return;
+  
+  staff_sided_item_l_arr_.push (i);
+  add_dependency (i);
 }
 
 static int
-idx (bool inside, int dir)
+staff_side_compare (Item * const &i1,
+		    Item * const &i2)
 {
-  int j = (dir+1);
-  if (!inside)
-    j ++;
-  return j;
-}
+  Score_element *e1 = get_Staff_side (i1);
+  Score_element *e2 = get_Staff_side (i2);
 
+  SCM p1 = e1->get_elt_property (script_priority_scm_sym);
+  SCM p2 = e2->get_elt_property (script_priority_scm_sym);
 
-Script_column::Script_column ()
-{
-  set_axes (X_AXIS,X_AXIS);
-}
-
-void
-Script_column::do_pre_processing()
-{
-  if (!script_l_arr_.size()) 
-    return;
-  
-  /* up+inside, up+outside, down+inside, down+outside */
-  Array<Script*> placed_l_arr_a[4];
-  for (int i=0; i < script_l_arr_.size(); i++) 
-    {
-      Script*s_l = script_l_arr_[i];
-      placed_l_arr_a[idx (s_l->specs_p_->inside_b(),
-			  s_l->dir_) ].push (s_l);
-    }
-  
-  for (int j =0; j <4; j++) 
-    {
-      placed_l_arr_a[j].sort (Script::compare);
-    }
-
-
-  for (int j =0; j < 4; j++) 
-    {
-      if (placed_l_arr_a[j].size())
-	for (int i=0; i  < support_l_arr_.size(); i++)
-	  placed_l_arr_a[j][0]->add_support (support_l_arr_[i]);
-    }
-  
-  Item * support_l=0;
-  int j = 0;
-  for (; j < 2; j++) 
-    {
-      for (int i=0; i < placed_l_arr_a[j].size(); i++) 
-	{
-	  if (support_l)
-	    placed_l_arr_a[j][i]->add_support (support_l);
-	  support_l = placed_l_arr_a[j][i];
-	}
-    }
-  support_l = 0;
-  for (; j < 4; j++) 
-    {
-      for (int i=0; i < placed_l_arr_a[j].size(); i++) 
-	{
-	  if (support_l)
-	    placed_l_arr_a[j][i]->add_support (support_l);
-	  support_l = placed_l_arr_a[j][i];
-	}
-    }
-}
-
-
-void
-Script_column::add_support (Item*i_l)
-{
-  support_l_arr_.push (i_l);
-  add_dependency (i_l);
-  add_element (i_l);
+  return gh_scm2int (SCM_CDR(p1)) - gh_scm2int (SCM_CDR(p2));
 }
 
 void
-Script_column::do_substitute_element_pointer (Score_element*o,Score_element*n)
+Script_column::do_pre_processing ()
 {
-  if (dynamic_cast <Item *> (o)) 
+  Drul_array<Link_array<Item> > arrs;
+
+  for (int i=0; i < staff_sided_item_l_arr_.size (); i++)
     {
-      script_l_arr_.substitute (dynamic_cast<Script *> (o),
-				dynamic_cast <Script *> (n));
-      support_l_arr_.substitute (dynamic_cast <Item *> (o),
-				 dynamic_cast <Item *> (n));
+      Staff_side_item * ip = get_Staff_side (staff_sided_item_l_arr_[i]);
+      arrs[ip->dir_].push (staff_sided_item_l_arr_[i]);
     }
+
+  Direction d = DOWN;
+  do {
+    Link_array<Item> &arr(arrs[d]);
+    
+    arr.sort (staff_side_compare);
+
+    Item * last = 0;
+    for (int i=0; i < arr.size (); i++)
+      {
+	Staff_side_item * gs = get_Staff_side (arr[i]);
+	if (last)
+	  {
+	    gs->add_support (last);
+	    gs->add_support (get_Staff_side (last));
+	  }
+	    
+	gs->remove_elt_property (script_priority_scm_sym);
+	last = arr[i];
+      }
+    
+  } while (flip (&d) != DOWN);
 }

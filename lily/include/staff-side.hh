@@ -1,60 +1,73 @@
-/*
-  staff-side.hh -- declare Staff_side
-
+/*   
+  staff-side.hh -- declare Staff_side_{element,spanner,item}
+  
   source file of the GNU LilyPond music typesetter
-
-  (c)  1997--1999 Han-Wen Nienhuys <hanwen@cs.uu.nl>
-*/
-
+  
+  (c) 1999 Han-Wen Nienhuys <hanwen@cs.uu.nl>
+  
+ */
 
 #ifndef STAFF_SIDE_HH
 #define STAFF_SIDE_HH
 
-#include "score-element.hh"
-#include "interval.hh"
-#include "direction.hh"
+
+#include "spanner.hh"
+#include "item.hh"
 #include "staff-symbol-referencer.hh"
 
 /**
+   Position myself next to a set of elements.  Configurable in axis
+   and direction.
 
-   A symbol which sits either below or above "something" (usually, a
-   staff).
+  Properties:
 
+    padding :: Real
+
+    Amount of extra space to add.
 */
-class Staff_side : public  Staff_symbol_referencer 
+class Staff_side_element :  public Staff_symbol_referencer
 {
+  void position_self ();
+
 public:
-
-  /**
-    Vertical dir of symbol relative to staff. -1 = below staff?
-    */
+  Score_element * to_position_l_;
   Direction dir_;
+  Link_array<Score_element> support_l_arr_;
   Axis axis_;
-  Interval sym_int_;
-    
-  Real coordinate_offset_f_;
-
-  /**
-     Add extra vertical space to the support symbols.
-   */
-  Real padding_f_;
-
-  Staff_side ();
-  void add_support (Score_element*);
+  //junkme.
+  bool staff_support_b_;
   
-    
+  Staff_side_element ();
+  void set_victim (Score_element*);
+  void add_support (Score_element*);
+
+  VIRTUAL_COPY_CONS(Score_element);
+  virtual Direction get_default_direction () const;
 protected:
-  virtual Interval symbol_height () const;
-  Interval symbol_extent () const;
-  virtual Real get_position_f () const;
-  virtual void do_substitute_element_pointer (Score_element *, Score_element*);
+  virtual Interval do_height () const;
+  virtual void do_print () const;
+  virtual void do_add_processing ();
+  virtual void do_substitute_element_pointer (Score_element*,Score_element*);
   virtual void do_pre_processing ();
   virtual void do_post_processing ();
-  virtual void do_add_processing ();
-  Interval support_extent () const;
-private:
-  void do_side_processing ();
-  Link_array<Score_element> support_l_arr_;
 };
 
-#endif // STAFF_SIDE_HH
+class Staff_side_item : public Staff_side_element, public Item
+{
+public:
+  VIRTUAL_COPY_CONS(Score_element);
+protected:
+  virtual Interval do_width () const;
+  virtual void do_print () const;
+};
+
+class Staff_side_spanner : public Staff_side_element, public Spanner
+{
+public:
+  VIRTUAL_COPY_CONS(Score_element);
+protected:
+  virtual void do_print () const;
+};
+
+#endif /* STAFF_SIDE_HH */
+

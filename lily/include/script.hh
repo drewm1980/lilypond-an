@@ -1,43 +1,41 @@
-/*
-  script.hh -- part of GNU LilyPond
-
-  (c) 1996--1999 Han-Wen Nienhuys
-*/
+/*   
+  script.hh -- declare Script
+  
+  source file of the GNU LilyPond music typesetter
+  
+  (c) 1999 Han-Wen Nienhuys <hanwen@cs.uu.nl>
+  
+ */
 
 #ifndef SCRIPT_HH
 #define SCRIPT_HH
 
-#include "staff-side.hh"
 #include "item.hh"
-  
+#include "drul-array.hh"
+
 /**
-  Accents that are put over a note-group.
- */
-class Script : public Item, public Staff_side {
-  Stem *stem_l_;
+   Articulation marks (and the like) that are attached to notes/stems.
+   Needs support from Staff_side for proper operation.  Staff_side
+   handles the positioning.
+
+*/
+class Script : public Item
+{
+  Staff_side_item * staff_side_l_;
+
+  Molecule get_molecule (Direction d) const;
+public:
+  Script ();
+  void set_staff_side (Staff_side_item*);
 
 protected:
-  Molecule *do_brew_molecule_p() const;
-  virtual void do_substitute_element_pointer (Score_element*,Score_element*);
-  virtual void do_print() const;
-  virtual Interval symbol_height() const;
-  virtual void do_pre_processing();
-  virtual Interval do_width() const;
-  VIRTUAL_COPY_CONS(Score_element);
-private:
-
-  void set_default_dir();
-public:
-  General_script_def *specs_p_;
-
-  static int compare (Script  *const&, Script *const&) ;
-  Script();
-  ~Script ();
-  Script (Script const&);
-   
-  void set_stem (Stem*);
+  virtual void do_print () const;
+  virtual void do_substitute_element_pointer (Score_element*o,
+					      Score_element*n);
+  virtual void do_pre_processing ();
+  virtual void do_post_processing ();
+  Molecule* do_brew_molecule_p () const;
 };
 
-
-#endif // SCRIPT_HH
+#endif /* Stem_SCRIPT_HH */
 
