@@ -54,20 +54,20 @@ friend class String_handle;
     void tighten();
 
     // assignment.
-    void set( Byte const* byte_C, int length_i );
+    void set( Byte const* byte_c_l, int length_i );
 
-    void set( char const* ch_C );
+    void set( char const* ch_c_l );
     
     /// concatenation.
-    void append( Byte const* byte_C, int length_i );
+    void append( Byte const* byte_c_l, int length_i );
 
-    void operator += ( char const* ch_C );
+    void operator += ( char const* ch_c_l );
 
-    char const* ch_C() const; 
+    char const* ch_c_l() const; 
 
     char* ch_l();
 
-    Byte const* byte_C() const;
+    Byte const* byte_c_l() const;
 
     // idem, non const
     Byte* byte_l();
@@ -87,7 +87,7 @@ friend class String_handle;
 #ifndef INLINE
 #define INLINE inline
 #endif
-#include "string-data.icc"
+#include "string-data.inl"
 
 #endif
 

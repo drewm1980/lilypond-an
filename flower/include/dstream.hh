@@ -1,10 +1,3 @@
-/*
-  dstream.hh -- declare Dstream
-
-  source file of the Flower Library
-
-  (c) 1997 Han-Wen Nienhuys <hanwen@stack.nl>
-*/
 
 #ifndef DSTREAM_HH
 #define DSTREAM_HH
@@ -16,7 +9,7 @@ const char eol= '\n';
 template<class K,class V>
 struct Assoc;
 
-/**  Debug stream. 
+/**  debug stream. 
    a class for providing debug output of nested structures,
    with indents according to \{\}()[].
 
@@ -29,30 +22,27 @@ struct Assoc;
    
    Init for the class names which should be silent can be given in a rc file. 
    
-   TODO:
-   make a baseclass for indentable streams.
   */
 class Dstream
 {
-    ostream *os_l_;
-    int indent_level_i_;
-    bool local_silence_b_;
-    String current_classname_str_;
+    ostream *os;
+    int indentlvl;
+    bool local_silence;
+    String classname;
     void output(String s);
-    Assoc<String, bool> *silent_assoc_p_;
+    Assoc<String, bool> *silent;
 public:
-    void clear_silence();
+
     bool silence(String);
     
     /**
       if rcfile == 0, then do not read any rc file.
       */
+      
     Dstream(ostream *r, char const * rcfile);
     virtual ~Dstream();
     Dstream &identify_as(String s);
 
-/** Output a string via the Dstream. This is the only output
- interface. It delegates all conversion to String class.  */
     Dstream &operator << (String s);
     /**
       Output memory locations.
