@@ -1,5 +1,5 @@
 /*
-  duration-convert.cc -- implement 
+  duration-convert.cc -- implement Duration_convert
 
   source file of the LilyPond music typesetter
 
@@ -7,7 +7,7 @@
 */
 #include <assert.h>
 #include "duration-convert.hh"
-#include "debug.hh"
+#include "warn.hh"
 
 // statics Duration_convert
 bool const Duration_convert::midi_as_plet_b_s = true;
@@ -198,7 +198,7 @@ Duration_convert::ticks2standardised_dur( int ticks_i )
 		if ( mom == upper_mom ) // don-t miss last (sic)
 			return upper_dur;
 		if ( ( mom >= lower_mom ) && ( mom <= upper_mom ) ) {
-			warning( String( "duration not exact: " ) + String( (Real)mom ), 0 );
+			warning( String( "duration not exact: " ) + String( (Real)mom ) );
 			if ( abs( mom - lower_mom ) < abs( mom - upper_mom ) )
 				return lower_dur;
 			else
