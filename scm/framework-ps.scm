@@ -291,7 +291,7 @@
 
     (postscript->png (if (number? resolution) resolution
 
-			 (ly:get-option 'resolution))
+			 (ly:get-option 'preview-resolution))
 		     name)))
 
 (define-public (convert-to-dvi book name)
