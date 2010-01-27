@@ -396,8 +396,10 @@ voice @q{two} when part-combining.")
 part-combining.")
      (squashedPosition ,integer? "Vertical position of squashing for
 @internalsref{Pitch_squash_engraver}.")
-     (staffLineLayoutFunction ,procedure? "Layout of staff lines,
+     (staff-line-layout ,procedure? "Layout of staff lines,
 @code{traditional}, or @code{semitone}.")
+(staffLineLayoutFunction ,procedure? "Layout of staff lines,
+     @code{traditional}, or @code{semitone}.")
      (stanza ,markup? "Stanza @q{number} to print before the start of a
 verse.  Use in @code{Lyrics} context.")
      (stemLeftBeamCount ,integer? "Specify the number of beams to draw

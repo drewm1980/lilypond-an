@@ -29,6 +29,8 @@ al-niente hairpins.
    
 @item @email{benkop@@freestart.hu,Pal Benko},
     Ancient notation.
+@item @email{kevin@@kelphead.org,Kevin Dalley},
+    Chromatic staff, staff-line-layout, and internal ledger lines.
 @item @email{jch@@pps.jussieu.fr, Juliusz Chroboczek},
     Type42 code.
 @item @email{david.feuer@@gmail.com, David Feuer},

@@ -19,6 +19,37 @@ using namespace std;
 #include "warn.hh"
 
 #include "translator.icc"
+class Layout_pos 
+{
+public:
+  virtual int pos(Pitch* pit) = 0;
+  virtual ~Layout_pos()
+  {
+  }
+};
+
+class Layout_pos_traditional : public Layout_pos
+{
+public:
+  virtual int pos(Pitch* pit)
+  {
+    return pit ? pit->steps () : 0;
+  }
+};
+
+static Layout_pos_traditional layout_pos_traditional;
+
+class Layout_pos_semitone : public Layout_pos
+{
+public:
+  virtual int pos(Pitch* pit)
+  {
+    return pit ? pit->rounded_semitone_pitch() : 0;
+  }
+};
+
+static Layout_pos_semitone layout_pos_semitone;
+  
 
 class Note_heads_engraver : public Engraver
 {
@@ -48,8 +79,17 @@ Note_heads_engraver::listen_note (Stream_event *ev)
 void
 Note_heads_engraver::process_music ()
 {
-  SCM c0 = get_property ("middleCPosition");
-  SCM layout_proc = get_property("staffLineLayoutFunction");
+  Layout_pos *layout_pos = &layout_pos_traditional;
+  SCM layout_property = get_property("staff-line-layout");
+  if (layout_property)
+    {
+      if (ly_is_equal(layout_property, ly_symbol2scm("traditional"))){
+	layout_pos = &layout_pos_traditional;
+      }
+      else if (ly_is_equal(layout_property, ly_symbol2scm("semitone"))){
+	layout_pos = &layout_pos_semitone;
+      }
+    }
       
   for (vsize i = 0; i < note_evs_.size (); i++)
     {
@@ -64,18 +104,15 @@ Note_heads_engraver::process_music ()
 	ev->origin ()->warning (_ ("NoteEvent without pitch"));
 #endif
 
-      int pos;
-      if (pit == 0)
-	pos = 0;
-      else if (ly_is_procedure (layout_proc)){
-	SCM pitch = ev->get_property("pitch");
-	pos = scm_to_int(scm_call_1 (layout_proc, pitch));
-      }
-      else 
-	pos = pit->steps ();
-
+      SCM c0 = get_property ("middleCPosition");
+      int middleC;
       if (scm_is_number (c0))
-	pos += scm_to_int(c0);
+	middleC = scm_to_int(c0);
+      else
+	middleC = 0;
+      int pos = layout_pos->pos(pit);
+	    
+      pos += middleC;
       
       note->set_property ("staff-position", scm_from_int (pos));
 
@@ -117,11 +154,7 @@ ADD_TRANSLATOR (Note_heads_engraver,
 
 		/* create */
 		"NoteHead ",
-
-		/* read */
-		"middleCPosition "
-		"staffLineLayoutFunction ",
-
-		/* write */
-		""
-		);
+		/* read */ "middleCPosition "
+		"staffLineLayoutFunction "
+		"staff-line-layout",
+		/* write */ "");

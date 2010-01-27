@@ -273,8 +273,8 @@ configuration to this index, and print the respective scores.")
      (inspect-quants ,number-pair? "If debugging is set,
 set beam and slur quants to this position, and print the respective
 scores.")
-
-     (keep-fixed-while-stretching ,boolean? "A grob with this property
+     (internal-ledger-lines ,list? "Ledger lines placed between first and last lines of staff.")
+	 (keep-fixed-while-stretching ,boolean? "A grob with this property
 set to true is fixed relative to the staff above it when systems are
 stretched.")
      (keep-inside-line ,boolean? "If set, this column cannot have

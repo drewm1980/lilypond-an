@@ -170,13 +170,14 @@ Staff_symbol::height  (SCM smob)
 
 
 
-ADD_INTERFACE (Staff_symbol,
-	       "This spanner draws the lines of a staff.  A staff symbol"
-	       " defines a vertical unit, the @emph{staff space}.  Quantities"
-	       " that go by a half staff space are called @emph{positions}."
-	       "  The center (i.e., middle line or space) is position@tie{}0."
-	       " The length of the symbol may be set by hand through the"
-	       " @code{width} property.",
+ADD_INTERFACE (Staff_symbol, 
+	       "This spanner draws the lines of a staff. "
+	       "A staff symbol definines a vertical unit, the staff space. "
+	       "Quantities that go by a half staff space are called positions "
+	       "The center (i.e. middle line "
+	       "or space) is position 0. The length of the symbol may be set by hand "
+	       "through the @code{width} property. ",
+
 
 	       /* properties */
 	       "ledger-line-thickness "
@@ -185,4 +186,5 @@ ADD_INTERFACE (Staff_symbol,
 	       "staff-space "
 	       "thickness "
 	       "width "
+	       "internal-ledger-lines "
 	       );
