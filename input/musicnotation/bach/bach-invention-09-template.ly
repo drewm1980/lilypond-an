@@ -1,6 +1,6 @@
 \include "bach-invention-09-common.ly"
 #(use-modules (guile-user))
-\include "chromatic.ly"
+\include "../chromatic.ly"
 % sample notation
 %#(define notation-style "6-6-tetragram")
 %#(define notation-style "twinline")

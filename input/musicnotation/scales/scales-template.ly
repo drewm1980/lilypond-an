@@ -1,7 +1,7 @@
 \version "2.10"
 #(use-modules (guile-user))
 \include "english.ly"
-\include "chromatic.ly"
+\include "../chromatic.ly"
 % sample notation
 %#(define notation-style "6-6-tetragram")
 % or run from command line as

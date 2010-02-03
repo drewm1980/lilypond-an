@@ -2,7 +2,7 @@
 \include "english.ly"
 #(set-global-staff-size 20)
 #(use-modules (guile-user))
-\include "chromatic.ly"
+\include "../chromatic.ly"
 % sample notation
 %#(define notation-style "twinline")
 %#(define notation-style "6-6-tetragram")
