@@ -71,7 +71,7 @@ Syntax: @var{note}@code{x}@code{y}, where @code{x} is a direction
 (@code{^} for up or @code{_} for down), or LilyPond's choice
 (no direction specified)), and where @code{y} is an articulation
 (such as @code{-.}, @code{->}, @code{\\tenuto}, @code{\\downbow}).
-See the user manual for details.")
+See the Notation Reference for details.")
 	(types . (general-music event articulation-event script-event))
 	))
 
@@ -150,7 +150,7 @@ specific context.")
 Syntax: @var{note}@code{\\cr} @dots{} @var{note}@code{\\rc}
 
 You can also use @code{\\<}, @code{\\!}, @code{\\cresc}, and
-@code{\\endcresc}.  See the user manual for details.")
+@code{\\endcresc}.  See the Notation Reference for details.")
 	(types . (general-music span-event span-dynamic-event crescendo-event
 		  event))
 	))
@@ -660,7 +660,7 @@ Syntax: @code{\\\\}")
 
 (define-safe-public (make-music name . music-properties)
   "Create a music object of given name, and set its properties
-according to @code{music-properties}, a list of alterning property symbols
+according to @code{music-properties}, a list of alternating property symbols
 and values. E.g:
   (make-music 'OverrideProperty
 	      'symbol 'Stem
@@ -690,6 +690,6 @@ and values. E.g:
 			 (cdr handle)
 			 (begin
 			   (ly:warning (_ "unknown repeat type `~S'") name)
-			   (ly:warning (_ "See music-types.scm for supported repeats"))
+			   (ly:warning (_ "See define-music-types.scm for supported repeats"))
 			   'VoltaRepeatedMusic))))
     (make-music music-name)))

@@ -1,7 +1,7 @@
-\version "2.10.0"
+\version "2.11.57"
 
 slashSeparator = \markup {
-  \hcenter
+  \center-align
   \vcenter \combine
   \beam #2.0 #0.5 #0.48
   \raise #0.7 \beam #2.0 #0.5 #0.48
@@ -25,7 +25,7 @@ tagline = \markup {
 }
 
 #(define (print-all-headers layout props arg)
-  (if (eq? (ly:output-def-lookup layout 'printallheaders) #t)
+  (if (eq? (ly:output-def-lookup layout 'print-all-headers) #t)
    (interpret-markup layout props arg)
    empty-stencil))
 
@@ -35,13 +35,13 @@ bookTitleMarkup = \markup {
     \fill-line { \fromproperty #'header:dedication }
     \override #'(baseline-skip . 3.5)
     \column {
-      \huge \bigger \bold
+      \huge \larger \bold
       \fill-line {
-        \bigger \fromproperty #'header:title
+        \larger \fromproperty #'header:title
       }
       \fill-line {
         \large \smaller \bold
-        \bigger \fromproperty #'header:subtitle
+        \larger \fromproperty #'header:subtitle
       }
       \fill-line {
         \smaller \bold
@@ -69,22 +69,48 @@ scoreTitleMarkup = \markup { \column {
 }
 }
 
+%% Book first page and last page predicates
 #(define (first-page layout props arg)
+  (define (ancestor layout)
+    "Return the topmost layout ancestor"
+    (let ((parent (ly:output-def-parent layout)))
+       (if (not (ly:output-def? parent))
+           layout
+           (ancestor parent))))
+  (if (= (chain-assoc-get 'page:page-number props -1)
+         (ly:output-def-lookup (ancestor layout) 'first-page-number))
+      (interpret-markup layout props arg)
+      empty-stencil))
+
+#(define (last-page layout props arg)
+  (if (and (chain-assoc-get 'page:is-bookpart-last-page props #f)
+           (chain-assoc-get 'page:is-last-bookpart props #f))
+      (interpret-markup layout props arg)
+      empty-stencil))
+
+#(define (not-first-page layout props arg)
+  (define (ancestor layout)
+    "Return the topmost layout ancestor"
+    (let ((parent (ly:output-def-parent layout)))
+       (if (not (ly:output-def? parent))
+           layout
+           (ancestor parent))))
+  (if (not (= (chain-assoc-get 'page:page-number props -1)
+              (ly:output-def-lookup (ancestor layout) 'first-page-number)))
+      (interpret-markup layout props arg)
+      empty-stencil))
+
+%% Bookpart first page and last page predicates
+#(define (part-first-page layout props arg)
   (if (= (chain-assoc-get 'page:page-number props -1)
          (ly:output-def-lookup layout 'first-page-number))
       (interpret-markup layout props arg)
       empty-stencil))
 
-#(define (last-page layout props arg)
-  (if (chain-assoc-get 'page:last? props #f)
-   (interpret-markup layout props arg)
-   empty-stencil))
-
-#(define (not-first-page layout props arg)
-  (if (not (= (chain-assoc-get 'page:page-number props -1)
-              (ly:output-def-lookup layout 'first-page-number)))
-   (interpret-markup layout props arg)
-   empty-stencil))
+#(define (part-last-page layout props arg)
+  (if (chain-assoc-get 'page:is-bookpart-last-page props #f)
+      (interpret-markup layout props arg)
+      empty-stencil))
 
 %% unused
 #(define (not-single-page layout props arg)

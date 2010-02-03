@@ -1,7 +1,7 @@
 \header {
 
   texidoc = "New sections for spacing can be started with
-@code{@\newSpacingSection}. In this example, a section is started at
+@code{\newSpacingSection}. In this example, a section is started at
 the 4/16, and a 16th in the second section takes as much space as a
 8th in first section."
 
@@ -11,7 +11,7 @@ the 4/16, and a 16th in the second section takes as much space as a
 {
   ragged-right = ##t
   }
-\version "2.10.0"
+\version "2.11.51"
 \relative {
   \time 2/4
   c4 c8 c 

@@ -4,12 +4,12 @@ longgrace = \override Stem  #'stroke-style = #'()
 endlonggrace = \revert Stem #'stroke-style
 ritenuto = \markup { \italic  "rit." }
 
-\version "2.10.0"
+\version "2.11.61"
   
 cresc =  {
     #(ly:export (make-event-chord (list (make-span-event 'CrescendoEvent START)))) 
     \set crescendoText =  \markup { \italic \bold "cresc." }
-    \set crescendoSpanner =  #'dashed-line
+    \set crescendoSpanner =  #'text
 }
 
 \layout {

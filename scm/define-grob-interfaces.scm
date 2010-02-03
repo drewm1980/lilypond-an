@@ -52,16 +52,19 @@ note)."
 
 (ly:add-interface
  'fret-diagram-interface
- "A fret diagram."
- '(align-dir barre-type dot-color dot-radius finger-code fret-count
-label-dir number-type size string-count xo-font-magnification
-mute-string open-string orientation string-fret-finger-combinations
-thickness))
+ "A fret diagram"
+ '(align-dir fret-diagram-details size dot-placement-list
+   thickness))
 
 (ly:add-interface
  'grace-spacing-interface
  "Keep track of durations in a run of grace notes."
  '(columns common-shortest-duration))
+
+(ly:add-interface
+ 'instrument-specific-markup-interface
+ "Instrument-specific markup (like fret boards or harp pedal diagrams)."
+ '(fret-diagram-details harp-pedal-details size thickness))
 
 (ly:add-interface
  'key-cancellation-interface
@@ -117,6 +120,11 @@ thickness))
  'parentheses-interface
  "Parentheses for other objects."
  '(padding stencils))
+
+(ly:add-interface
+ 'percent-repeat-interface
+ "Beat, Double and single measure repeats."
+ '(dot-negative-kern slash-negative-kern slope thickness))
 
 (ly:add-interface
  'piano-pedal-interface
@@ -184,5 +192,5 @@ with @code{breakable=##t}."
 (ly:add-interface
  'vertically-spaceable-interface
  "Objects that should be kept at constant vertical distances.  Typically:
-@internalsref{VerticalAxisGroup} objects of @internalsref{Staff} contexts."
+@rinternals{VerticalAxisGroup} objects of @rinternals{Staff} contexts."
  '())

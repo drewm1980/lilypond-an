@@ -1,12 +1,12 @@
 \header {
   texidoc ="Lyric syllables without note attachment are not
 centered.  Centering may cause unintended effects when the
-papercolumn is very  wide."
+paper column is very wide."
 }
  
 \layout{ ragged-right = ##t }
 
-\version "2.11.38"
+\version "2.11.51"
 <<
   \new Staff \relative c' {
     \key aes \major

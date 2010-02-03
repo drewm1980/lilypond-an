@@ -14,29 +14,36 @@ OUT_PDF_IMAGES=$(IMAGES:%.png=$(outdir)/%.pdf) $(addprefix $(outdir)/,$(PDF_ILLU
 
 OUT_PNG_IMAGES=$(OUT_PDF_IMAGES:%.pdf=%.png)
 
+OUT_MASTER_TEXI_FILES = $(outdir)/lilypond-internals.texi
 OUT_TEXI_FILES=$(ITEXI_FILES:%.itexi=$(outdir)/%.texi)\
  $(ITELY_FILES:%.itely=$(outdir)/%.texi)
+
 HTML_FILES = $(TELY_FILES:%.tely=$(outdir)/%-big-page.html)\
  $(outdir)/lilypond-internals-big-page.html
 
 # todo: add latex.
-PDF_FILES = $(TELY_FILES:%.tely=$(outdir)/%.pdf)
+PDF_FILES = $(TELY_FILES:%.tely=$(outdir)/%.pdf)\
+ $(outdir)/lilypond-internals.pdf
 
 MAIN_INFO_DOC = lilypond
 INFO_DOCS = lilypond lilypond-internals music-glossary lilypond-program lilypond-learning
 INFO_FILES = $(INFO_DOCS:%=$(outdir)/%.info)
+
+TEXI2PDF_FLAGS = -I $(top-src-dir)/Documentation/user
 
 ifeq ($(out),www)
 INFO_IMAGES_DIR = lilypond
 DEST_INFO_IMAGES_SUBDIR = Documentation/user
 endif
 
-STEPMAKE_TEMPLATES=tex texinfo omf documentation
+STEPMAKE_TEMPLATES=texinfo omf documentation
 OMF_FILES += $(outdir)/lilypond-internals.html.omf
 
 LOCALSTEPMAKE_TEMPLATES=lilypond ly
 
 include $(depth)/make/stepmake.make
+
+default:
 
 info: $(INFO_FILES)
 	@echo export LILYPOND_DATADIR=$(LILYPOND_DATADIR)
@@ -44,13 +51,6 @@ info: $(INFO_FILES)
 
 xml: $(outdir)/lilypond/lilypond.xml $(outdir)/lilypond-internals/lilypond-internals.xml
 
-
-# All web targets, except info image symlinks and info docs are
-# installed in non-recursing target from TOP-SRC-DIR
-local-install-WWW: local-install-info
-local-uninstall-WWW: local-uninstall-info
-
-default:
 
 local-clean:
 	rm -f $(INFO_IMAGES_DIR)
@@ -60,13 +60,8 @@ local-help: extra-local-help
 extra-local-help:
 	@echo -e "\
   info        update info pages\n\
-  ps          update PostScript documents\n\
   xml	      update Docbook xml documentation\n\
 "
-
-# Generic rule using % twice not possible?
-# $(outdir)/%/%.html: $(outdir)/%.texi
-$(outdir)/lilypond.texi: $(outdir)/lilypond-internals.texi
 
 #
 # Split manuals in HTML
@@ -83,11 +78,11 @@ $(outdir)/lilypond-learning-big-page.html: $(OUT_PNG_IMAGES)
 
 $(outdir)/lilypond.xml: $(outdir)/lilypond.texi
 	mkdir -p $(dir $@)
-	$(MAKEINFO) -I$(outdir) --output=$@ --docbook $<
+	$(MAKEINFO) -I$(src-dir) -I$(outdir) --output=$@ --docbook $<
 
 $(outdir)/lilypond-internals/lilypond-internals.xml: $(outdir)/lilypond-internals.texi
 	mkdir -p $(dir $@)
-	$(MAKEINFO) --output=$(outdir)/lilypond-internals --docbook $<
+	$(MAKEINFO) -I$(src-dir) -I$(outdir) --output=$(outdir)/lilypond-internals --docbook $<
 
 $(outdir)/lilypond.pdf $(outdir)/lilypond-learning.pdf: $(OUT_PDF_IMAGES)
 
@@ -113,7 +108,7 @@ DEEP_HTML_FILES =\
 
 # Symlinks to refer to external source documents from split and non-split HTML
 source-links = $(outdir)/source $(outdir)/lilypond/source $(outdir)/music-glossary/source \
- $(outdir)/lilypond-program/source $(outdir)/lilypond-learning/source
+ $(outdir)/lilypond-program/source $(outdir)/lilypond-learning/source $(outdir)/lilypond-internals/source
 
 $(outdir)/source:
 	@rm -f $(@)
@@ -124,12 +119,12 @@ $(outdir)/%/source:
 	mkdir -p $(dir $@)
 	ln -sf $(depth)/.. $(@)
 
-local-WWW: $(HTML_FILES) $(DEEP_HTML_FILES)\
- $(datafiles) $(PDF_FILES) $(source-links) info
+local-WWW-1: $(MASTER_TEXI_FILES) $(PDF_FILES) info
+
+local-WWW-2: $(HTML_FILES) $(DEEP_HTML_FILES) $(source-links)
 
 $(outdir)/%.bib: %.bib
 	ln -f $< $@
-
 
 # lilypond.texi deps
 $(top-build-dir)/mf/$(outconfbase)/feta16list.ly:
@@ -147,7 +142,4 @@ $(outdir)/lilypond.texi $(outdir)/lilypond-program.texi $(outdir)/lilypond-learn
 $(outdir)/lilypond-internals.texi: $(LILYPOND_BINARY)
 	cd $(outdir) && $(LILYPOND_BINARY) --verbose $(top-src-dir)/ly/generate-documentation
 
-
-## unused
-$(outdir)/interfaces.itexi: dummy
-	cd $(outdir) && lilypond $(top-src-dir)/ly/generate-interface-doc
+.SECONDARY:

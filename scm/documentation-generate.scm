@@ -30,13 +30,17 @@
  (slot-ref (all-scheme-functions-doc) 'text)
  (open-output-file "scheme-functions.tely"))
 
-(display 
- (markup-doc-string)
- (open-output-file "markup-commands.tely"))
+;;(display 
+;; (markup-doc-string)
+;; (open-output-file "markup-commands.tely"))
 
-(display 
- (markup-list-doc-string)
- (open-output-file "markup-list-commands.tely"))
+(call-with-output-file "markup-commands.tely"
+  (lambda (port)
+    (dump-node (markup-doc-node) port 2)))
+
+(call-with-output-file "markup-list-commands.tely"
+  (lambda (port)
+    (dump-node (markup-list-doc-node) port 2)))
 
 (display 
  (identifiers-doc-string)
@@ -66,96 +70,7 @@
 		  "(lilypond/lilypond-internals.info)")
   "
 
-@c NOTE: This is documentation-generate.scm, not macros.itexi
-
-
-@ifhtml
-@c ***** HTML *****
-
-@ifset bigpage
-
-@macro ruser{TEXT}
-@ref{\\TEXT\\,,,lilypond-big-page,Notation Reference}
-@cindex \\TEXT\\
-@end macro
-
-@macro glossaryref{TEXT}
-@vindex \\TEXT\\
-@ref{\\TEXT\\,,,music-glossary-big-page,Music Glossary}
-@end macro
-
-@end ifset
-
-@ifclear bigpage
-
-@macro ruser{NAME}
-@ref{\\NAME\\,,,lilypond}
-@cindex \\NAME\\
-@end macro
-
-@macro glossaryref{NAME}
-@ref{\\NAME\\,,,music-glossary}
-@cindex \\NAME\\
-@end macro
-
-@end ifclear
-
-@macro inputfileref{DIR,NAME}
-@uref{source/\\DIR\\/out-www/collated-files.html#\\NAME\\,@file{\\DIR\\/\\NAME\\}}@c
-@end macro
-
-@macro q{TEXT}
-@html
-&lsquo;\\TEXT\\&rsquo;
-@end html
-@end macro
-@end ifhtml
-
-
-@ifinfo
-@c ***** info *****
-
-@macro ruser{NAME}
-@inforef{\\NAME\\,,,lilypond}
-@cindex \\NAME\\
-@end macro
-
-@macro glossaryref{NAME}
-@inforef{\\NAME\\,,lilypond/music-glossary}
-@cindex \\NAME\\
-@end macro
-
-@macro inputfileref{DIR,NAME}
-@file{\\DIR\\/\\NAME\\}
-@end macro
-
-@macro q{TEXT}
-`\\TEXT\\'
-@end macro
-@end ifinfo
-
-
-@iftex
-@c ***** TeX *****
-
-@macro ruser{NAME}
-@ref{\\NAME\\}@c
-@end macro
-
-@macro inputfileref{DIR,NAME}@c
-@file{\\DIR\\/\\NAME\\}@c
-@end macro
-
-@macro q{TEXT}
-`\\TEXT\\'
-@end macro
-@end iftex
-
-
-@macro internalsref{NAME}
-@ref{\\NAME\\}
-@end macro
-
+@include macros.itexi
 
 @ignore
 @omftitle LilyPond internals
@@ -166,15 +81,48 @@
 @omfcategory Applications|Publishing
 @end ignore
 
+@iftex
+@afourpaper
+@c don't replace quotes with directed quotes
+@tex
+\\gdef\\SETtxicodequoteundirected{Foo}
+\\gdef\\SETtxicodequotebacktick{Bla}
+@end tex
+@end iftex
 
-")
+@finalout
+
+@titlepage
+@title LilyPond
+@subtitle The music typesetter
+@titlefont{Internals Reference}
+@author The LilyPond development team
+
+Copyright @copyright{} 1999--2008 by the authors
+
+@vskip 20pt
+
+For LilyPond version @version{}
+@end titlepage
+
+@contents
+
+@ifnottex")
  out-port)
 
 (define top-node
   (make <texi-node>
-    #:name "Top"
-    #:text 
-    (string-append  "This is the program reference for version "
+    #:name "GNU LilyPond -- Internals Reference"
+    #:text
+    (string-append  "@end ifnottex
+
+@ifhtml
+This document is also available as a
+@uref{source/Documentation/user/lilypond-internals.pdf,PDF} and as
+@uref{source/Documentation/user/lilypond-internals-big-page.html,one big page}.
+@end ifhtml
+
+This is the Internals Reference (IR) for version "
 		    (lilypond-version)
 		    " of LilyPond, the GNU music typesetter.")
 
@@ -185,13 +133,14 @@
      (backend-doc-node)
      (all-scheme-functions-doc)
      (make <texi-node>
-       #:name "Indexes"
+       #:appendix #t
+       #:name "Indices"
        #:text "
-@unnumbered Concept index
+@appendixsec Concept index
 
 @printindex cp
 
-@unnumbered Function index
+@appendixsec Function index
 
 @printindex fn
 

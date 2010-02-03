@@ -18,6 +18,7 @@
 #include "paper-column.hh"
 #include "paper-score.hh"
 #include "separation-item.hh"
+#include "skyline-pair.hh"
 #include "stencil.hh"
 #include "system.hh"
 #include "warn.hh"
@@ -578,6 +579,15 @@ add_grobs_of_one_priority (Skyline_pair *const skylines,
 Skyline_pair
 Axis_group_interface::skyline_spacing (Grob *me, vector<Grob*> elements)
 {
+  /* For grobs with an outside-staff-priority, the sorting function might
+     call extent and cause suicide. This breaks the contract that is required
+     for the STL sort function. To avoid this, we make sure that any suicides
+     are triggered beforehand.
+  */
+  for (vsize i = 0; i < elements.size (); i++)
+    if (scm_is_number (elements[i]->get_property ("outside-staff-priority")))
+      elements[i]->extent (elements[i], X_AXIS);
+
   vector_sort (elements, staff_priority_less);
   Grob *x_common = common_refpoint_of_array (elements, me, X_AXIS);
   Grob *y_common = common_refpoint_of_array (elements, me, Y_AXIS);
@@ -629,7 +639,6 @@ Axis_group_interface::calc_max_stretch (SCM smob)
   return scm_from_double (ret);
 }
 
-extern bool debug_skylines;
 MAKE_SCHEME_CALLBACK (Axis_group_interface, print, 1)
 SCM
 Axis_group_interface::print (SCM smob)
@@ -641,8 +650,10 @@ Axis_group_interface::print (SCM smob)
   Stencil ret;
   if (Skyline_pair *s = Skyline_pair::unsmob (me->get_property ("vertical-skylines")))
     {
-      ret.add_stencil (Lookup::points_to_line_stencil (0.1, (*s)[UP].to_points (X_AXIS)).in_color (255, 0, 255));
-      ret.add_stencil (Lookup::points_to_line_stencil (0.1, (*s)[DOWN].to_points (X_AXIS)).in_color (0, 255, 255));
+      ret.add_stencil (Lookup::points_to_line_stencil (0.1, (*s)[UP].to_points (X_AXIS))
+		       .in_color (255, 0, 255));
+      ret.add_stencil (Lookup::points_to_line_stencil (0.1, (*s)[DOWN].to_points (X_AXIS))
+		       .in_color (0, 255, 255));
     }
   return ret.smobbed_copy ();
 }

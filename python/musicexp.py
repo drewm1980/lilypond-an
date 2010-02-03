@@ -271,6 +271,7 @@ class Pitch:
         self.alteration = 0
         self.step = 0
         self.octave = 0
+        self._force_absolute_pitch = False
         
     def __repr__(self):
         return self.ly_expression()
@@ -340,7 +341,7 @@ class Pitch:
 
     def ly_expression (self):
         str = self.ly_step_expression ()
-        if relative_pitches:
+        if relative_pitches and not self._force_absolute_pitch:
             str += self.relative_pitch ()
         else:
             str += self.absolute_pitch ()
@@ -451,7 +452,68 @@ class RelativeMusic (MusicWrapper):
         relative_pitches = prev_relative_pitches
 
 class TimeScaledMusic (MusicWrapper):
+    def __init__ (self):
+        MusicWrapper.__init__ (self)
+        self.numerator = 1
+        self.denominator = 1
+        self.display_number = "actual" # valid values "actual" | "both" | None
+        # Display the basic note length for the tuplet:
+        self.display_type = None       # value values "actual" | "both" | None
+        self.display_bracket = "bracket" # valid values "bracket" | "curved" | None
+        self.actual_type = None   # The actually played unit of the scaling
+        self.normal_type = None   # The basic unit of the scaling
+        self.display_numerator = None
+        self.display_denominator = None
+
     def print_ly (self, func):
+        if self.display_bracket == None:
+            func ("\\once \\override TupletBracket #'stencil = ##f")
+            func.newline ()
+        elif self.display_bracket == "curved":
+            warning (_ ("Tuplet brackets of curved shape are not correctly implemented"))
+            func ("\\once \\override TupletBracket #'stencil = #ly:slur::print")
+            func.newline ()
+
+        base_number_function = {None: "#f", 
+             "actual": "tuplet-number::calc-denominator-text", 
+             "both": "tuplet-number::calc-fraction-text"}.get (self.display_number, None)
+        # If we have non-standard numerator/denominator, use our custom function
+        if self.display_number == "actual" and self.display_denominator:
+            base_number_function = "(tuplet-number::non-default-tuplet-denominator-text %s)" % self.display_denominator
+        elif self.display_number == "both" and (self.display_denominator or self.display_numerator):
+            if self.display_numerator:
+                num = self.display_numerator
+            else:
+                num = "#f"
+            if self.display_denominator:
+                den = self.display_denominator
+            else:
+                den = "#f"
+            base_number_function = "(tuplet-number::non-default-tuplet-fraction-text %s %s)" % (den, num)
+
+
+        if self.display_type == "actual" and self.normal_type:
+            # Obtain the note duration in scheme-mode, i.e. \longa as \\longa
+            base_duration = self.normal_type.ly_expression (None, True)
+            func ("\\once \\override TupletNumber #'text = #(tuplet-number::append-note-wrapper %s \"%s\")" %
+                (base_number_function, base_duration))
+            func.newline ()
+        elif self.display_type == "both": # TODO: Implement this using actual_type and normal_type!
+            warning (_ ("Tuplet brackets displaying both note durations are not implemented, using default"))
+            if self.display_number == None:
+                func ("\\once \\override TupletNumber #'stencil = ##f")
+                func.newline ()
+            elif self.display_number == "both":
+                func ("\\once \\override TupletNumber #'text = #%s" % base_number_function)
+                func.newline ()
+        else:
+            if self.display_number == None:
+                func ("\\once \\override TupletNumber #'stencil = ##f")
+                func.newline ()
+            elif self.display_number == "both":
+                func ("\\once \\override TupletNumber #'text = #%s" % base_number_function)
+                func.newline ()
+
         func ('\\times %d/%d ' %
            (self.numerator, self.denominator))
         func.add_factor (Rational (self.numerator, self.denominator))
@@ -582,8 +644,8 @@ class RepeatedMusic:
             self.music = SequentialMusic ()
             self.music.elements = music
         else:
-            warning (_ ("unable to set the music %(music)s for the repeat %(repeat)s" % \
-                            {'music':music, 'repeat':self}))
+            warning (_ ("unable to set the music %(music)s for the repeat %(repeat)s") % \
+                            {'music':music, 'repeat':self})
     def add_ending (self, music):
         self.endings.append (music)
     def print_ly (self, printer):
@@ -706,6 +768,7 @@ class Layout:
 class ChordEvent (NestedMusic):
     def __init__ (self):
         NestedMusic.__init__ (self)
+        self.after_grace_elements = None
         self.grace_elements = None
         self.grace_type = None
     def append_grace (self, element):
@@ -713,6 +776,16 @@ class ChordEvent (NestedMusic):
             if not self.grace_elements:
                 self.grace_elements = SequentialMusic ()
             self.grace_elements.append (element)
+    def append_after_grace (self, element):
+        if element:
+            if not self.after_grace_elements:
+                self.after_grace_elements = SequentialMusic ()
+            self.after_grace_elements.append (element)
+
+    def has_elements (self):
+        return [e for e in self.elements if
+               isinstance (e, NoteEvent) or isinstance (e, RestEvent)] != []
+
 
     def get_length (self):
         l = Rational (0)
@@ -739,6 +812,9 @@ class ChordEvent (NestedMusic):
         other_events = [e for e in self.elements if
                 not isinstance (e, RhythmicEvent)]
 
+        if self.after_grace_elements:
+            printer ('\\afterGrace {')
+
         if self.grace_elements and self.elements:
             if self.grace_type:
                 printer ('\\%s' % self.grace_type)
@@ -746,6 +822,15 @@ class ChordEvent (NestedMusic):
                 printer ('\\grace')
             # don't print newlines after the { and } braces
             self.grace_elements.print_ly (printer, False)
+        elif self.grace_elements: # no self.elements!
+            warning (_ ("Grace note with no following music: %s") % self.grace_elements)
+            if self.grace_type:
+                printer ('\\%s' % self.grace_type)
+            else:
+                printer ('\\grace')
+            self.grace_elements.print_ly (printer, False)
+            printer ('{}')
+
         # Print all overrides and other settings needed by the 
         # articulations/ornaments before the note
         for e in other_events:
@@ -777,6 +862,10 @@ class ChordEvent (NestedMusic):
         for e in other_events:
             e.print_after_note (printer)
 
+        if self.after_grace_elements:
+            printer ('}')
+            self.after_grace_elements.print_ly (printer, False)
+
         self.print_comment (printer)
             
 class Partial (Music):
@@ -805,7 +894,7 @@ class BarLine (Music):
 
         if self.bar_number > 0 and (self.bar_number % 10) == 0:
             printer.dump ("\\barNumberCheck #%d " % self.bar_number)
-        else:
+        elif self.bar_number > 0:
             printer.print_verbatim (' %% %d' % self.bar_number)
         printer.newline ()
 
@@ -863,9 +952,9 @@ class BeamEvent (SpanEvent):
 
 class PedalEvent (SpanEvent):
     def ly_expression (self):
-        return {-1: '\\sustainDown',
-            0:'\\sustainUp\\sustainDown',
-            1:'\\sustainUp'}.get (self.span_direction, '')
+        return {-1: '\\sustainOn',
+            0:'\\sustainOff\\sustainOn',
+            1:'\\sustainOff'}.get (self.span_direction, '')
 
 class TextSpannerEvent (SpanEvent):
     def ly_expression (self):
@@ -901,10 +990,10 @@ class OctaveShiftEvent (SpanEvent):
         dir = self.ly_octave_shift_indicator ()
         value = ''
         if dir:
-            value = '#(set-octavation %s)' % dir
+            value = '\ottava #%s' % dir
         return { 
             -1: value,
-            1: '#(set-octavation 0)'}.get (self.span_direction, '')
+            1: '\ottava #0'}.get (self.span_direction, '')
 
 class TrillSpanEvent (SpanEvent):
     def ly_expression (self):
@@ -937,12 +1026,12 @@ class ArpeggioEvent(Event):
         if self.non_arpeggiate:
             printer.dump ("\\arpeggioBracket")
         else:
-          dir = { -1: "\\arpeggioDown", 1: "\\arpeggioUp" }.get (self.direction, '')
+          dir = { -1: "\\arpeggioArrowDown", 1: "\\arpeggioArrowUp" }.get (self.direction, '')
           if dir:
               printer.dump (dir)
     def print_after_note (self, printer):
         if self.non_arpeggiate or self.direction:
-            printer.dump ("\\arpeggioNeutral")
+            printer.dump ("\\arpeggioNormal")
     def ly_expression (self):
         return ('\\arpeggio')
 
@@ -1327,6 +1416,13 @@ class ClefChange (Music):
 """ % (glyph, pos, c0)
         return clefsetting
 
+class Transposition (Music):
+    def __init__ (self):
+        Music.__init__ (self)
+        self.pitch = None
+    def ly_expression (self):
+        self.pitch._force_absolute_pitch = True
+        return '\\transposition %s' % self.pitch.ly_expression ()
 
 class StaffChange (Music):
     def __init__ (self, staff):
@@ -1371,9 +1467,7 @@ class TempoMark (Music):
             return res
         if self.beats:
             if self.parentheses:
-                dm = self.duration_to_markup (self.baseduration)
-                contents = "\"(\" %s = %s \")\"" % (dm, self.beats)
-                res += self.tempo_markup_template() % contents
+                res += "\\tempo \"\" %s=%s" % (self.baseduration.ly_expression(), self.beats)
             else:
                 res += "\\tempo %s=%s" % (self.baseduration.ly_expression(), self.beats)
         elif self.newduration:
@@ -1619,6 +1713,34 @@ class DrumStaff (Staff):
 class RhythmicStaff (Staff):
     def __init__ (self, command = "RhythmicStaff"):
         Staff.__init__ (self, command)
+        
+class Score:
+    def __init__ (self):
+        self.contents = None
+        self.create_midi = False
+
+    def set_contents (self, contents):
+        self.contents = contents
+    
+    def set_part_information (self, part_id, staves_info):
+        if self.contents:
+          self.contents.set_part_information (part_id, staves_info)
+
+    def print_ly (self, printer):
+        printer.dump ("\\score {");
+        printer.newline ()
+        if self.contents:
+            self.contents.print_ly (printer);
+        printer.dump ("\\layout {}");
+        printer.newline ()
+        if not self.create_midi:
+            printer.dump ("% To create MIDI output, uncomment the following line:");
+            printer.newline ();
+            printer.dump ("% ");
+        printer.dump ("\\midi {}");
+        printer.newline ()
+        printer.dump ("}");
+        printer.newline ()
 
 
 def test_pitch ():

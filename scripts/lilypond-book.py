@@ -45,10 +45,22 @@ import fontextract
 import langdefs
 global _;_=ly._
 
+ly.require_python_version ()
 
 # Lilylib globals.
 program_version = '@TOPLEVEL_VERSION@'
 program_name = os.path.basename (sys.argv[0])
+
+# Check if program_version contains @ characters. This will be the case if
+# the .py file is called directly while building the lilypond documentation.
+# If so, try to check for the env var LILYPOND_VERSION, which is set by our 
+# makefiles and use its value.
+at_re = re.compile (r'@')
+if at_re.match (program_version):
+    if os.environ.has_key('LILYPOND_VERSION'):
+        program_version = os.environ['LILYPOND_VERSION']
+    else:
+        program_version = "unknown"
 
 original_dir = os.getcwd ()
 backend = 'ps'
@@ -58,9 +70,9 @@ _ ("Process LilyPond snippets in hybrid HTML, LaTeX, texinfo or DocBook document
 + '\n\n'
 + _ ("Examples:")
 + '''
- lilypond-book --filter="tr '[a-z]' '[A-Z]'" %(BOOK)s
- lilypond-book --filter="convert-ly --no-version --from=2.0.0 -" %(BOOK)s
- lilypond-book --process='lilypond -I include' %(BOOK)s
+ $ lilypond-book --filter="tr '[a-z]' '[A-Z]'" %(BOOK)s
+ $ lilypond-book -F "convert-ly --no-version --from=2.0.0 -" %(BOOK)s
+ $ lilypond-book --process='lilypond -I include' %(BOOK)s
 ''' % {'BOOK': _ ("BOOK")})
 
 authors = ('Jan Nieuwenhuizen <janneke@gnu.org>',
@@ -113,11 +125,12 @@ def get_option_parser ():
     p.add_option ('-F', '--filter', metavar=_ ("FILTER"),
                   action="store",
                   dest="filter_cmd",
-                  help=_ ("pipe snippets through FILTER [convert-ly -n -]"),
+                  help=_ ("pipe snippets through FILTER [default: `convert-ly -n -']"),
                   default=None)
 
     p.add_option ('-f', '--format',
                   help=_ ("use output format FORMAT (texi [default], texi-html, latex, html, docbook)"),
+                  metavar=_ ("FORMAT"),
                   action='store')
 
     p.add_option("-h", "--help",
@@ -155,7 +168,7 @@ def get_option_parser ():
                   default='')
     
     p.add_option ('--skip-lily-check',
-                  help=_ ("do not fail if no lilypond output is found."),
+                  help=_ ("do not fail if no lilypond output is found"),
                   metavar=_ ("DIR"),
                   action='store_true', dest='skip_lilypond_run',
                   default=False)
@@ -167,7 +180,7 @@ def get_option_parser ():
                   default=False)
     
     p.add_option ('--lily-output-dir',
-                  help=_ ("write lily-XXX files to DIR, link into --output dir."),
+                  help=_ ("write lily-XXX files to DIR, link into --output dir"),
                   metavar=_ ("DIR"),
                   action='store', dest='lily_output_dir',
                   default=None)
@@ -196,13 +209,19 @@ def get_option_parser ():
     p.add_option ('-w', '--warranty',
                   help=_ ("show warranty and copyright"),
                   action='store_true')
-    p.add_option_group (ly.display_encode (_ ('Bugs')),
+    p.add_option_group ('',
                         description=(
         _ ("Report bugs via")
         + ' http://post.gmane.org/post.php?group=gmane.comp.gnu.lilypond.bugs\n'))
     return p
 
 lilypond_binary = os.path.join ('@bindir@', 'lilypond')
+
+# If we are called with full path, try to use lilypond binary
+# installed in the same path; this is needed in GUB binaries, where
+# @bindir is always different from the installed binary path.
+if 'bindir' in globals () and bindir:
+    lilypond_binary = os.path.join (bindir, 'lilypond')
 
 # Only use installed binary when we are installed too.
 if '@bindir@' == ('@' + 'bindir@') or not os.path.exists (lilypond_binary):
@@ -235,6 +254,7 @@ LILYQUOTE = 'lilyquote'
 NOFRAGMENT = 'nofragment'
 NOINDENT = 'noindent'
 NOQUOTE = 'noquote'
+NORAGGED_RIGHT = 'noragged-right'
 NOTES = 'body'
 NOTIME = 'notime'
 OUTPUT = 'output'
@@ -247,9 +267,11 @@ QUOTE = 'quote'
 RAGGED_RIGHT = 'ragged-right'
 RELATIVE = 'relative'
 STAFFSIZE = 'staffsize'
+DOCTITLE = 'doctitle'
 TEXIDOC = 'texidoc'
 TEXINFO = 'texinfo'
 VERBATIM = 'verbatim'
+VERSION = 'lilypondversion'
 FONTLOAD = 'fontload'
 FILENAME = 'filename'
 ALT = 'alt'
@@ -307,7 +329,9 @@ snippet_res = {
 
         'verbatim':
 	no_match,
-    	
+
+        'lilypondversion':
+         no_match,
     }, 
     ##
     HTML: {
@@ -360,6 +384,11 @@ snippet_res = {
           (?s)
           (?P<match>
            (?P<code><pre>\s.*?</pre>\s))''',
+
+        'lilypondversion':
+         r'''(?mx)
+          (?P<match>
+          <lilypondversion\s*/>)''',
     },
 
     ##
@@ -433,6 +462,12 @@ snippet_res = {
            \\begin\s*{verbatim}
             .*?
            \\end\s*{verbatim}))''',
+
+        'lilypondversion':
+         r'''(?smx)
+          (?P<match>
+          \\lilypondversion)[^a-zA-Z]''',
+
     },
 
     ##
@@ -499,6 +534,12 @@ snippet_res = {
            @example
             \s.*?
            @end\s+example\s))''',
+
+        'lilypondversion':
+         r'''(?mx)
+         [^@](?P<match>
+          @lilypondversion)[^a-zA-Z]''',
+
     },
 }
 
@@ -533,6 +574,7 @@ simple_options = [
     NOFRAGMENT,
     NOINDENT,
     PRINTFILENAME,
+    DOCTITLE,
     TEXIDOC,
     LANG,
     VERBATIM,
@@ -560,6 +602,8 @@ ly_options = {
 
         RAGGED_RIGHT: r'''ragged-right = ##t''',
 
+        NORAGGED_RIGHT: r'''ragged-right = ##f''',
+
         PACKED: r'''packed = ##t''',
     },
 
@@ -567,12 +611,12 @@ ly_options = {
     LAYOUT: {
         NOTIME: r'''
  \context {
-  \Score
-  timing = ##f
+   \Score
+   timing = ##f
  }
  \context {
-  \Staff
-  \remove Time_signature_engraver
+   \Staff
+   \remove "Time_signature_engraver"
  }''',
     },
 
@@ -595,6 +639,8 @@ output = {
 		<imagedata fileref="%(base)s.png" format="PNG"/></imageobject>''',
     
         VERBATIM: r'''<programlisting>%(verb)s</programlisting>''',
+        
+        VERSION: program_version,
     
         PRINTFILENAME: '<textobject><simpara><ulink url="%(base)s.ly"><filename>%(filename)s</filename></ulink></simpara></textobject>'
     },
@@ -625,6 +671,8 @@ output = {
 
         VERBATIM: r'''<pre>
 %(verb)s</pre>''',
+
+        VERSION: program_version,
     },
 
     ##
@@ -653,6 +701,8 @@ output = {
 
         VERBATIM: r'''\noindent
 \begin{verbatim}%(verb)s\end{verbatim}''',
+
+        VERSION: program_version,
 
         FILTER: r'''\begin{lilypond}[%(options)s]
 %(code)s
@@ -707,6 +757,8 @@ output = {
 %(version)s@verbatim
 %(verb)s@end verbatim
 ''',
+
+        VERSION: program_version,
 
         ADDVERSION: r'''@example
 \version @w{"@version{}"}
@@ -827,6 +879,8 @@ def verbatim_html (s):
 
 ly_var_def_re = re.compile (r'^([a-zA-Z]+)[\t ]*=', re.M)
 ly_comment_re = re.compile (r'(%+[\t ]*)(.*)$', re.M)
+ly_context_id_re = re.compile ('\\\\(?:new|context)\\s+(?:[a-zA-Z]*?(?:Staff\
+(?:Group)?|Voice|FiguredBass|FretBoards|Names|Devnull))\\s+=\\s+"?([a-zA-Z]+)"?\\s+')
 
 def ly_comment_gettext (t, m):
     return m.group (1) + t (m.group (2))
@@ -844,6 +898,10 @@ def verb_ly_gettext (s):
     for v in ly_var_def_re.findall (s):
         s = re.sub (r"(?m)(^|[' \\#])%s([^a-zA-Z])" % v,
                     "\\1" + t (v) + "\\2",
+                    s)
+    for id in ly_context_id_re.findall (s):
+        s = re.sub (r'(\s+|")%s(\s+|")' % id,
+                    "\\1" + t (id) + "\\2",
                     s)
     return s
 
@@ -990,6 +1048,12 @@ class LilypondSnippet (Snippet):
         for k in default_ly_options:
             if k not in self.option_dict:
                 self.option_dict[k] = default_ly_options[k]
+
+        # RELATIVE does not work without FRAGMENT;
+        # make RELATIVE imply FRAGMENT
+        has_relative = self.option_dict.has_key (RELATIVE)
+        if has_relative and not self.option_dict.has_key (FRAGMENT):
+            self.option_dict[FRAGMENT] = None
 
         if not has_line_width:
             if type == 'lilypond' or FRAGMENT in self.option_dict:
@@ -1197,13 +1261,22 @@ class LilypondSnippet (Snippet):
         if not skip_lily:
             require_file (base + '-systems.count')
 
+        if 'ddump-profile' in global_options.process_cmd:
+            require_file (base + '.profile')
+        if 'dseparate-log-file' in global_options.process_cmd:
+            require_file (base + '.log')
+
         map (consider_file, [base + '.tex',
                              base + '.eps',
                              base + '.texidoc',
-                             base + '.texidoc' + document_language,
+                             base + '.doctitle',
                              base + '-systems.texi',
                              base + '-systems.tex',
                              base + '-systems.pdftexi'])
+        if document_language:
+            map (consider_file,
+                 [base + '.texidoc' + document_language,
+                  base + '.doctitle' + document_language])
 
         # UGH - junk global_options
         if (base + '.eps' in result and self.format in (HTML, TEXINFO)
@@ -1218,11 +1291,18 @@ class LilypondSnippet (Snippet):
         system_count = 0
         if not skip_lily and not missing:
             system_count = int(file (full + '-systems.count').read())
+
         for number in range(1, system_count + 1):
             systemfile = '%s-%d' % (base, number)
             require_file (systemfile + '.eps')
             consider_file (systemfile + '.pdf')
-        
+
+            # We can't require signatures, since books and toplevel
+            # markups do not output a signature.
+            if 'ddump-signature' in global_options.process_cmd:
+                consider_file (systemfile + '.signature')
+             
+       
         return (result, missing)
     
     def is_outdated (self, output_dir, current_files):
@@ -1346,6 +1426,13 @@ class LilypondSnippet (Snippet):
     def output_texinfo (self):
         str = self.output_print_filename (TEXINFO)
         base = self.basename ()
+        if DOCTITLE in self.option_dict:
+            doctitle = base + '.doctitle'
+            translated_doctitle = doctitle + document_language
+            if os.path.exists (translated_doctitle):
+                str += '@lydoctitle %s\n' % open (translated_doctitle).read ()
+            elif os.path.exists (doctitle):
+                str += '@lydoctitle %s\n' % open (doctitle).read ()
         if TEXIDOC in self.option_dict:
             texidoc = base + '.texidoc'
             translated_texidoc = texidoc + document_language
@@ -1398,11 +1485,21 @@ class LilypondFileSnippet (LilypondSnippet):
                 % (name, self.contents))
 
 
+class LilyPondVersionString (Snippet):
+    """A string that does not require extra memory."""
+    def __init__ (self, type, match, format, line_number):
+        Snippet.__init__ (self, type, match, format, line_number)
+
+    def replacement_text (self):
+        return output[self.format][self.type]
+
+
 snippet_type_to_class = {
     'lilypond_file': LilypondFileSnippet,
     'lilypond_block': LilypondSnippet,
     'lilypond': LilypondSnippet,
     'include': IncludeSnippet,
+    'lilypondversion': LilyPondVersionString,
 }
 
 def find_linestarts (s):
@@ -1560,7 +1657,7 @@ def process_snippets (cmd, snippets,
                          'snippet-names-%d.ly' % checksum)
     file (name, 'wb').write (contents)
 
-    system_in_directory (' '.join ([cmd, name]),
+    system_in_directory (' '.join ([cmd, ly.mkarg (name)]),
                          lily_output_dir)
             
         
@@ -1831,6 +1928,7 @@ def do_file (input_filename, included=False):
             'lilypond_file',
             'include',
             'lilypond',
+            'lilypondversion',
         )
         progress (_ ("Dissecting..."))
         chunks = find_toplevel_snippets (source, global_options.format, snippet_types)
@@ -1911,8 +2009,13 @@ def main ():
                                       + ' --formats=%s -dbackend=eps ' % formats)
 
     if global_options.process_cmd:
-        global_options.process_cmd += ' '.join ([(' -I %s' % ly.mkarg (p))
-                                                 for p in global_options.include_path])
+        includes = global_options.include_path
+        if global_options.lily_output_dir:
+            # This must be first, so lilypond prefers to read .ly
+            # files in the other lybookdb dir.
+            includes = [os.path.abspath(global_options.lily_output_dir)] + includes
+        global_options.process_cmd += ' '.join ([' -I %s' % ly.mkarg (p)
+                                                 for p in includes])
 
     if global_options.format in (TEXINFO, LATEX):
         ## prevent PDF from being switched on by default.

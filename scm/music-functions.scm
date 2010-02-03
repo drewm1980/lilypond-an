@@ -340,7 +340,18 @@ i.e.  this is not an override"
 	      'grob-property gprop))
 
 (define direction-polyphonic-grobs
-  '(Stem Tie Rest Slur PhrasingSlur Script TextScript Dots DotColumn Fingering))
+  '(DotColumn
+    Dots
+    Fingering
+    LaissezVibrerTie
+    PhrasingSlur
+    RepeatTie
+    Rest
+    Script
+    Slur
+    Stem
+    TextScript
+    Tie))
 
 (define-safe-public (make-voice-props-set n)
   (make-sequential-music
@@ -678,7 +689,6 @@ SkipEvent. Useful for extracting parts from crowded scores"
       ((< i 0))
     (f (vector-ref v i))))
 
-;; TODO:  make a remove-grace-property too.
 (define-public (add-grace-property context-name grob sym val)
   "Set SYM=VAL for GROB in CONTEXT-NAME. "
   (define (set-prop context)
@@ -688,6 +698,25 @@ SkipEvent. Useful for extracting parts from crowded scores"
 				 (list (list context-name grob sym val)))))
       (ly:context-set-property! where 'graceSettings new-settings)))
   (ly:export (context-spec-music (make-apply-context set-prop) 'Voice)))
+
+(define-public (remove-grace-property context-name grob sym)
+  "Remove all SYM for GROB in CONTEXT-NAME. "
+  (define (sym-grob-context? property sym grob context-name)
+    (and (eq? (car property) context-name)
+         (eq? (cadr property) grob)
+         (eq? (caddr property) sym)))
+  (define (delete-prop context)
+    (let* ((where (ly:context-property-where-defined context 'graceSettings))
+	   (current (ly:context-property where 'graceSettings))
+           (prop-settings (filter 
+                            (lambda(x) (sym-grob-context? x sym grob context-name))
+                            current)) 
+	   (new-settings current))
+      (for-each (lambda(x) 
+                 (set! new-settings (delete x new-settings)))
+               prop-settings)
+      (ly:context-set-property! where 'graceSettings new-settings)))
+  (ly:export (context-spec-music (make-apply-context delete-prop) 'Voice)))
 
 
 
@@ -794,41 +823,94 @@ Syntax:
 	(ly:music-length music))
   music)
 
-(define (skip-to-last music parser)
+(define-public (make-duration-of-length moment)
+ "Make duration of the given MOMENT length."
+ (ly:make-duration 0 0
+  (ly:moment-main-numerator moment)
+  (ly:moment-main-denominator moment)))
 
-  "Replace MUSIC by
+(define (skip-this moment)
+ "set skipTypesetting, make SkipMusic of the given MOMENT length,
+ and then unset skipTypesetting."
+ (make-sequential-music
+  (list
+   (context-spec-music (make-property-set 'skipTypesetting #t)
+    'Score)
+   (make-music 'SkipMusic 'duration
+    (make-duration-of-length moment))
+   (context-spec-music (make-property-set 'skipTypesetting #f)
+    'Score))))
 
-<< { \\set skipTypesetting = ##t
-     LENGTHOF(\\showLastLength)
-     \\set skipTypesetting = ##t  }
-    MUSIC >>
+(define (unskip-this moment)
+ "unset skipTypesetting, make SkipMusic of the given MOMENT length,
+ and then set skipTypesetting."
+ (make-sequential-music
+  (list
+   (context-spec-music (make-property-set 'skipTypesetting #f)
+    'Score)
+   (make-music 'SkipMusic 'duration
+    (make-duration-of-length moment))
+   (context-spec-music (make-property-set 'skipTypesetting #t)
+    'Score))))
 
-if appropriate.
- "
-  (let*
-      ((show-last  (ly:parser-lookup parser 'showLastLength)))
-    
-    (if (ly:music? show-last)
-	(let*
-	    ((orig-length (ly:music-length music))
-	     (skip-length (ly:moment-sub orig-length (ly:music-length show-last))))
+(define (skip-as-needed music parser)
+ "Replace MUSIC by
+ << {  \\set skipTypesetting = ##f
+ LENGTHOF(\\showFirstLength)
+ \\set skipTypesetting = ##t
+ LENGTHOF(\\showLastLength) }
+ MUSIC >>
+ if appropriate.
 
-	  (make-simultaneous-music
-	   (list
-	    (make-sequential-music
-	     (list
-	      (context-spec-music (make-property-set 'skipTypesetting #t)
-				  'Score)
-	      (make-music 'SkipMusic 'duration
-			  (ly:make-duration
-			   0 0
-			   (ly:moment-main-numerator skip-length)
-			   (ly:moment-main-denominator skip-length)))
-	      (context-spec-music (make-property-set 'skipTypesetting #f)
-				  'Score)))
-	    music)))
-	music)))
-    
+ When only showFirstLength is set,
+ the 'length property of the music is
+ overridden to speed up compiling."
+ (let*
+  ((show-last (ly:parser-lookup parser 'showLastLength))
+   (show-first (ly:parser-lookup parser 'showFirstLength)))
+  (cond
+
+   ;; both properties may be set.
+   ((and (ly:music? show-first) (ly:music? show-last))
+    (let*
+     ((orig-length (ly:music-length music))
+      (skip-length (ly:moment-sub orig-length (ly:music-length show-last)))
+      (begin-length (ly:music-length show-first)))
+     (make-simultaneous-music
+      (list
+       (make-sequential-music
+        (list
+         (skip-this skip-length)
+         ;; let's draw a separator between the beginning and the end
+         (context-spec-music (make-property-set 'whichBar "||")
+          'Timing)))
+       (unskip-this begin-length)
+       music))))
+
+   ;; we may only want to print the last length
+   ((ly:music? show-last)
+    (let*
+     ((orig-length (ly:music-length music))
+      (skip-length (ly:moment-sub orig-length (ly:music-length show-last))))
+     (make-simultaneous-music
+      (list
+       (skip-this skip-length)
+       music))))
+
+   ;; we may only want to print the beginning; in this case
+   ;; only the first length will be processed (much faster).
+   ((ly:music? show-first)
+    (let*
+     ((orig-length (ly:music-length music))
+      (begin-length (ly:music-length show-first)))
+     ;; the first length must not exceed the original length.
+     (if (ly:moment<? begin-length orig-length)
+      (set! (ly:music-property music 'length)
+       (ly:music-length show-first)))
+     music))
+
+   (else music))))
+
 
 (define-public toplevel-music-functions
   (list
@@ -843,7 +925,7 @@ if appropriate.
    (lambda (x parser) (music-map cue-substitute x))
  
    (lambda (x parser)
-     (skip-to-last x parser)
+     (skip-as-needed x parser)
    )))
 
 
@@ -864,6 +946,105 @@ if appropriate.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; accidentals
 
+(define-public ((make-accidental-rule octaveness lazyness) context pitch barnum measurepos)
+  "Creates an accidental rule that makes its decision based on the octave of the note
+  and a laziness value.
+  octaveness is either 'same-octave or 'any-octave and defines whether the rule should
+  respond to accidental changes in other octaves than the current. 'same-octave is the
+  normal way to typeset accidentals - an accidental is made if the alteration is different
+  from the last active pitch in the same octave. 'any-octave looks at the last active pitch
+  in any octave.
+  lazyness states over how many bars an accidental should be remembered.
+  0 is default - accidental lasts over 0 bar lines, that is, to the end of current measure.
+  A positive integer means that the accidental lasts over that many bar lines.
+  -1 is 'forget immediately', that is, only look at key signature.
+  #t is forever."
+  (let ((keysig (ly:context-property context 'localKeySignature)))
+    (ly:find-accidentals-simple keysig pitch barnum lazyness octaveness)))
+
+(define (key-entry-notename entry)
+  "Return the pitch of an entry in localKeySignature. The entry is either of the form
+  '(notename . alter) or '((octave . notename) . (alter barnum . measurepos))."
+  (if (number? (car entry))
+      (car entry)
+      (cdar entry)))
+
+(define (key-entry-octave entry)
+  "Return the octave of an entry in localKeySignature (or #f if the entry does not have
+  an octave)."
+  (and (pair? (car entry)) (caar entry)))
+
+(define (key-entry-bar-number entry)
+  "Return the bar number of an entry in localKeySignature (or #f if the entry does not
+  have a bar number)."
+  (and (pair? (car entry)) (caddr entry)))
+
+(define (key-entry-measure-position entry)
+  "Return the measure position of an entry in localKeySignature (or #f if the entry does
+  not have a measure position)."
+  (and (pair? (car entry)) (cdddr entry)))
+
+(define (key-entry-alteration entry)
+  "Return the alteration of an entry in localKeySignature."
+  (if (number? (car entry))
+      (cdr entry)
+      (cadr entry)))
+
+(define-public (find-pitch-entry keysig pitch accept-global accept-local)
+  "Return the first entry in keysig that matches the pitch.
+  accept-global states whether key signature entries should be included.
+  accept-local states whether local accidentals should be included.
+  if no matching entry is found, #f is returned."
+  (if (pair? keysig)
+      (let* ((entry (car keysig))
+	     (entryoct (key-entry-octave entry))
+	     (entrynn (key-entry-notename entry))
+	     (oct (ly:pitch-octave pitch))
+	     (nn (ly:pitch-notename pitch)))
+	(if (and (equal? nn entrynn)
+		 (or (and accept-global (equal? #f entryoct))
+		     (and accept-local (equal? oct entryoct))))
+	    entry
+	    (find-pitch-entry (cdr keysig) pitch accept-global accept-local)))
+      #f))
+
+(define-public (neo-modern-accidental-rule context pitch barnum measurepos)
+  "an accidental rule that typesets an accidental if it differs from the key signature
+   AND does not directly follow a note on the same staff-line.
+   This rule should not be used alone because it does neither look at bar lines
+   nor different accidentals at the same notename"
+  (let* ((keysig (ly:context-property context 'localKeySignature))
+	 (entry (find-pitch-entry keysig pitch #t #t)))
+    (if (equal? #f entry)
+	(cons #f #f)
+	(let* ((global-entry (find-pitch-entry keysig pitch #t #f))
+	       (key-acc (if (equal? global-entry #f)
+			    0
+			    (key-entry-alteration global-entry)))
+	       (acc (ly:pitch-alteration pitch))
+	       (entrymp (key-entry-measure-position entry))
+	       (entrybn (key-entry-bar-number entry)))
+	  (cons #f (not (or (equal? acc key-acc)
+			    (and (equal? entrybn barnum) (equal? entrymp measurepos)))))))))
+
+(define-public (teaching-accidental-rule context pitch barnum measurepos)
+  "an accidental rule that typesets a cautionary accidental
+  if it is included in the key signature AND does not directly follow
+  a note on the same staff-line."
+  (let* ((keysig (ly:context-property context 'localKeySignature))
+	 (entry (find-pitch-entry keysig pitch #t #t)))
+    (if (equal? #f entry)
+	(cons #f #f)
+	(let* ((global-entry (find-pitch-entry keysig pitch #f #f))
+	       (key-acc (if (equal? global-entry #f)
+			    0
+			    (key-entry-alteration global-entry)))
+	       (acc (ly:pitch-alteration pitch))
+	       (entrymp (key-entry-measure-position entry))
+	       (entrybn (key-entry-bar-number entry)))
+	  (cons #f (not (or (equal? acc key-acc)
+			    (and (equal? entrybn barnum) (equal? entrymp measurepos)))))))))
+
 (define-public (set-accidentals-properties extra-natural
 					   auto-accs auto-cauts
 					   context)
@@ -878,7 +1059,7 @@ if appropriate.
 
 (define-public (set-accidental-style style . rest)
   "Set accidental style to STYLE. Optionally takes a context argument,
-e.g. 'Staff or 'Voice. The context defaults to Voice, except for piano styles, which
+e.g. 'Staff or 'Voice. The context defaults to Staff, except for piano styles, which
 use GrandStaff as a context. "
   (let ((context (if (pair? rest)
 		     (car rest) 'Staff))
@@ -888,55 +1069,111 @@ use GrandStaff as a context. "
      (cond
       ;; accidentals as they were common in the 18th century.
       ((equal? style 'default)
-       (set-accidentals-properties #t '(Staff (same-octave . 0))
-				   '() context))
+       (set-accidentals-properties #t
+				   `(Staff ,(make-accidental-rule 'same-octave 0))
+				   '()
+				   context))
       ;; accidentals from one voice do NOT get cancelled in other voices
       ((equal? style 'voice)
-       (set-accidentals-properties #t '(Voice (same-octave . 0))
-				   '() context))
+       (set-accidentals-properties #t
+				   `(Voice ,(make-accidental-rule 'same-octave 0))
+				   '()
+				   context))
       ;; accidentals as suggested by Kurt Stone, Music Notation in the 20th century.
       ;; This includes all the default accidentals, but accidentals also needs cancelling
       ;; in other octaves and in the next measure.
       ((equal? style 'modern)
-       (set-accidentals-properties #f '(Staff (same-octave . 0) (any-octave . 0) (same-octave . 1))
-				   '()	context))
+       (set-accidentals-properties #f
+				   `(Staff ,(make-accidental-rule 'same-octave 0)
+					   ,(make-accidental-rule 'any-octave 0)
+					   ,(make-accidental-rule 'same-octave 1))
+				   '()
+				   context))
       ;; the accidentals that Stone adds to the old standard as cautionaries
       ((equal? style 'modern-cautionary)
-       (set-accidentals-properties #f '(Staff (same-octave . 0))
-				   '(Staff (any-octave . 0) (same-octave . 1))
+       (set-accidentals-properties #f
+				   `(Staff ,(make-accidental-rule 'same-octave 0))
+				   `(Staff ,(make-accidental-rule 'any-octave 0)
+					   ,(make-accidental-rule 'same-octave 1))
+				   context))
+      ;; same as modern, but accidentals different from the key signature are always
+      ;; typeset - unless they directly follow a note of the same pitch.
+      ((equal? style 'neo-modern)
+       (set-accidentals-properties #f
+				   `(Staff ,(make-accidental-rule 'same-octave 0)
+					   ,(make-accidental-rule 'any-octave 0)
+					   ,(make-accidental-rule 'same-octave 1)
+				           ,neo-modern-accidental-rule)
+				   '()
+				   context))
+      ((equal? style 'neo-modern-cautionary)
+       (set-accidentals-properties #f
+				   `(Staff ,(make-accidental-rule 'same-octave 0))
+				   `(Staff ,(make-accidental-rule 'any-octave 0)
+					   ,(make-accidental-rule 'same-octave 1)
+				           ,neo-modern-accidental-rule)
+				   context))
+      ;; Accidentals as they were common in dodecaphonic music with no tonality.
+      ;; Each note gets one accidental.
+      ((equal? style 'dodecaphonic)
+       (set-accidentals-properties #f
+				   `(Staff ,(lambda (c p bn mp) '(#f . #t)))
+				   '()
 				   context))
       ;; Multivoice accidentals to be read both by musicians playing one voice
       ;; and musicians playing all voices.
       ;; Accidentals are typeset for each voice, but they ARE cancelled across voices.
       ((equal? style 'modern-voice)
        (set-accidentals-properties  #f
-				    '(Voice (same-octave . 0) (any-octave . 0) (same-octave . 1)
-					    Staff (same-octave . 0) (any-octave . 0) (same-octave . 1))
+				    `(Voice ,(make-accidental-rule 'same-octave 0)
+					    ,(make-accidental-rule 'any-octave 0)
+					    ,(make-accidental-rule 'same-octave 1)
+				      Staff ,(make-accidental-rule 'same-octave 0)
+					    ,(make-accidental-rule 'any-octave 0)
+					    ,(make-accidental-rule 'same-octave 1))
 				    '()
 				    context))
       ;; same as modernVoiceAccidental eccept that all special accidentals are typeset
       ;; as cautionaries
       ((equal? style 'modern-voice-cautionary)
        (set-accidentals-properties #f
-				   '(Voice (same-octave . 0))
-				   '(Voice (any-octave . 0) (same-octave . 1)
-					   Staff (same-octave . 0) (any-octave . 0) (same-octave . 1))
+				   `(Voice ,(make-accidental-rule 'same-octave 0))
+				   `(Voice ,(make-accidental-rule 'any-octave 0)
+					   ,(make-accidental-rule 'same-octave 1)
+				     Staff ,(make-accidental-rule 'same-octave 0)
+				           ,(make-accidental-rule 'any-octave 0)
+					   ,(make-accidental-rule 'same-octave 1))
 				   context))
       ;; stone's suggestions for accidentals on grand staff.
       ;; Accidentals are cancelled across the staves in the same grand staff as well
       ((equal? style 'piano)
        (set-accidentals-properties #f
-				   '(Staff (same-octave . 0)
-					   (any-octave . 0) (same-octave . 1)
-					   GrandStaff (any-octave . 0) (same-octave . 1))
+				   `(Staff ,(make-accidental-rule 'same-octave 0)
+					   ,(make-accidental-rule 'any-octave 0)
+					   ,(make-accidental-rule 'same-octave 1)
+				     GrandStaff
+				           ,(make-accidental-rule 'any-octave 0)
+					   ,(make-accidental-rule 'same-octave 1))
 				   '()
 				   pcontext))
       ((equal? style 'piano-cautionary)
        (set-accidentals-properties #f
-				   '(Staff (same-octave . 0))
-				   '(Staff (any-octave . 0) (same-octave . 1)
-					   GrandStaff (any-octave . 0) (same-octave . 1))
+				   `(Staff ,(make-accidental-rule 'same-octave 0))
+				   `(Staff ,(make-accidental-rule 'any-octave 0)
+					   ,(make-accidental-rule 'same-octave 1)
+				     GrandStaff
+				           ,(make-accidental-rule 'any-octave 0)
+					   ,(make-accidental-rule 'same-octave 1))
 				   pcontext))
+
+      ;; same as modern, but cautionary accidentals are printed for all sharp or flat
+      ;; tones specified by the key signature.  
+       ((equal? style 'teaching)
+       (set-accidentals-properties #f
+				    `(Staff ,(make-accidental-rule 'same-octave 0))
+				    `(Staff ,(make-accidental-rule 'same-octave 1)
+				           ,teaching-accidental-rule)
+				   context))
       
       ;; do not set localKeySignature when a note alterated differently from
       ;; localKeySignature is found.
@@ -944,21 +1181,21 @@ use GrandStaff as a context. "
       ;; remembered for the duration of a measure.
       ;; accidentals not being remembered, causing accidentals always to
       ;; be typeset relative to the time signature
-      
       ((equal? style 'forget)
        (set-accidentals-properties '()
-				   '(Staff (same-octave . -1))
-				   '() context))
+				   `(Staff ,(make-accidental-rule 'same-octave -1))
+				   '()
+				   context))
       ;; Do not reset the key at the start of a measure.  Accidentals will be
       ;; printed only once and are in effect until overridden, possibly many
       ;; measures later.
       ((equal? style 'no-reset)
        (set-accidentals-properties '()
-				   '(Staff (same-octave . #t))
+				   `(Staff ,(make-accidental-rule 'same-octave #t))
 				   '()
 				   context))
       (else
-       (ly:warning (_ "unknown accidental style: ~S" style))
+       (ly:warning (_ "unknown accidental style: ~S") style)
        (make-sequential-music '()))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -991,3 +1228,34 @@ use GrandStaff as a context. "
 	(ly:music-property (car evs) 'pitch)
 	#f)))
        
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-public (extract-named-music music music-name)
+"Return a flat list of all music named @code{music-name}
+from @code{music}."
+   (let ((extracted-list
+          (if (ly:music? music)
+              (if (eq? (ly:music-property music 'name) music-name)
+                  (list music)
+                  (let ((elt (ly:music-property music 'element))
+                        (elts (ly:music-property music 'elements)))
+                    (if (ly:music? elt)
+                        (extract-named-music elt music-name)
+                        (if (null? elts)
+                            '()
+                            (map (lambda(x) 
+                                    (extract-named-music x music-name ))
+                             elts)))))
+              '())))
+     (flatten-list extracted-list)))
+
+(define-public (event-chord-notes event-chord)
+"Return a list of all notes from @{event-chord}."
+  (filter
+    (lambda (m) (eq? 'NoteEvent (ly:music-property m 'name)))
+    (ly:music-property event-chord 'elements)))
+
+(define-public (event-chord-pitches event-chord)
+"Return a list of all pitches from @{event-chord}."
+  (map (lambda (x) (ly:music-property x 'pitch))
+       (event-chord-notes event-chord)))

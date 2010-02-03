@@ -1,6 +1,6 @@
 #!@TARGET_PYTHON@
 #
-# msdi2ly.py -- LilyPond midi import script
+# midi2ly.py -- LilyPond midi import script
 # 
 # source file of the GNU LilyPond music typesetter
 #
@@ -22,7 +22,6 @@ TODO:
 '''
 
 import os
-import string
 import sys
 
 """
@@ -37,7 +36,6 @@ global _;_=ly._
 ## CONSTANTS
 
 
-output_name = ''
 LINE_BELL = 60
 scale_steps = [0, 2, 4, 5, 7, 9, 11]
 global_options = None
@@ -87,7 +85,7 @@ def warning (s):
         
 def error (s):
     progress (_ ("error: ") + s)
-    raise _ ("Exiting... ")
+    raise Exception (_ ("Exiting... "))
 
 def system (cmd, ignore_error = 0):
     return ly.system (cmd, ignore_error=ignore_error)
@@ -482,12 +480,12 @@ def events_on_channel (channel):
         # all include ALL_NOTES_OFF
         elif e[1][0] >= midi.ALL_SOUND_OFF \
           and e[1][0] <= midi.POLY_MODE_ON:
-            for i in pitches.keys ():
+            for i in pitches:
                 end_note (pitches, notes, t, i)
                 
         elif e[1][0] == midi.META_EVENT:
             if e[1][1] == midi.END_OF_TRACK:
-                for i in pitches.keys ():
+                for i in pitches:
                     end_note (pitches, notes, t, i)
                 break
 
@@ -671,10 +669,10 @@ def dump_channel (thread, skip):
     for ch in chs: 
         t = ch[0]
 
-        i = string.rfind (lines[-1], '\n') + 1
+        i = lines[-1].rfind ('\n') + 1
         if len (lines[-1][i:]) > LINE_BELL:
             lines.append ('')
-            
+
         if t - last_t > 0:
             lines[-1] = lines[-1] + dump_skip (skip, t-last_t)
         elif t - last_t < 0:
@@ -697,7 +695,7 @@ def dump_channel (thread, skip):
                               last_t, bar_count)
         lines[-1] = lines[-1] + s
 
-    return string.join (lines, '\n  ') + '\n'
+    return '\n  '.join (lines) + '\n'
 
 def track_name (i):
     return 'track%c' % (i + ord ('A'))
@@ -845,7 +843,7 @@ def convert_midi (in_file, out_file):
 
 def get_option_parser ():
     p = ly.get_option_parser (usage=_ ("%s [OPTION]... FILE") % 'midi2ly',
-                 description=_ ("Convert %s to LilyPond input.") % 'MIDI',
+                 description=_ ("Convert %s to LilyPond input.\n") % 'MIDI',
                  add_help_option=False)
 
     p.add_option ('-a', '--absolute-pitches',
@@ -889,10 +887,9 @@ def get_option_parser ():
 
     p.add_option_group (ly.display_encode (_ ("Examples")),
               description = r'''
-  midi2ly --key=-2:1 --duration-quant=32 \
-    --allow-tuplet=4*2/3 --allow-tuplet=2*4/3 foo.midi
+  $ midi2ly --key=-2:1 --duration-quant=32 --allow-tuplet=4*2/3 --allow-tuplet=2*4/3 foo.midi
 ''')
-    p.add_option_group (ly.display_encode (_ ('Bugs')),
+    p.add_option_group ('',
                         description=(_ ('Report bugs via')
                                      + ''' http://post.gmane.org/post.php'''
                                      '''?group=gmane.comp.gnu.lilypond.bugs\n'''))
@@ -917,7 +914,7 @@ def do_options ():
         warranty ()
         sys.exit (0)
     if 1:
-        (alterations, minor) = map (int, string.split (options.key + ':0', ':'))[0:2]
+        (alterations, minor) = map (int, (options.key + ':0').split (':'))[0:2]
         sharps = 0
         flats = 0
         if alterations >= 0:
@@ -949,16 +946,16 @@ def main():
         g = strip_extension (g, '.MID')
         (outdir, outbase) = ('','')
 
-        if not output_name:
+        if not global_options.output:
             outdir = '.'
             outbase = os.path.basename (g)
             o = os.path.join (outdir, outbase + '-midi.ly')
-        elif output_name[-1] == os.sep:
-            outdir = output_name
+        elif global_options.output[-1] == os.sep:
+            outdir = global_options.output
             outbase = os.path.basename (g)
             os.path.join (outdir, outbase + '-gen.ly')
         else:
-            o = output_name
+            o = global_options.output
             (outdir, outbase) = os.path.split (o)
 
         if outdir != '.' and outdir != '':

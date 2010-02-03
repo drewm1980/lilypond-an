@@ -2,15 +2,16 @@
 \header
 {
   texidoc = "Ottava brackets are supported, through the
-use of the scheme function @code{set-octavation}.
+use of the music function @code{\\ottava}.
 
 The spanner should go below a staff for 8va bassa, and the ottavation
-string can be tuned with @code{Staff.ottavation}.
+markup can be tuned with @code{Staff.ottavation}.
 
 "
 
 }
-\version "2.10.0"
+
+\version "2.11.53"
 
 %% . There must be a minimum distance between the octavation line and the
 %%   topmost staff line, taking into account the height of the closing
@@ -19,7 +20,7 @@ string can be tuned with @code{Staff.ottavation}.
 %% . Octavation lines broken across staves must always start with `8va'
 %%   (or something similar).
 				%
-%% . The `8va' should be slightl offset to the left.
+%% . The `8va' should be slightly offset to the left.
 				%
 %% . The final vertical dashed line of the octavation line should be offset
 %%   to the right.
@@ -36,31 +37,33 @@ string can be tuned with @code{Staff.ottavation}.
 
 \relative c'''  {
   a b c a
-  #(set-octavation 1)
+  \ottava #1
   a b c a
-  #(set-octavation 0)
-  #(set-octavation 2)
+  \ottava #0
+  \ottava #2
   a b c a
-  #(set-octavation 0)
-  #(set-octavation -1)
-  a b c a 
-  #(set-octavation 0)
+  \ottava #0
+  \ottava #-1
+  a b c a
+  \ottava #0
   \break
   a, 
-  #(set-octavation 1)
+  \ottava #1
   \set Staff.ottavation = #"8"
   b
-  #(set-octavation 0)
+  \ottava #0
   c a 
-  #(set-octavation -1) b a g 
-  #(set-octavation 0)
+  \ottava #-1
+  \set Staff.ottavation = \markup { \concat { 8 \tiny \raise #0.8 vb }}
+  b a g
+  \ottava #0
   c 
-  #(set-octavation -1)
+  \ottava #-1
   \set Staff.ottavation = #"8"
   c,,16
-  #(set-octavation 0)
+  \ottava #0
   c'16
-  #(set-octavation -1)
+  \ottava #-1
   \set Staff.ottavation = #"8"
   g,,16
 }

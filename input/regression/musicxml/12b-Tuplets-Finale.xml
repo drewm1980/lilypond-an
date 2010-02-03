@@ -2,15 +2,13 @@
 <!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 1.0 Partwise//EN"
                                 "http://www.musicxml.org/dtds/partwise.dtd">
 <score-partwise>
-  <movement-title>Finale tuplet test</movement-title>
   <identification>
-    <creator type="composer">Reinhold Kainhofer</creator>
-    <rights>Public domain</rights>
-    <encoding>
-      <software>Finale 2007 for Windows</software>
-      <software>Dolet Light for Finale 2007</software>
-      <encoding-date>2007-09-14</encoding-date>
-    </encoding>
+    <miscellaneous>
+      <miscellaneous-field name="description">Some tuplets (3:2, 3:2, 3:2, 4:2, 
+          4:1, 7:3, 6:2) with the default tuplet bracket displaying the number 
+          of actual notes played. The second tuplet does not have a number 
+          attribute set.</miscellaneous-field>
+    </miscellaneous>
   </identification>
   <part-list>
     <score-part id="P1">
@@ -105,7 +103,7 @@
         </time-modification>
         <stem>up</stem>
         <notations>
-          <tuplet number="1" placement="above" type="start"/>
+          <tuplet placement="above" type="start"/>
         </notations>
       </note>
       <note>
@@ -136,7 +134,7 @@
         </time-modification>
         <stem>up</stem>
         <notations>
-          <tuplet number="1" type="stop"/>
+          <tuplet type="stop"/>
         </notations>
       </note>
       <note>
@@ -153,7 +151,7 @@
         </time-modification>
         <stem>down</stem>
         <notations>
-          <tuplet bracket="no" number="1" placement="above" type="start"/>
+          <tuplet number="1" placement="above" type="start"/>
         </notations>
       </note>
       <note>

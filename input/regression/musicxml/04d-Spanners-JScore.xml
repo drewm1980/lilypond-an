@@ -3,18 +3,17 @@
 "-//Recordare//DTD MusicXML 1.0 Partwise//EN" 
 "http://www.musicxml.org/dtds/partwise.dtd">
 <score-partwise>
-<work>
-<work-title>JScore Spanners Test</work-title>
-</work>
 <identification>
-<creator type="composer">Reinhold Kainhofer</creator>
 <encoding>
 <software>JMSL's MusicXMLWriter by Nick Didkovsky. Java Music Specification Language by Nick Didkovsky and Phil Burk, (c) 2003 Nick Didkovsky, Phil Burk.  Available from: http://www.algomusic.com</software>
 </encoding>
+<miscellaneous>
+<miscellaneous-field name="description">Some spanners, exported by JMSL's MusicXMLWriter</miscellaneous-field>
+</miscellaneous>
 </identification>
 <part-list>
 <score-part id="P1" >
-<part-name>Voice 1</part-name>
+<part-name>MusicXML Part</part-name>
 </score-part>
 </part-list>
 <part id="P1" >

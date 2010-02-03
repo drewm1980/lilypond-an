@@ -1,29 +1,45 @@
 @c -*- coding: utf-8; mode: texinfo; documentlanguage: fr -*-
 @c This file is part of lilypond.tely
 @ignore
-    Translation of GIT committish: dab80970d8e89571263d16433aff1e6f878a8f62
+    Translation of GIT committish: d582eed083d91248d0424a79bdc6fdcdb24dc0b8
 
     When revising a translation, copy the HEAD committish of the
     version that you are working on.  See TRANSLATION for details.
 @end ignore
 
-@c \version "2.11.38"
+@c \version "2.11.61"
 
 @c Translators: Frédéric Chiasson, Jean-Charles Malahieude
 
 @node Notation manual tables
 @appendix Notation manual tables
 
-UNTRANSLATED NODE: IGNORE ME
+@c Please do not delete the following @ignore block.
+@ignore
+Note for editors and translators: In the following menu, two entries
+are needed to link to a pair of automatically generated sections.
+Please keep them and, if using emacs, do not run
+texinfo-all-menus-update without manually restoring them back. These
+menu entries are:
 
-@menu 
+* Text markup commands::
+* Text markup list commands::
+
+and they should go just after
+* Note head styles::
+
+and just before
+* List of articulations::
+@end ignore
+
+@menu
 * Chord name chart::
 * MIDI instruments::
 * List of colors::
 * The Feta font::
 * Note head styles::
-* Overview of text markup commands::
-* Overview of text markup list commands::
+* Text markup commands::
+* Text markup list commands::
 * List of articulations::       
 * All context properties::      
 * Layout properties::           
@@ -34,17 +50,17 @@ UNTRANSLATED NODE: IGNORE ME
 @node Chord name chart
 @appendixsec Chord name chart
 
-UNTRANSLATED NODE: IGNORE ME
+@untranslated
 
 @node MIDI instruments
 @appendixsec MIDI instruments
 
-UNTRANSLATED NODE: IGNORE ME
+@untranslated
 
 @node List of colors
 @appendixsec List of colors
 
-UNTRANSLATED NODE: IGNORE ME
+@untranslated
 
 @subsubheading Normal colors
 @subsubheading X color names
@@ -55,27 +71,24 @@ UNTRANSLATED NODE: IGNORE ME
 @node The Feta font
 @appendixsec The Feta font
 
-UNTRANSLATED NODE: IGNORE ME
+@untranslated
 
 @node Note head styles
 @appendixsec Note head styles
 
-UNTRANSLATED NODE: IGNORE ME
+@untranslated
 
-
-@node Overview of text markup commands
-@appendixsec Overview of text markup commands
-
+@ignore
 Vous pouvez utiliser les commandes suivantes au sein d'un bloc
 @code{\markup @{ @}}.
+@end ignore
 
 @include markup-commands.tely
 
 
-@node Overview of text markup list commands
-@appendixsec Overview of text markup list commands
-
+@ignore
 Vous pouvez utiliser les commandes suivantes avec @code{\markuplines}.
+@end ignore
 
 @include markup-list-commands.tely
 
@@ -118,22 +131,22 @@ Voici la liste exhaustive des symboles :
 @node All context properties
 @appendixsec All context properties
 
-UNTRANSLATED NODE: IGNORE ME
+@untranslated
 
 
 @node Layout properties
 @appendixsec Layout properties
 
-UNTRANSLATED NODE: IGNORE ME
+@untranslated
 
 
 @node Identifiers
 @appendixsec Identifiers
 
-UNTRANSLATED NODE: IGNORE ME
+@untranslated
 
 
 @node Scheme functions
 @appendixsec Scheme functions
 
-UNTRANSLATED NODE: IGNORE ME
+@untranslated

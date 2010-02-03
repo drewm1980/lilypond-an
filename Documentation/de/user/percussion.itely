@@ -1,58 +1,45 @@
 @c -*- coding: utf-8; mode: texinfo; documentlanguage: de -*-
 @c This file is part of lilypond.tely
 @ignore
-    Translation of GIT committish: dab80970d8e89571263d16433aff1e6f878a8f62
+    Translation of GIT committish: 19fc0f930f921ca2609e0e60aa26f9d980771b97
 
     When revising a translation, copy the HEAD committish of the
     version that you are working on.  See TRANSLATION for details.
 @end ignore
 
-@c \version "2.11.38"
-
+@c \version "2.11.62"
 
 @node Percussion
 @section Percussion
 
-@menu 
-* TODO percussion node fix::
+@untranslated
+
+
+@menu
+* Common notation for percussion::
 @end menu
 
-@node TODO percussion node fix
-@subsection TODO percussion node fix
+@node Common notation for percussion
+@subsection Common notation for percussion
 
 Rhythmusnotation wird vor allem für Schlaginstrumente eingesetzt, 
 aber hiermit kann auch der Rhythmus einer Melodie dargestellt werden.
 
+
 @menu
-* Showing melody rhythms::      
-* Entering percussion::         
-* Percussion staves::           
-* Ghost notes::                 
+* References for percussion::
+* Basic percussion notation::
+* Percussion staves::
+* Ghost notes::
 @end menu
 
+@node References for percussion
+@unnumberedsubsubsec References for percussion
 
-@node Showing melody rhythms
-@unnumberedsubsubsec Showing melody rhythms
+@untranslated
 
-Manchmal soll nur der Rhythmus einer Melodie dargestellt werden. Das 
-erreicht man mit einem Schlagzeug-Notensystem. Alle Tonhöhen werden 
-auf eine Linie reduziert und das System hat auch nur eine einzige 
-Linie.
-
-@lilypond[quote,ragged-right,fragment,relative=1,verbatim]
-\new RhythmicStaff {
-  \time 4/4
-  c4 e8 f g2 | r4 g r2 | g1:32 | r1 |
-}
-@end lilypond
-
-@seealso
-
-Programmreferenz: @internalsref{RhythmicStaff}.
-
-
-@node Entering percussion
-@unnumberedsubsubsec Entering percussion
+@node Basic percussion notation
+@unnumberedsubsubsec Basic percussion notation
 
 @cindex Percussion
 @cindex Drums
@@ -76,10 +63,13 @@ der Datei @file{ly/@/drumpitch@/-init@/.ly}.
 
 @seealso
 
-Programmreferenz: @internalsref{note-event}.
+Programmreferenz:
+@rinternals{note-event}.
+
 
 @node Percussion staves
 @unnumberedsubsubsec Percussion staves
+
 @cindex Perkussion
 @cindex Schlagzeug
 
@@ -88,8 +78,8 @@ mit mehreren Linien, wobei jede Linie ein bestimmtes Schlagzeug-Instrument
 darstellt.
 
 Um die Noten darstellen zu können, müssen sie sich innerhalb von 
-einem @internalsref{DrumStaff}- und einem 
-@internalsref{DrumVoice}-Kontext befinden.
+einem @rinternals{DrumStaff}- und einem 
+@rinternals{DrumVoice}-Kontext befinden.
 
 @lilypond[quote,ragged-right,verbatim]
 up = \drummode { crashcymbal4 hihat8 halfopenhihat hh hh hh openhihat }
@@ -101,8 +91,8 @@ down = \drummode { bassdrum4 snare8 bd r bd sn4 }
 @end lilypond
 Das Beispiel zeigt ausdrücklich definierte mehrstimmige Notation. Die 
 Kurznotation für mehrstimmige Musik, wie sie im Abschnitt 
-@ref{Basic polyphony} beschrieben wird, kann auch verwendet werden, 
-wenn die @internalsref{DrumVoice} (Schlagzeugstimmen) am Anfang explizit 
+@ref{Simultaneous expressions} beschrieben wird, kann auch verwendet werden, 
+wenn die @rinternals{DrumVoice} (Schlagzeugstimmen) am Anfang explizit 
 initialisiert werden.
 
 @lilypond[quote,ragged-right,fragment,verbatim]
@@ -122,7 +112,7 @@ initialisiert werden.
 
 Es gibt auch weitere Layout-Einstellungen. Um diese zu verwenden, 
 muss die Eigenschaft @code{drumStyleTable} im 
-@internalsref{DrumVoice}-Kontext entsprechend eingestellt werden. 
+@rinternals{DrumVoice}-Kontext entsprechend eingestellt werden. 
 Folgende Variablen sind vordefiniert:
 
 @table @code
@@ -142,7 +132,7 @@ mus = \drummode {
        \remove Bar_engraver
        \remove Time_signature_engraver
        \override Stem #'transparent = ##t
-       \override Stem #'Y-extent-callback = ##f
+       \override Stem #'Y-extent = ##f
        \override VerticalAxisGroup #'minimum-Y-extent = #'(-4.0 . 5.0)
      } \mus
      \new Lyrics \nam
@@ -174,7 +164,7 @@ mus = \drummode { timh ssh timl ssl cb s16 }
     \remove Bar_engraver
     \remove Time_signature_engraver
     \override Stem #'transparent = ##t
-    \override Stem #'Y-extent-callback = ##f
+    \override Stem #'Y-extent = ##f
     \override StaffSymbol #'line-count = #2
     \override StaffSymbol #'staff-space = #2
     \override VerticalAxisGroup #'minimum-Y-extent = #'(-3.0 . 4.0)
@@ -204,7 +194,7 @@ mus = \drummode { cgh cgho cghm ssh cgl cglo cglm ssl s16 }
     %% this sucks; it will lengthen stems.
     \override StaffSymbol #'staff-space = #2
     \override Stem #'transparent = ##t
-    \override Stem #'Y-extent-callback = ##f
+    \override Stem #'Y-extent = ##f
   } \mus
   \new Lyrics {
     \override LyricText #'font-family = #'typewriter
@@ -230,7 +220,7 @@ mus = \drummode { boh boho bohm ssh bol bolo bolm ssl s16 }
     %% this sucks; it will lengthen stems.
     \override StaffSymbol #'staff-space = #2
     \override Stem #'transparent = ##t
-    \override Stem #'Y-extent-callback = ##f
+    \override Stem #'Y-extent = ##f
   } \mus
   \new Lyrics {
     \override LyricText #'font-family = #'typewriter
@@ -253,7 +243,7 @@ mus = \drummode { tri trio trim gui guis guil cb cl tamb cab mar hc s16 }
     \override StaffSymbol #'line-count = #1
     \remove Time_signature_engraver
     \override Stem #'transparent = ##t
-    \override Stem #'Y-extent-callback = ##f
+    \override Stem #'Y-extent = ##f
   } \mus
   \new Lyrics {
     \override LyricText #'font-family = #'typewriter
@@ -288,7 +278,7 @@ down = \drummode { bd4 sn bd toml8 toml }
 
 Init-Dateien: @file{ly/@/drumpitch@/-init@/.ly}.
 
-Programmreferenz: @internalsref{DrumStaff}, @internalsref{DrumVoice}.
+Programmreferenz: @rinternals{DrumStaff}, @rinternals{DrumVoice}.
 
 @knownissues
 
@@ -296,7 +286,6 @@ Weil in den allgemeinen MIDI-Definitionen kein Rimshot enthalten ist,
 wird sidestick für diesen Zweck benutzt.
 
 
-@c FIXME: check name -tr
 @node Ghost notes
 @unnumberedsubsubsec Ghost notes
 
@@ -305,7 +294,7 @@ Klammer- (@code{\parenthesize})-Befehl, beschrieben in @ref{Parentheses},
 erstellt werden. Im Standard-@code{\drummode}-Modus ist aber 
 das @code{Parenthesis_engraver}-Plugin nicht automatisch enthalten. 
 Sie müssen das Plugin ausdrücklich in den Kontext-Definitionen 
-laden, wie im Abschnitt @ref{Changing context properties on the fly}
+laden, wie im Abschnitt @rlearning{Modifying context properties}
 detailliert beschrieben.
 
 @lilypond[quote,ragged-right,verbatim,fragment]

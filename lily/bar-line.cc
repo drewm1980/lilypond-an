@@ -94,13 +94,28 @@ Bar_line::compound_barline (Grob *me, string str, Real h,
   colon.translate_axis (-dist / 2, Y_AXIS);
 
   Stencil m;
+  Grob *staff = Staff_symbol_referencer::get_staff_symbol (me);
+  Real center = 0;
+  if (staff)
+    {
+      Interval staff_extent = staff->extent (staff, Y_AXIS);
+      center = staff_extent.center ();
+    }
+
   if (str == "||:")
     str = "|:";
 
   if (str == "")
-    return Lookup::blank (Box (Interval (0, 0), Interval (-h / 2, h / 2)));
+    {
+      Stencil empty =  Lookup::blank (Box (Interval (0, 0), Interval (-h / 2, h / 2)));
+      empty.translate_axis (center, Y_AXIS);
+      return empty;
+    }
   else if (str == "|")
-    return thin;
+    {
+      thin.translate_axis (center, Y_AXIS);
+      return thin;
+    }
   else if (str == "|." || (h == 0 && str == ":|"))
     {
       m.add_at_edge (X_AXIS, LEFT, thick, 0);
@@ -130,10 +145,32 @@ Bar_line::compound_barline (Grob *me, string str, Real h,
       m.add_at_edge (X_AXIS, RIGHT, thick, kern);
       m.add_at_edge (X_AXIS, RIGHT, colon, kern);
     }
+  else if (str == ":|.|:")
+    {
+      m.add_at_edge (X_AXIS, LEFT, thick, 0);
+      m.add_at_edge (X_AXIS, LEFT, thin, kern);
+      m.add_at_edge (X_AXIS, LEFT, colon, kern);
+      m.add_at_edge (X_AXIS, RIGHT, thin, kern);
+      m.add_at_edge (X_AXIS, RIGHT, colon, kern);
+
+    }
+  else if (str == ":|.:")
+    {
+      m.add_at_edge (X_AXIS, LEFT, thick, 0);
+      m.add_at_edge (X_AXIS, LEFT, thin, kern);
+      m.add_at_edge (X_AXIS, LEFT, colon, kern);
+      m.add_at_edge (X_AXIS, RIGHT, colon, kern);
+    }
   else if (str == ".|.")
     {
       m.add_at_edge (X_AXIS, LEFT, thick, thinkern);
       m.add_at_edge (X_AXIS, RIGHT, thick, kern);
+    }
+  else if (str == "|.|")
+    {
+      m.add_at_edge (X_AXIS, LEFT, thick, 0);
+      m.add_at_edge (X_AXIS, LEFT, thin, kern);
+      m.add_at_edge (X_AXIS, RIGHT, thin, kern);
     }
   else if (str == "||")
     {
@@ -165,6 +202,8 @@ Bar_line::compound_barline (Grob *me, string str, Real h,
     {
       m = dot;
     }
+
+  m.translate_axis (center, Y_AXIS);
   return m;
 }
 
@@ -295,13 +334,17 @@ ADD_INTERFACE (Bar_line,
 	       "\n"
 	       "Print a special bar symbol.  It replaces the regular bar"
 	       " symbol with a special symbol.  The argument @var{bartype}"
-	       " is a string which specifies the kind of bar to print."
-	       "  Options are @code{:|}, @code{|:}, @code{:|:}, @code{||},"
-	       " @code{|.}, @code{.|}, and @code{.|.}.\n"
+	       " is a string which specifies the kind of bar line to print."
+	       "  Options are @code{:|}, @code{|:}, @code{:|:}, @code{:|.|:},"
+	       " @code{:|.:}, @code{||}, @code{|.}, @code{.|}, @code{.|.},"
+	       " @code{|.|}, @code{:} and @code{dashed}.\n"
 	       "\n"
 	       "These produce, respectively, a right repeat, a left repeat,"
-	       " a double repeat, a double bar, a start bar, an end bar, and"
-	       " a thick double bar.  In addition, there is an option"
+	       " a thick double repeat, a thin-thick-thin double repeat,"
+	       " a thin-thick double repeat, a double bar, a start bar,"
+	       " an end bar, a thick double bar, a thin-thick-thin bar,"
+	       " a dotted bar and a dashed bar."
+	       "  In addition, there is an option"
 	       " @code{||:} which is equivalent to @code{|:} except at line"
 	       " breaks, where it produces a double bar (@code{||}) at the"
 	       " end of the line and a repeat sign (@code{|:}) at the"
@@ -310,7 +353,7 @@ ADD_INTERFACE (Bar_line,
 	       "If @var{bartype} is set to @code{empty} then nothing is"
 	       " printed, but a line break is allowed at that spot.\n"
 	       "\n"
-	       "@code{gap} is used for the gaps in dashed barlines.",
+	       "@code{gap} is used for the gaps in dashed bar lines.",
 
 	       /* properties */
 	       "allow-span-bar "
@@ -324,5 +367,3 @@ ADD_INTERFACE (Bar_line,
 	       "bar-size "
 	       "bar-extent "
 	       );
-
-

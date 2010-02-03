@@ -12,14 +12,7 @@
 
 @include macros.itexi
 
-@iftex
 @afourpaper
-@c don't replace quotes with directed quotes
-@tex
-\gdef\SETtxicodequoteundirected{Foo}
-\gdef\SETtxicodequotebacktick{Bla}
-@end tex
-@end iftex
 
 
 @c don't remove this comment.
@@ -30,6 +23,11 @@
 @omfcategory Applications|Publishing
 @omflanguage English
 @end ignore
+
+@ifnottex
+@node Top
+@top GNU LilyPond --- Learning Manual
+@end ifnottex
 
 
 @ifhtml
@@ -53,7 +51,7 @@ This document is also available as a
 @author The LilyPond development team
 
 
-Copyright @copyright{} 1999--2007 by the authors
+Copyright @copyright{} 1999--2008 by the authors
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -70,7 +68,7 @@ For LilyPond version @version{}
 @end titlepage
 
 @copying
-Copyright @copyright{} 1999--2007 by the authors
+Copyright @copyright{} 1999--2008 by the authors
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -85,7 +83,7 @@ Free Documentation License''.
 @ifnottex
 This file documents GNU LilyPond for beginners.
 
-Copyright 1999--2007 by the authors
+Copyright 1999--2008 by the authors
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -98,10 +96,9 @@ Free Documentation License''.
 @end ifnottex
 
 @ifnottex
-@node Top
-@top GNU LilyPond --- learning manual
-
-This is the learning manual for GNU LilyPond version @version{}.
+This is the Learning Manual (LM) for GNU LilyPond version @version{}.
+For more information about how this fits with the other
+documentation, see @ref{About the documentation}.
 
 @cindex web site
 @cindex URL

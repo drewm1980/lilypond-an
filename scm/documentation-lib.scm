@@ -11,6 +11,7 @@
 	     (srfi srfi-1))
 
 (define-class <texi-node> ()
+  (appendix #:init-value #f #:accessor appendix? #:init-keyword #:appendix)
   (children #:init-value '() #:accessor node-children #:init-keyword #:children)
   (text #:init-value "" #:accessor node-text #:init-keyword #:text)
   (name #:init-value "" #:accessor node-name #:init-keyword #:name)
@@ -21,13 +22,16 @@
    (node-name x)
    (node-desc x)))
 
-(define (dump-node node port level)
+(define* (dump-node node port level)
   (display
    (string-append
     "\n@node "
-    (node-name node)
-    "\n\n"
-    (texi-section-command level) " "
+    (if (= level 0) "Top" (node-name node))
+    "\n"
+    (if (appendix? node)
+        (texi-appendix-section-command level)
+        (texi-section-command level))
+    " "
     (node-name node)
     "\n\n"
     (node-text node)
@@ -59,11 +63,19 @@
   (cdr (assoc level '(
 		      ;; Hmm, texinfo doesn't have ``part''
 		      (0 . "@top")
-		      (1 . "@unnumbered")
-		      (2 . "@unnumberedsec")
-		      (3 . "@unnumberedsubsec")
+		      (1 . "@chapter")
+		      (2 . "@section")
+		      (3 . "@subsection")
 		      (4 . "@unnumberedsubsubsec")
 		      (5 . "@unnumberedsubsubsec")))))
+
+(define (texi-appendix-section-command level)
+  (cdr (assoc level '((0 . "@top")
+		      (1 . "@appendix")
+		      (2 . "@appendixsec")
+		      (3 . "@appendixsubsec")
+		      (4 . "@appendixsubsubsec")
+		      (5 . "@appendixsubsubsec")))))
 
 (define (one-item->texi label-desc-pair)
   "Document one (LABEL . DESC); return empty string if LABEL is empty string."

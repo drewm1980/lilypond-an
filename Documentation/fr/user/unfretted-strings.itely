@@ -1,0 +1,64 @@
+@c -*- coding: utf-8; mode: texinfo; documentlanguage: fr -*-
+@c This file is part of lilypond.tely
+@ignore
+    Translation of GIT committish: bdf8540b74167817eab96ed3d13b35477217f9fe
+
+    When revising a translation, copy the HEAD committish of the
+    version that you are working on.  See TRANSLATION for details.
+@end ignore
+
+@c \version "2.11.61"
+
+@c Translators: Valentin Villenave
+@c Translation checkers: Jean-Charles Malahieude, John Mandereau
+
+@node Unfretted string instruments
+@section Unfretted string instruments
+
+Cette section dispense des informations supplémentaires et utiles à
+l'écriture pour les cordes frottées.
+
+@menu
+* Common notation for unfretted strings::  
+@end menu
+
+@node Common notation for unfretted strings
+@subsection Common notation for unfretted strings
+
+@untranslated
+
+@menu
+* References for unfretted strings::  
+* Bowing indications::          
+* Harmonics::                   
+* Snap (Bartók) pizzicato::     
+@end menu
+
+@node References for unfretted strings
+@unnumberedsubsubsec References for unfretted strings
+
+@untranslated
+
+@node Bowing indications
+@unnumberedsubsubsec Bowing indications
+
+@untranslated
+
+@node Harmonics
+@unnumberedsubsubsec Harmonics
+
+@cindex harmoniques
+
+La plupart des instruments à cordes peuvent produire des harmoniques
+artificiels, lorsque l'instrumentiste effleure simplement la corde pour
+une note donnée.  Le son émis sera un harmonique, que l'on peut indiquer
+par @code{\harmonic}.
+
+@lilypond[verbatim,quote,relative=1]
+<e a\harmonic>2  <c g'\harmonic>
+@end lilypond
+
+@node Snap (Bartók) pizzicato
+@unnumberedsubsubsec Snap (Bartók) pizzicato
+
+@untranslated

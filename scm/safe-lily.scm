@@ -92,6 +92,7 @@
    ly:number->string
    ly:option-usage
    ly:output-def-clone
+   ly:output-def-lookup
    ly:output-def-scope
    ly:output-description
    ly:paper-book?
@@ -100,7 +101,6 @@
    ly:paper-get-font
    ly:paper-get-number
    ly:paper-system?
-   ly:output-def-lookup
    ly:parser-parse-string
    ly:pitch-alteration
    ly:pitch-diff
@@ -112,6 +112,7 @@
    ly:pitch-transpose
    ly:pitch<?
    ly:pitch?
+   ly:position-on-line?
    ly:round-filled-box
    ly:run-translator
    ly:set-option
@@ -119,6 +120,7 @@
    ly:spanner-broken-into
    ly:spanner-bound
    ly:spanner?
+   ly:staff-symbol-line-thickness
    ly:stencil-add
    ly:stencil-aligned-to
    ly:stencil-combine-at-edge

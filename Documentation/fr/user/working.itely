@@ -7,7 +7,7 @@
    version that you are working on.  See TRANSLATION for details.
 @end ignore
 
-@c \version "2.11.38"
+@c \version "2.11.61"
 
 @c Translators: Ludovic Sardain
 @c Translation checkers: Jean-Yves Baudais, Valentin Villenave, John Mandereau, Jean-Charles Malahieude
@@ -21,13 +21,13 @@ ces astuces peuvent vous paraître évidentes, mais vous ne perdrez tout
 de même pas votre temps à lire ce chapitre.
 
 @menu
-* Suggestions for writing LilyPond files::  
+* Suggestions for writing LilyPond input files::
 * When things don't work::      
 * Scores and parts::            
 @end menu
 
-@node Suggestions for writing LilyPond files
-@section Suggestions for writing LilyPond files
+@node Suggestions for writing LilyPond input files
+@section Suggestions for writing LilyPond input files
 
 Maintenant vous êtes prêt à travailler sur de plus gros fichiers
 LilyPond --- des pièces entières, et plus seulement les petits
@@ -80,11 +80,11 @@ de se rappeler quelle version de LilyPond on utilisait quelques
 années auparavant.  L'utilitaire @command{convert-ly} demande que vous
 spécifiiez la version de LilyPond vous utilisiez alors.
 
-@item @strong{Ajoutez des contrôles}: @ruser{Bar check}, @ruser{Octave
-check} et @ruser{Barnumber check}.  Si vous avez ajouté des contrôles de
-loin en loin, et que vous faites une erreur, vous pourrez la retrouver
-plus rapidement.  @qq{De loin en loin}, qu'est-ce à dire ?  Cela
-dépend de la complexité de la musique.  Pour de la musique très
+@item @strong{Ajoutez des contrôles}: @ruser{Octave checks}, et
+@ruser{Bar and bar number checks}.  Si vous avez ajouté des contrôles
+de loin en loin, et que vous faites une erreur, vous pourrez la
+retrouver plus rapidement.  @qq{De loin en loin}, qu'est-ce à dire ?
+Cela dépend de la complexité de la musique.  Pour de la musique très
 simple, peut-être une ou deux fois.  Pour de la musique très complexe,
 peut-être à chaque mesure.
 
@@ -108,8 +108,8 @@ structuré si vous n'y avez pas adjoint de commentaires.
 viennent d'un défaut de parité entre @code{@{} et @code{@}}.
 
 @item @strong{Séparez les affinages de mise en forme} de la musique
-elle-même. Voyez @ruser{Saving typing with identifiers and functions} et
-@ruser{Style sheets}.
+elle-même. Voyez @ref{Saving typing with variables and functions} et
+@ref{Style sheets}.
 
 @end itemize
 
@@ -168,7 +168,7 @@ g4 c'8. e16
 @end example
 
 @item @strong{Séparez les retouches} des définitions de
-musique.  Ce conseil a été vu dans @ruser{General suggestions},
+musique.  Ce conseil a été vu dans @ref{General suggestions},
 mais pour les projets d'importance c'est absolument vital.  Nous
 pouvons avoir besoin de changer la définition de
 @code{fthenp}, mais dans ce cas nous n'aurons besoin de le faire
@@ -208,9 +208,9 @@ Vous comprendrez combien cela peut être utile pour écrire de la
 musique minimaliste :
 
 @lilypond[quote,verbatim,ragged-right]
-fragA = \relative c'' { a4 a8. b16 }
-fragB = \relative c'' { a8. gis16 ees4 }
-violin = \new Staff { \fragA \fragA \fragB \fragA }
+fragmentA = \relative c'' { a4 a8. b16 }
+fragmentB = \relative c'' { a8. gis16 ees4 }
+violin = \new Staff { \fragmentA \fragmentA \fragmentB \fragmentA }
 \score {
   {
     \violin
@@ -285,8 +285,8 @@ padText =
 
 Utiliser les identificateurs est aussi un bon moyen pour vous épargner
 du travail si la syntaxe de LilyPond change un jour --- voir
-@ruser{Updating old files}.  Si vous avez une seule définition, par
-exemple @code{\dolce}, pour tous vos fichiers (voir @ruser{Style
+@ref{Updating old files}.  Si vous avez une seule définition, par
+exemple @code{\dolce}, pour tous vos fichiers (voir @ref{Style
 sheets}), et que la syntaxe change, alors vous n'aurez qu'à mettre à
 jour votre seule définition @code{\dolce}, au lieu de devoir modifier
 chaque fichier @code{.ly}.
@@ -296,14 +296,14 @@ chaque fichier @code{.ly}.
 @subsection Style sheets
 
 La sortie que produit LilyPond peut être largement modifiée --- voir
-@ruser{Tweaking output} pour plus de détails.  Mais que faire si vous
+@ref{Tweaking output} pour plus de détails.  Mais que faire si vous
 avez beaucoup de fichiers auxquels vous souhaitez appliquer vos
 retouches ? Ou si vous souhaitez simplement séparer les retouches de
 la musique elle-même ?  Rien de plus facile.
 
 Prenons un exemple.  Ne vous inquiétez pas si vous ne comprenez pas
 les parties avec tous les @code{#()}.  Celles-ci sont expliquées dans
-@ruser{Advanced tweaks with Scheme}.
+@ref{Advanced tweaks with Scheme}.
 
 @lilypond[quote,verbatim,ragged-right]
 mpdolce = #(make-dynamic-script (markup #:hspace 1 #:translate (cons 5 0)
@@ -324,7 +324,7 @@ tempoMark = #(define-music-function (parser location markp) (string?)
 @end lilypond
 
 Il y a quelques problèmes de chevauchement ; nous allons arranger
-cela en utilisant les techniques de @ruser{Moving objects}.  On peut
+cela en utilisant les techniques de @ref{Moving objects}.  On peut
 aussi faire quelque chose pour les définitions de @code{mpdolce}
 et @code{tempoMark}.  Elles produisent le résultat que nous désirons,
 mais nous pourrions aussi vouloir les utiliser dans une autre pièce.
@@ -645,10 +645,10 @@ problème.
 
 Une autre technique de déboguage très utile est la construction
 @iftex
-de @ruser{Minimal examples}.
+de @ref{Minimal examples}.
 @end iftex
 @ifnottex
-d'@ruser{Minimal examples}.
+d'@ref{Minimal examples}.
 @end ifnottex
 
 
@@ -811,7 +811,7 @@ ce qui équivaut à
 
 Des informations plus détaillées sur la mise en place de conducteurs
 et de parties séparées se trouvent dans le manuel : voir
-@ruser{Orchestral music}.
+@ruser{Writing parts}.
 
 Les variables (@q{propriétés}) réglables sont abordées en détail dans
-@ruser{Changing context properties on the fly}.
+@ruser{The set command}.

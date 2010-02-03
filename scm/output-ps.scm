@@ -26,9 +26,11 @@
 	    dashed-slur
 	    dot
 	    draw-line
+            ellipse
 	    embedded-ps
 	    named-glyph
 	    no-origin
+            oval
 	    placebox
 	    polygon
 	    repeat-slash
@@ -116,6 +118,14 @@
 	  (- x2 x1) (- y2 y1)
 	  x1 y1 thick))
 
+(define (ellipse x-radius y-radius thick fill)
+  (ly:format
+   "~a ~4f ~4f ~4f draw_ellipse"
+   (if fill
+     "true"
+     "false")
+   x-radius y-radius thick))
+
 (define (embedded-ps string)
   string)
 
@@ -189,6 +199,14 @@
 (define (no-origin)
   "")
 
+(define (oval x-radius y-radius thick fill)
+  (ly:format
+   "~a ~4f ~4f ~4f draw_oval"
+   (if fill
+     "true"
+     "false")
+   x-radius y-radius thick))
+
 (define (placebox x y s) 
   (ly:format
 "~4f ~4f moveto
@@ -226,7 +244,7 @@
 	      (list r g b)))
 
 ;; restore color from stack
-(define (resetcolor) "grestore \n")
+(define (resetcolor) "grestore\n")
 
 ;; rotation around given point
 (define (setrotation ang x y)

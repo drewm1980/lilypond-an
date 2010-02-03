@@ -17,6 +17,7 @@
 #include "note-head.hh"
 #include "output-def.hh"
 #include "paper-column.hh"
+#include "pointer-group-interface.hh"
 #include "rhythmic-head.hh"
 #include "spanner.hh"
 #include "staff-symbol-referencer.hh"
@@ -30,8 +31,7 @@
 
 
 bool
-Tie::less (Grob *const &s1,
-	   Grob *const &s2)
+Tie::less (Grob *const &s1, Grob *const &s2)
 {
   return Tie::get_position (s1) < Tie::get_position (s2);
 }
@@ -113,7 +113,11 @@ Tie::get_default_dir (Grob *me)
   Direction d = LEFT;
   do
     {
-      Grob *stem = head (me, d) ? Rhythmic_head::get_stem (head (me, d)) : 0;
+      Grob *one_head = head (me, d);
+      if (!one_head && dynamic_cast<Spanner*> (me)) 
+	one_head = Tie::head (dynamic_cast<Spanner*> (me)->broken_neighbor (d), d);
+      
+      Grob *stem = one_head ? Rhythmic_head::get_stem (one_head) : 0;
       if (stem)
 	stem = Stem::is_invisible (stem) ? 0 : stem;
 
@@ -135,7 +139,7 @@ Tie::get_default_dir (Grob *me)
   else if (int p = get_position (me))
     return Direction (sign (p));
   
-  return UP;
+  return to_dir (me->get_property("neutral-direction"));
 }
 
 
@@ -204,7 +208,6 @@ Tie::get_control_points (Grob *me,
   return controls;
 }
 
-
 MAKE_SCHEME_CALLBACK (Tie, calc_control_points, 1);
 SCM
 Tie::calc_control_points (SCM smob)
@@ -214,10 +217,16 @@ Tie::calc_control_points (SCM smob)
   Grob *yparent = me->get_parent (Y_AXIS);
   if ((Tie_column::has_interface (yparent)
        || Semi_tie_column::has_interface (yparent)) 
-      && unsmob_grob_array (yparent->get_object ("ties"))
-      //      && unsmob_grob_array (yparent->get_object ("ties"))->size () > 1
-      )
+      && unsmob_grob_array (yparent->get_object ("ties")))
     {
+      extract_grob_set (yparent, "ties", ties);
+      if (me->original() && ties.size() == 1
+	  && !to_dir (me->get_property_data ("direction")))
+	{
+	  assert (ties[0] == me);
+	  set_grob_direction (me, Tie::get_default_dir (me));
+	    
+	}      
       /* trigger positioning. */
       (void) yparent->get_property ("positioning-done");
     }
@@ -310,10 +319,11 @@ ADD_INTERFACE (Tie,
 	       "dash-period "
 	       "details "
 	       "direction "
-	       "separation-item "
 	       "head-direction "
 	       "line-thickness "
+	       "neutral-direction "
 	       "quant-score "
+	       "separation-item "
 	       "staff-position "
 	       "thickness "
 	       );

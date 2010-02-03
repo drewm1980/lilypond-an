@@ -1,4 +1,4 @@
-\version "2.10"
+\version "2.10.0"
 \include "english.ly"
 % This shows how to use internal-ledger-lines and staff-line-layout
 % to produce alternative chromatic notation.

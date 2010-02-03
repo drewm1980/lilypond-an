@@ -22,6 +22,8 @@
   \consists "Separating_line_group_engraver"
   \consists "Font_size_engraver"
   \consists "Instrument_name_engraver"
+
+  predefinedDiagramTable = #fretboard-table
 }
 
 \context {
@@ -104,7 +106,7 @@
 
 \context {
   \type "Engraver_group"
-  \name "InnerChoirStaff"
+  \name "ChoirStaff"
   \consists "System_start_delimiter_engraver"
   systemStartDelimiter = #'SystemStartBracket
   vocalName = #'()
@@ -117,19 +119,11 @@
   \accepts "PianoStaff"
   \accepts "Lyrics"
   \accepts "ChordNames"
+  \accepts "ChoirStaff"
+  \accepts "StaffGroup"
   \defaultchild "Staff"
-}
-
-\context {
-  \InnerChoirStaff
-  \name ChoirStaff
-  
-  \defaultchild "Staff"
-  \accepts "InnerChoirStaff"
-  \accepts "InnerStaffGroup"
   \description "Identical to @code{StaffGroup} except that the
 contained staves are not connected vertically."
-
 }
 
 \context{
@@ -222,7 +216,9 @@ multiple voices on the same staff."
   \consists "Part_combine_engraver"
 
   \consists "Text_engraver"
-  \consists "Dynamic_engraver"
+  \consists "New_dynamic_engraver"
+  \consists "Dynamic_align_engraver"
+%  \consists "Dynamic_engraver"
   \consists "Fingering_engraver"
   \consists "Bend_engraver"
 
@@ -249,6 +245,7 @@ multiple voices on the same staff."
   fontSize = #-4
   \override Stem #'length-fraction = #(magstep -4)
   \override Beam #'length-fraction = #(magstep -4)
+  \override Beam #'thickness = #0.35
 }
 
 \context {
@@ -298,9 +295,8 @@ contained staves are connected vertically."
   \name "PianoStaff"
   \alias "GrandStaff"
 
-  \description "Just like @code{GrandStaff} but with a forced
-distance between the staves, so cross staff beaming and slurring
-can be used."
+  \description "Just like @code{GrandStaff} but with support for
+instrument names at the start of each system."
 
   \consists "Instrument_name_engraver"
   
@@ -310,7 +306,7 @@ can be used."
 
 \context {
   \type "Engraver_group"
-  \name InnerStaffGroup
+  \name "StaffGroup"
 
   \consists "Span_bar_engraver"
   \consists "Span_arpeggio_engraver"
@@ -328,23 +324,15 @@ can be used."
   \accepts "TabStaff"	
   \accepts "Lyrics"
   \accepts "ChordNames"
-}
-
-\context {
-  \InnerStaffGroup
-  \name StaffGroup
+  \accepts "FiguredBass"
+  \accepts "ChoirStaff"
+  \accepts "StaffGroup"
   
   \description "Groups staves while adding a bracket on the left
 side, grouping the staves together.  The bar lines of the contained
 staves are connected vertically.  @code{StaffGroup} only consists of
 a collection of staves, with a bracket in front and spanning bar lines."
-  
-  \accepts "InnerChoirStaff"
-  \accepts "ChoirStaff"
-  \accepts "InnerStaffGroup"
-  \accepts "FiguredBass"
 }
-
 
 \context{
   \type "Engraver_group"
@@ -505,14 +493,20 @@ automatically when an output definition (a @code{\score} or
   middleCClefPosition = #-6
   middleCPosition = #-6
   firstClef = ##t
+
+  crescendoSpanner = #'hairpin
+  decrescendoSpanner = #'hairpin
   
   defaultBarType = #"|"
+  doubleRepeatType = #":|:"
   barNumberVisibility = #first-bar-number-invisible
   automaticBars = ##t
   
   explicitClefVisibility = #all-visible
   explicitKeySignatureVisibility = #all-visible
   implicitTimeSignatureVisibility = #end-of-line-invisible
+  
+  repeatCountVisibility = #all-repeat-counts-visible
   
   autoBeamSettings = #default-auto-beam-settings
   autoBeaming = ##t
@@ -542,7 +536,7 @@ automatically when an output definition (a @code{\score} or
   subdivideBeams = ##f
   allowBeamBreak = ##f
   extraNatural = ##t
-  autoAccidentals = #'(Staff (same-octave . 0))
+  autoAccidentals = #`(Staff ,(make-accidental-rule 'same-octave 0))
   autoCautionaries = #'()  
 
   printKeyCancellation = ##t
@@ -604,10 +598,12 @@ automatically when an output definition (a @code{\score} or
   keepAliveInterfaces = #'(
     rhythmic-grob-interface
     lyric-interface
+    percent-repeat-item-interface
+    percent-repeat-interface
 
     ;; need this, as stanza numbers are items, and appear only once. 
     stanza-number-interface
-    percent-repeat-interface)
+  )
   quotedEventTypes = #'(
     note-event
     rest-event
@@ -617,8 +613,6 @@ automatically when an output definition (a @code{\score} or
   instrumentTransposition = #(ly:make-pitch 0 0 0)
 
   verticallySpacedContexts = #'(Staff)
-
-  \override Voice #'hairpinToBarline = ##t 
   
   timing = ##t
 }
@@ -711,15 +705,15 @@ context."
   clefPosition = #0
 }
 
-%% TODO: Gregorian Chant contexts should be moved to gregorian-init.ly,
+%% TODO: Gregorian Chant contexts should be moved to gregorian.ly,
 %% but this does not work (is this a bug or intended behaviour?):
 %%
 %% If I try to do so, I get "error: unknown escaped string:
 %% `\VaticanaStaff'" in params-init.ly.  If I also move
 %% "\context { \Vaticana*Context }" from params-init.ly to the end
-%% of gregorian-init.ly, then I get "error: parse error, unexpected
+%% of gregorian.ly, then I get "error: parse error, unexpected
 %% TRANSLATOR: \context { \VaticanaStaff }" in
-%% gregorian-init.ly. --jr
+%% gregorian.ly. --jr
 
 \context {
   \Voice
@@ -900,7 +894,7 @@ accommodated for typesetting a piece in mensural style."
   %% Accidentals are valid only once (same as
   %% #(set-accidental-style 'forget))
   extraNatural = ##f
-  autoAccidentals = #'(Staff (same-octave . -1))
+  autoAccidentals = #`(Staff ,(make-accidental-rule 'same-octave -1))
   autoCautionaries = #'()  
   printKeyCancellation = ##f
 }

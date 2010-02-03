@@ -1,4 +1,4 @@
-\version "2.10.0"
+\version "2.11.51"
 
 \header{
   texidoc="
@@ -9,7 +9,7 @@ finalis, the latter three looking similar to bar glyphs.
 
 " }
 
-\include "gregorian-init.ly"
+\include "gregorian.ly"
 
 \context VaticanaStaff {
   \relative c' {

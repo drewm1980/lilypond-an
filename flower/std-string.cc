@@ -58,6 +58,12 @@ to_string (unsigned u)
 }
 
 string
+to_string (I64 b, char const *format)
+{
+  return String_convert::i64_string (b, format);
+}
+
+string
 to_string (char const *format, ...)
 {
   va_list args;
@@ -71,20 +77,20 @@ to_string (char const *format, ...)
   TODO: this O(n^2) in #occurences of find, due to repeated copying.
  */
 string &
-replace_all (string &str, string find, string replace)
+replace_all (string *str, string const &find, string const &replace)
 {
   ssize len = find.length ();
-  for (ssize i = str.find (find); i != NPOS; i = str.find (find, i + len))
-    str = str.replace (i, len, replace);
-  return str;
+  for (ssize i = str->find (find); i != NPOS; i = str->find (find, i + len))
+    *str = str->replace (i, len, replace);
+  return *str;
 }
 
 string &
-replace_all (string &str, char find, char replace)
+replace_all (string *str, char find, char replace)
 {
-  for (ssize i = str.find (find); i != NPOS; i = str.find (find, i + 1))
-    str[i] = replace;
-  return str;
+  for (ssize i = str->find (find); i != NPOS; i = str->find (find, i + 1))
+    (*str)[i] = replace;
+  return *str;
 }
 
 char *

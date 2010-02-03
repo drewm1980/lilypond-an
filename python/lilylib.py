@@ -18,24 +18,6 @@ import optparse
 # Users of python modules should include this snippet
 # and customize variables below.
 
-# We'll suffer this path init stuff as long as we don't install our
-# python packages in <prefix>/lib/pythonx.y (and don't kludge around
-# it as we do with teTeX on Red Hat Linux: set some environment var
-# (PYTHONPATH) in profile)
-
-# If set, LILYPOND_DATADIR must take prevalence
-# if datadir is not set, we're doing a build and LILYPOND_DATADIR
-
-datadir = '@local_lilypond_datadir@'
-if not os.path.isdir (datadir):
-    datadir = '@lilypond_datadir@'
-if os.environ.has_key ('LILYPOND_DATADIR') :
-    datadir = os.environ['LILYPOND_DATADIR']
-    while datadir[-1] == os.sep:
-	datadir= datadir[:-1]
-
-sys.path.insert (0, os.path.join (datadir, 'python'))
-
 
 # Python 2.5 only accepts strings with proper Python internal encoding
 # (i.e. ASCII or Unicode) when writing to stdout/stderr, so we must
@@ -67,6 +49,14 @@ def stderr_write (s):
     encoded_write (sys.stderr, s)
 
 progress = stderr_write
+
+def require_python_version ():
+    if sys.hexversion < 0x02040000:
+        stderr_write ("Python 2.4 or newer is required to run this program.\n\
+Please upgrade Python from http://python.org/download/, and if you use MacOS X,\n\
+please read 'Setup for MacOS X' in Application Usage.")
+        os.system ("open http://python.org/download/")
+        sys.exit (2)
 
 # Modified version of the commands.mkarg(x), which always uses 
 # double quotes (since Windows can't handle the single quotes:

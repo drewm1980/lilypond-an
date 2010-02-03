@@ -1,12 +1,12 @@
 @c -*- coding: utf-8; mode: texinfo; -*-
 @ignore
-    Translation of GIT committish: f7420240e4ce1fe2217646482a47d00f566af52c
+    Translation of GIT committish: 33ba8d40c3493011a4b39ab8b1369701f8013bd6
 
     When revising a translation, copy the HEAD committish of the
     version that you are working on.  See TRANSLATION for details.
 @end ignore
 
-@c \version "2.11.38"
+@c \version "2.11.61"
 
 @c Translators: Valentin Villenave
 @c Translation checkers: Jean-Charles Malahieude, John Mandereau
@@ -14,6 +14,8 @@
 
 @node Expressive marks
 @section Expressive marks
+
+@lilypondfile[quote]{expressive-headword.ly}
 
 @menu
 * Attached to notes::           
@@ -27,16 +29,17 @@
 
 
 @menu
-* Articulations::               
+* Articulations and ornamentations::               
 * Dynamics::                    
+* New dynamic marks::           
 @end menu
 
-@node Articulations
-@unnumberedsubsubsec Articulations
+@node Articulations and ornamentations
+@unnumberedsubsubsec Articulations and ornamentations
 
 @cindex articulations
 @cindex symboles d'ornementation
-@cindex ornementations, symboles
+@cindex ornementation, symboles
 
 
 Différents symboles peuvent être ajoutés au-dessus ou au-dessous des
@@ -101,9 +104,9 @@ Voici la liste exhaustive des symboles :
 Les symboles s'ordonnent verticalement suivant la propriété
 @code{script-priority}. Plus sa valeur numérique est faible, plus le
 symbole sera proche de la note. Dans l'exemple suivant, l'objet
-@internalsref{TextScript} --- le dièse --- a d'abord la propriété la
+@rinternals{TextScript} --- le dièse --- a d'abord la propriété la
 plus basse, et il est donc placé plus près de la note ; ensuite c'est
-l'objet @internalsref{Script} qui a la propriété la plus basse, et il se
+l'objet @rinternals{Script} qui a la propriété la plus basse, et il se
 place alors sous le dièse.  Lorsque deux objets ont la même priorité,
 c'est l'ordre dans lequel ils sont indiqués qui détermine lequel sera
 placé en premier.
@@ -119,7 +122,7 @@ a4^\prall^\markup { \sharp }
 
 @seealso
 
-Référence du programme : @internalsref{Script}.
+Référence du programme : @rinternals{Script}.
 
 
 @knownissues
@@ -187,10 +190,7 @@ barre de mesure qui la précède.  Ce comportement peut être annulé
 en assignant @emph{faux} (lettre @q{f}) à la propriété
 @code{hairpinToBarline} :
 
-@lilypond[quote,ragged-right,fragment,verbatim,relative=2]
-\set hairpinToBarline = ##f
-c4\< c2. c4\!
-@end lilypond
+@c TODO: Add link to new snippet for #'to-barline
 
 On peut avoir recours à l'indication @code{\espressivo} pour indiquer un
 crescendo puis un decrescendo sur une seule note.
@@ -202,8 +202,8 @@ c2 b4 a g1\espressivo
 Cependant, ces deux indications graphiques peuvent se trouver très
 comprimées horizontalement.  Pour les rallonger, on peut modifier la
 propriété @code{minimum-length} de
-@code{Voice.Hairpin} --- @internalsref{Voice}
-étant le contexte, et @internalsref{Hairpin} l'objet affecté. Par
+@code{Voice.Hairpin} --- @rinternals{Voice}
+étant le contexte, et @rinternals{Hairpin} l'objet affecté. Par
 exemple :
 
 @example
@@ -232,13 +232,13 @@ Au lieu d'une notation graphique des crescendos, on peut utiliser
 une notation textuelle.
 
 @lilypond[quote,ragged-right,fragment,relative=2,verbatim]
-\setTextCresc
+\crescTextCresc
 c\< d e f\!
-\setHairpinCresc
+\crescHairpin
 e\> d c b\!
-\setTextDecresc
+\dimTextDecresc
 c\> d e f\!
-\setTextDim
+\dimTextDim
 e\> d c b\!
 @end lilypond
 
@@ -246,7 +246,7 @@ On peut même définir ses propres indications textuelles :
 
 @lilypond[quote,ragged-right,fragment,relative=1,verbatim]
 \set crescendoText = \markup { \italic "cresc. poco" }
-\set crescendoSpanner = #'dashed-line
+\set crescendoSpanner = #'text
 a'2\< a a a\!\mf
 @end lilypond
 
@@ -254,7 +254,7 @@ Pour créer des indications de nuances qui restent alignées
 avec les nuances habituelles, voir @ref{New dynamic marks}.
 
 Le positionnement vertical des nuances est géré par le
-@internalsref{DynamicLineSpanner}.
+@rinternals{DynamicLineSpanner}.
 
 
 @commonprop
@@ -301,153 +301,61 @@ leur étendue.  On peut empêcher l'impression de ces pointillés avec :
 
 @seealso
 
-Référence du programme : @internalsref{DynamicText}, @internalsref{Hairpin}.
+Référence du programme : @rinternals{DynamicText}, @rinternals{Hairpin}.
 
 Le placement vertical de ces éléments graphiques est géré par le
-@internalsref{DynamicLineSpanner}.
+@rinternals{DynamicLineSpanner}.
+
+
+@node New dynamic marks
+@unnumberedsubsubsec New dynamic marks
+
+Grâce à la commande @code{make-dynamic-script}, vous pouvez créer de
+nouvelles marques textuelles de nuances que vous combinerez
+éventuellement avec les signes de nuances.
+Notez bien que la police des nuances en contient que les caractères
+@code{f,m,p,r,s} and @code{z}. 
+
+Certains composants, tels que les marques de nuances, possèdent des
+propriétés particulières et prédéfinies quant à leur police.  Lorsque
+vous créez du texte en pareille situation, nous vous recommandons
+d'utiliser @code{normal-text} pour annuler ces propriétés.  Voir 
+@ref{Text markup commands} pour plus de détails.
+
+@cindex make-dynamic-script
+
+@lilypond[quote,verbatim,ragged-right]
+sfzp = #(make-dynamic-script "sfzp")
+\relative c' {
+  c4 c c\sfzp c
+}
+@end lilypond
+
+@cindex Nuances éditoriales
+@cindex Nuances, entre parenthèses
+
+Vous pouvez aussi encadrer les nuances entre parenthèses ou entre
+crochets.  Ceci est souvent utilisé pour ajouter des nuances propres à
+une édition donnée.
+
+@lilypond[quote,verbatim,ragged-right]
+rndf = \markup{ \center-align {\line { \bold{\italic (}
+  \dynamic f \bold{\italic )} }} }
+boxf = \markup{ \bracket { \dynamic f } }
+{ c'1_\rndf c'1_\boxf }
+@end lilypond
+
 
 
 @node Curves
 @subsection Curves
 
 @menu
-* Ties::                        
 * Slurs::                       
 * Phrasing slurs::              
-* Laissez vibrer ties::         
 * Breath marks::                
 * Falls and doits::             
 @end menu
-
-@node Ties
-@unnumberedsubsubsec Ties
-
-@cindex liaison de prolongation
-@funindex ~
-
-Une liaison de tenue (ou de prolongation) relie deux notes adjacentes de
-même hauteur.  Dans les faits, elle prolonge la durée d'une note, et ne
-doit donc pas être confondue avec les liaisons d'articulation ou de
-phrasé.  Une liaison de tenue est indiquée au moyen d'un tilde @samp{~}.
-
-@lilypond[quote,ragged-right,fragment,verbatim]
-e' ~ e' <c' e' g'> ~ <c' e' g'>
-@end lilypond
-
-
-Quand une liaison de tenue se trouve entre deux accords, toutes les
-notes de même hauteur entre ces deux accords sont reliées.  S'il n'y en
-a aucune, aucune liaison n'est créée.  Il est également possible de lier
-partiellement deux accords, en mettant les liaisons à l'intérieur des
-accords.
-
-@lilypond[quote,ragged-right,fragment,verbatim,relative=1]
-<c~ e g~ b> <c e g b>
-@end lilypond
-
-
-Une liaison de tenue est un moyen parmi d'autres pour prolonger la durée
-d'une note, tout comme les points.  L'exemple suivant montre deux
-manières de matérialiser exactement la même idée :
-
-
-@lilypond[quote,fragment,ragged-right]
-\time 3/4 c'2. c'2 ~ c'4
-@end lilypond
-
-@noindent
-Les liaisons de tenues sont utilisées soit lorsque la note dépasse de la
-mesure, soit quand les points ne suffisent pas à donner la bonne durée.
-Lorsque l'on utilise ces liaisons, les valeurs rythmiques les plus
-longues doivent s'aligner sur les subidivisions de la mesure, comme ici :
-
-@c KEEP LY
-@lilypond[fragment,quote,ragged-right]
-\relative {
-  r8^"oui" c8 ~ c2 r4 | r8^"non" c2 ~ c8 r4
-}
-@end lilypond
-
-
-Lorsque l'on doit lier de nombreuses notes sur plusieurs mesures, il
-devient plus facile d'avoir recours à la division automatique des notes
---- voir @ref{Automatic note splitting}.  Ce procédé divise
-automatiquement les notes trop longues, et les lie par-delà les barres
-de mesure.
-
-@funindex \repeatTie
-
-Lorsqu'une mesure de seconde fois après une reprise commence sur une
-note liée, la liaison doit être répétée. C'est à cela que sert la
-commande @code{\repeatTie} :
-
-@lilypond[fragment,quote,ragged-right,relative=2]
-r <c e g>\repeatTie
-@end lilypond
-
-@cindex liaison de prolongation, répétition
-@cindex reprises avec alternatives et liaisons de prolongation
-
-@commonprop
-
-Les liaisons de tenue servent parfois à rendre un accord arpégé. Dans ce
-cas, les notes liées ne sont pas toutes consécutives. Il faut alors
-assigner à la propriété @code{tieWaitForNote} la valeur @emph{vrai}
-(@q{t} pour @q{true}).  Cette même méthode peut servir, par exemple, à
-lier un trémolo à un accord.
-
-@lilypond[fragment,verbatim,relative=1,ragged-right,quote]
-\set tieWaitForNote = ##t
-\grace { c16[~ e~ g]~ } <c, e g>2
-\repeat tremolo 8 { c32~ c'~ } <c c,>1
-e8~ c~ a~ f~ <e' c a f>2
-@end lilypond
-
-Il est possible de graver manuellement les liaisons de tenue, en
-modifiant la propriété @code{tie-configuration}.  Pour chaque paire, le
-premier nombre indique la distance à la portée, en espaces de portée, et
-le second la direction (1 pour haut, @minus{}1 pour bas).
-
-@lilypond[fragment,verbatim,relative=1,ragged-right,quote]
-<c e g>2~ <c e g> |
-\override TieColumn #'tie-configuration =
-  #'((0.0 . 1) (-2.0 . 1) (-4.0 . 1))
-<c e g>~ <c e g> |
-@end lilypond
-
-
-@predefined
-
-@funindex \tieUp
-@code{\tieUp},
-@funindex \tieDown
-@code{\tieDown},
-@funindex \tieNeutral
-@code{\tieNeutral},
-@funindex \tieDotted
-@code{\tieDotted},
-@funindex \tieDashed
-@code{\tieDashed},
-@funindex \tieSolid
-@code{\tieSolid}.
-
-
-@seealso
-
-Dans ce même manuel : @ref{Automatic note splitting}.
-
-Référence du programme : @internalsref{Tie}.
-
-
-@knownissues
-
-Un changement de portée, lorsqu'une liaison de tenue est active, ne
-peut produire une liaison oblique.
-
-Le changement de clé ou d'octave pendant une liaison de tenue produit un
-résultat indéfini.  Dans ces cas-là, il est préférable d'utiliser un
-legato.
-
 
 @node Slurs
 @unnumberedsubsubsec Slurs
@@ -513,7 +421,7 @@ lier des accords. Dans LilyPond, il faut pour cela assigner
 
 @seealso
 
-Référence du programme : @internalsref{Slur}.
+Référence du programme : @rinternals{Slur}.
 
 
 @node Phrasing slurs
@@ -552,32 +460,7 @@ Il n'est pas possible d'avoir plusieurs liaisons de phrasé en même temps.
 
 @seealso
 
-Référence du programme : @internalsref{PhrasingSlur}.
-
-
-@node Laissez vibrer ties
-@unnumberedsubsubsec Laissez vibrer ties
-
-@cindex laissez vibrer
-@cindex liaison, laissez vibrer
-
-Les liaisons @qq{Laissez vibrer} (L.V.) sont utilisées pour le piano, la
-harpe, et certains instruments de percussion.  Elles indiquent à
-l'instrumentiste de laisser sonner la note ou l'accord au lieu de
-l'étouffer.  Cet effet s'obtient avec la commande @code{\laissezVibrer}.
-
-@lilypond[fragment,ragged-right,verbatim,relative=1]
-<c f g>\laissezVibrer
-@end lilypond
-
-@seealso
-
-Référence du programme :
-@internalsref{LaissezVibrerTie}
-@internalsref{LaissezVibrerTieColumn}
-
-D'autres exemples :
-@lsr{connecting,laissez-vibrer-ties.ly}
+Référence du programme : @rinternals{PhrasingSlur}.
 
 
 @node Breath marks
@@ -606,9 +489,9 @@ d4
 
 @seealso
 
-Référence du programme : @internalsref{BreathingSign}.
+Référence du programme : @rinternals{BreathingSign}.
 
-Exemples : @lsr{expressive,breathing-sign.ly}
+Exemples : @rlsr{Winds}.
 
 
 @node Falls and doits
@@ -631,7 +514,6 @@ c4-\bendAfter #-3
 * Glissando::                   
 * Arpeggio::                    
 * Trills::                      
-* Analysis brackets::           
 @end menu
 
 @node Glissando
@@ -666,9 +548,9 @@ I = \once \override NoteColumn #'ignore-collision = ##t
 
 @seealso
 
-Référence du programme : @internalsref{Glissando}.
+Référence du programme : @rinternals{Glissando}.
 
-D'autres exemples : @lsr{expressive,glissando.ly}, @lsr{expressive,line-styles.ly}.
+Exemples : @rlsr{Expressive marks}.
 
 
 @knownissues
@@ -707,9 +589,9 @@ de la vaguelette :
 
 @lilypond[quote,ragged-right,fragment,relative=1,verbatim]
 \new Voice {
-  \arpeggioUp
+  \arpeggioArrowUp
   <c e g c>\arpeggio
-  \arpeggioDown
+  \arpeggioArrowDown
   <c e g c>\arpeggio
 }
 @end lilypond
@@ -720,7 +602,7 @@ de la vaguelette :
 Quand un arpège couvre plusieurs portées, il est possible d'indiquer
 l'arpège sur chacune des portées, puis de relier la ligne de vaguelettes
 en assignant @emph{vrai} à la propriété @code{connectArpeggios}, par
-exemple dans le contexte @internalsref{PianoStaff} :
+exemple dans le contexte @rinternals{PianoStaff} :
 
 @lilypond[quote,ragged-right,fragment,relative=1,verbatim]
 \new PianoStaff <<
@@ -734,12 +616,12 @@ exemple dans le contexte @internalsref{PianoStaff} :
 @predefined
 
 @code{\arpeggio},
-@funindex \arpeggioUp
-@code{\arpeggioUp},
-@funindex \arpeggioDown
-@code{\arpeggioDown},
-@funindex \arpeggioNeutral
-@code{\arpeggioNeutral},
+@funindex \arpeggioArrowUp
+@code{\arpeggioArrowUp},
+@funindex \arpeggioArrowDown
+@code{\arpeggioArrowDown},
+@funindex \arpeggioNormal
+@code{\arpeggioNormal},
 @funindex \arpeggioBracket
 @code{\arpeggioBracket}.
 
@@ -748,13 +630,13 @@ exemple dans le contexte @internalsref{PianoStaff} :
 
 Dans ce même manuel : @ref{Ties}, pour noter explicitement des arpèges.
 
-Référence du programme : @internalsref{Arpeggio}.
+Référence du programme : @rinternals{Arpeggio}.
 
 
 @knownissues
 
 Il est impossible de mêler au même instant, dans un contexte
-@internalsref{PianoStaff}, des lignes d'arpèges connectées et d'autres
+@rinternals{PianoStaff}, des lignes d'arpèges connectées et d'autres
 non connectées.
 
 
@@ -762,7 +644,7 @@ non connectées.
 @unnumberedsubsubsec Trills
 
 Les trilles brefs s'indiquent comme n'importe quelle ponctuation :
-voir @ref{Articulations}.
+voir @ref{Articulations and ornamentations}.
 
 
 Les trilles plus longs sont délimités par @code{\startTrillSpan} et
@@ -800,39 +682,6 @@ sera imprimée comme une tête de note noire entre parenthèses.
 
 @seealso
 
-Référence du programme : @internalsref{TrillSpanner}.
-
-
-@node Analysis brackets
-@unnumberedsubsubsec Analysis brackets
-@cindex crochets
-@cindex crochets de phrasé
-@cindex analyse musicologique
-@cindex crochet de regroupement de notes
-
-On utilise des crochets en analyse musicale, pour indiquer la
-structure d'une pièce.  LilyPond permet d'utiliser une forme
-simplifiée de crochets horizontaux imbriqués, dans la mesure où le
-contexte @internalsref{Staff} comporte le graveur
-@internalsref{Horizontal_bracket_engraver}.  Un crochet s'ouvre avec
-@code{\startGroup}, et se ferme avec @code{\stopGroup}.
-
-@lilypond[quote,ragged-right,verbatim]
-\score {
-  \relative c'' {
-    c4\startGroup\startGroup
-    c4\stopGroup
-    c4\startGroup
-    c4\stopGroup\stopGroup
-  }
-  \layout {
-    \context {
-      \Staff \consists "Horizontal_bracket_engraver"
-}}}
-@end lilypond
-
-@seealso
-
-Référence du programme : @internalsref{HorizontalBracket}.
+Référence du programme : @rinternals{TrillSpanner}.
 
 

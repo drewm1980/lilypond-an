@@ -203,21 +203,26 @@ centered, X==1 is at the right, X == -1 is at the left."
 (define-public (first-bar-number-invisible barnum) (> barnum 1))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; percent repeat counters
+
+(define-public ((every-nth-repeat-count-visible n) count context) (= 0 (modulo count n)))
+
+(define-public (all-repeat-counts-visible count context) #t)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; break visibility
 
-(define-public begin-of-line-visible
-  #(#f #f #t))
-(define-public end-of-line-visible
-  #(#t #f #f))
-(define-public end-of-line-invisible
-  #(#f #t #t))
+(define-public all-visible             #(#t #t #t))
+(define-public begin-of-line-invisible #(#t #t #f))
+(define-public center-invisible        #(#t #f #t))
+(define-public end-of-line-invisible   #(#f #t #t))
+(define-public begin-of-line-visible   #(#f #f #t))
+(define-public center-visible          #(#f #t #f))
+(define-public end-of-line-visible     #(#t #f #f))
+(define-public all-invisible           #(#f #f #f))
+
 (define-public spanbar-begin-of-line-invisible
   #(#t #f #f))
-(define-public all-visible #(#t #t #t))
-(define-public all-invisible #(#f #f #f))
-(define-public begin-of-line-invisible
-  #(#t #t #f))
-(define-public center-invisible #(#t #f #t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Bar lines.
@@ -226,6 +231,8 @@ centered, X==1 is at the right, X == -1 is at the left."
 ;; How should a  bar line behave at a break? 
 (define bar-glyph-alist
   '((":|:" . (":|" . "|:"))
+    (":|.|:" . (":|" . "|:"))
+    (":|.:" . (":|" . "|:"))
     ("||:" . ("||" . "|:"))
     ("dashed" . ("dashed" . '())) 
     ("|" . ("|" . ()))
@@ -239,6 +246,7 @@ centered, X==1 is at the right, X == -1 is at the left."
     (":|" . (":|" . ()))
     ("||" . ("||" . ()))
     (".|." . (".|." . ()))
+    ("|.|" . ("|.|" . ()))
     ("" . ("" . ""))
     (":" . (":" . ""))
     ("." . ("." . ()))
@@ -650,40 +658,11 @@ centered, X==1 is at the right, X == -1 is at the left."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; fret boards
 
-(define (string-frets->description string-frets string-count)
-  (let*
-      ((desc (list->vector
-	      (map (lambda (x) (list 'mute  (1+ x)))
-		   (iota string-count)))))
-       
-       (for-each (lambda (sf)
-		   (let*
-		       ((string (car sf))
-			(fret (cadr sf))
-			(finger (caddr sf)))
-
-		     
-		     (vector-set! desc (1- string)
-				  (if (= 0 fret)
-				      (list 'open string)
-				      (if finger
-					  (list 'place-fret string fret finger) 
-					  (list 'place-fret string fret))
-					  
-
-				      ))
-		     ))
-		 string-frets)
-
-       (vector->list desc)))
-
 (define-public (fret-board::calc-stencil grob)
-  (let* ((string-frets (ly:grob-property grob 'string-fret-finger-combinations))
-	 (string-count (ly:grob-property grob 'string-count)))
-    
-    (grob-interpret-markup grob
-			   (make-fret-diagram-verbose-markup
-			    (string-frets->description string-frets string-count)))))
+    (grob-interpret-markup 
+      grob
+      (make-fret-diagram-verbose-markup
+        (ly:grob-property grob 'dot-placement-list))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; scripts

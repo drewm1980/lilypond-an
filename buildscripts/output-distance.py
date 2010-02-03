@@ -611,8 +611,8 @@ class SignatureFileLink (FileLink):
                 outfile = (dest_dir + '/' + f).replace ('.eps', '.png')
                 data_option = ''
                 if options.local_data_dir:
-                    data_option = ('-slilypond-datadir=%s/share/lilypond/current '
-                                   % os.path.split(infile)[0])
+                    data_option = ('-slilypond-datadir=%s/../share/lilypond/current '
+                                   % os.path.dirname(infile))
                 
                 mkdir (os.path.split (outfile)[0])
                 cmd = ('gs -sDEVICE=png16m -dGraphicsAlphaBits=4 -dTextAlphaBits=4 '
@@ -773,7 +773,7 @@ def paired_files (dir1, dir2, pattern):
         
     pairs = []
     missing = []
-    for f in files[0].keys ():
+    for f in files[0]:
         try:
             files[1].pop (f)
             pairs.append (f)

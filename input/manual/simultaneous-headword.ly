@@ -1,4 +1,4 @@
-\version "2.11.38"
+\version "2.11.65"
 \include "english.ly"
 #(set-global-staff-size 15)
 \paper{
@@ -6,7 +6,14 @@
   line-width=17\cm
   indent=0\cm
 }
- 
+
+\layout {
+  \context { \Score
+    \override PaperColumn #'keep-inside-line = ##t
+    \override NonMusicalPaperColumn #'keep-inside-line = ##t
+  }
+}
+
 % NR 1.5 Simultaneous notes
 
 % L. v. Beethoven, Op. 111
@@ -17,12 +24,19 @@
 \layout {
    \context {
       \Score
-      \override SpacingSpanner #'base-shortest-duration = 
-         #(ly:make-moment 1 18) 
+      \override SpacingSpanner #'base-shortest-duration =
+         #(ly:make-moment 1 18)
       \override NonMusicalPaperColumn #'line-break-system-details =
          #'((alignment-offsets . (0 -12)))
    }
 }
+
+trillflat =
+  \once \override TrillSpanner #'(bound-details left text) =
+    #(markup #:translate-scaled '(-0.05 . -1)
+             #:concat (#:musicglyph "scripts.trill"
+                       #:translate '(-0.5 . 1.9) #:fontsize -7 #:flat))
+
 
 \new PianoStaff <<
 
@@ -71,7 +85,9 @@
          af''8. ]
 
          |
+         \break
 
+         \trillflat
          af''4. \startTrillSpan
          ~
          af''8.
@@ -103,9 +119,9 @@
 
          \key ef \major
          c'''8. [
-         cs'''8. \f ] \stopTrillSpan 
+         cs'''8. \f ] \stopTrillSpan
          r8.
-         
+
       }
 
       % RH voice 2
@@ -127,6 +143,7 @@
          |
 
          d''8. \stopTrillSpan
+         \trillflat
          d''4. \startTrillSpan
          ~
 
@@ -153,6 +170,7 @@
 
          |
 
+         \trillflat
          d''4. \startTrillSpan
          ~
          d''8.

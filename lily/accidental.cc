@@ -109,7 +109,7 @@ Accidental_interface::accurate_boxes (Grob *me, Grob **common)
 	    really close.
 	  */
 	  Direction bulb_dir =
-	    glyph_name=="accidentals.mirroredflat" ? LEFT : RIGHT;
+	    glyph_name == "accidentals.mirroredflat" ? LEFT : RIGHT;
 	  stem[X_AXIS][bulb_dir] = stem[X_AXIS].center ();
 
 	  /*
@@ -189,7 +189,7 @@ Accidental_interface::get_stencil (Grob *me)
       return SCM_EOL;
     }
   
-  Stencil mol (fm->find_by_name (scm_i_string_chars (glyph_name)));
+  Stencil mol (fm->find_by_name (ly_scm2string (glyph_name)));
   if (to_boolean (me->get_property ("restore-first")))
     {
       /*

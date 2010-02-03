@@ -1,25 +1,18 @@
-\input texinfo @c -*- coding: utf-8; mode: texinfo; -*-
+\input texinfo @c -*- coding: utf-8; mode: texinfo; documentlanguage: es -*-
 @ignore
-    Translation of GIT committish: 0184e537d7eda6265b92fe20f3565de0f0411869
+    Translation of GIT committish: 470afe4ab29825194827f7dfcf031addb68771ce
 
     When revising a translation, copy the HEAD committish of the
     version that you are working on.  See TRANSLATION for details.
 @end ignore
-@setfilename lilypond.info
-@settitle Manual del usuario de GNU LilyPond
 @documentencoding UTF-8
 @documentlanguage es
+@setfilename lilypond.info
+@settitle Referencia de la notación de GNU LilyPond
 
 @include macros.itexi
 
-@iftex
 @afourpaper
-@c don't replace quotes with directed quotes
-@tex
-\gdef\SETtxicodequoteundirected{Foo}
-\gdef\SETtxicodequotebacktick{Bla}
-@end tex
-@end iftex
 
 @c  Keep this here, since it pertains to the direntry below.
 @ignore
@@ -49,7 +42,7 @@ Distributions will want to install lilypond.info in postinstall, doing:
 * LilyPond: (lilypond).                                 Referencia de la notación con LilyPond.
 * LilyPond Internals Reference: (lilypond-internals).   Definiciones para el trucaje.
 * LilyPond Application Usage: (lilypond-program).       Instalar y ejecutar las aplicaciones.
-* abc2ly: (lilypond-program)Invocar abc2ly.             Importar archivos de ABC.      
+* abc2ly: (lilypond-program)Invocar abc2ly.             Importar archivos de ABC.
 * convert-ly: (lilypond-program)Actualizar archivos mediante convert-ly.  Versiones de LilyPond antiguas.
 * etf2ly: (lilypond-program)Invocar etf2ly.                  Importar archivos de Finale.
 * lilypond-book: (lilypond-program)LilyPond-book.            Integrar texto y música.
@@ -60,7 +53,7 @@ Distributions will want to install lilypond.info in postinstall, doing:
 @c don't remove this comment.
 @ignore
 @omfcreator Han-Wen Nienhuys, Jan Nieuwenhuizen and Graham Percival
-@omfdescription User manual of the LilyPond music engraving system
+@omfdescription Notation Reference of the LilyPond music engraving system
 @omftype user manual
 @omfcategory Applications|Publishing
 @omflanguage Spanish
@@ -68,10 +61,18 @@ Distributions will want to install lilypond.info in postinstall, doing:
 
 @c Translators: Francisco Vila
 
+@ifnottex
+@node Top
+@top GNU LilyPond: Manual de referencia de la notación
+@chapheading El tipografiador de música
+@c HJJ: Info needs `@top', which is a synonym for `@unnumbered' in TeX.
+@end ifnottex
+
+
 @ifhtml
-Este documento también está disponible como
+Este documento también está disponible en formato
 @uref{source/Documentation/user/lilypond.es.pdf,PDF} y como
-@uref{source/Documentation/user/lilypond-big-page.html,una sola página enorme}.
+@uref{source/Documentation/user/lilypond-big-page.html,una sola página}.
 @end ifhtml
 
 
@@ -85,18 +86,18 @@ Este documento también está disponible como
 @titlepage
 @title LilyPond
 @subtitle El tipografiador de música
-@titlefont{Manual del usuario}
+@titlefont{Manual de referencia de la notación}
 @author El equipo de desarrollo de LilyPond
 
-Copyright @copyright{} 1999--2007 por los autores
-
-@emph{The translation of the following copyright notice is provided
-for courtesy to non-English speakers, but only the notice in English
-legally counts.}
+Copyright @copyright{} 1999--2008 por los autores
 
 @emph{La traducción de la siguiente nota de copyright se ofrece como
 cortesía para las personas de habla no inglesa, pero únicamente la
 nota en inglés tiene validez legal.}
+
+@emph{The translation of the following copyright notice is provided
+for courtesy to non-English speakers, but only the notice in English
+legally counts.}
 
 @quotation
 Se otorga permiso para copiar, distribuir y/o modificar este documento
@@ -122,15 +123,15 @@ Para LilyPond versión @version{}
 @end titlepage
 
 @copying
-Copyright @copyright{} 1999--2007 por los autores
-
-@emph{The translation of the following copyright notice is provided
-for courtesy to non-English speakers, but only the notice in English
-legally counts.}
+Copyright @copyright{} 1999--2008 por los autores
 
 @emph{La traducción de la siguiente nota de copyright se ofrece como
 cortesía para las personas de habla no inglesa, pero únicamente la
 nota en inglés tiene validez legal.}
+
+@emph{The translation of the following copyright notice is provided
+for courtesy to non-English speakers, but only the notice in English
+legally counts.}
 
 @quotation
 Se otorga permiso para copiar, distribuir y/o modificar este documento
@@ -154,15 +155,15 @@ Free Documentation License''.
 @ifnottex
 Este archivo es la documentación de GNU LilyPond.
 
-Copyright 1999--2007 por los autores
-
-@emph{The translation of the following copyright notice is provided
-for courtesy to non-English speakers, but only the notice in English
-legally counts.}
+Copyright 1999--2008 por los autores
 
 @emph{La traducción de la siguiente nota de copyright se ofrece como
 cortesía para las personas de habla no inglesa, pero únicamente la
 nota en inglés tiene validez legal.}
+
+@emph{The translation of the following copyright notice is provided
+for courtesy to non-English speakers, but only the notice in English
+legally counts.}
 
 @quotation
 Se otorga permiso para copiar, distribuir y/o modificar este documento
@@ -184,27 +185,26 @@ Free Documentation License''.
 @end ifnottex
 
 @ifnottex
-@node Top
-@top GNU LilyPond --- El tipografiador de música
-@c HJJ: Info needs `@top', which is a synonym for `@unnumbered' in TeX.
+El presente documento es el manual de referencia de la notación del
+programa GNU LilyPond, versión @version{}.  Para ver más información
+sobre la relación entre éste y el resto de los documentos, consulte
+@rlearning{About the documentation}.
 
-Éste es el manual del usuario del programa GNU LilyPond versión @version{}.
-
-@cindex web, sitio
+@cindex web, página
+@cindex página web
 @cindex URL
 
 Se puede encontrar más información en
-@uref{http://@/www@/.lilypond@/.org/}.  El sitio web contiene copias en línea
-de la presente documentación y de otras.
+@uref{http://@/www@/.lilypond@/.org/}.  La página web contiene copias
+en línea de la presente documentación y de otras.
 
 @include dedication.itely
 
 @c TRANSLATE ME
 @menu
 * Musical notation::               Notación musical.
-* Specialist notation::            Notación especializada.
-* Input syntax::                   General information about lilypond input files.
-* Non-musical notation::           Salida que no es notación musical.
+* Specialist notation::            Notación que solamente se utiliza para propósitos específicos.
+* General input and output::       Información general sobre la salida y la entrada de LlilyPond.
 * Spacing issues::                 Presentación de la salida sobre papel.
 * Changing defaults::              Ajuste fino de la salida.
 * Interfaces for programmers::     Utilización por expertos.
@@ -227,7 +227,6 @@ Apéndices
 @include specialist.itely
 
 @include input.itely
-@include non-music.itely
 @include spacing.itely
 
 @include changing-defaults.itely
@@ -241,10 +240,27 @@ Apéndices
 @node LilyPond command index
 @appendix LilyPond command index
 
+Este índice relaciona todas las instrucciones y palabras clave de
+LilyPond, con enlaces a aquellas secciones del manual que describen o
+se ocupan de su uso.  Cada uno de los enlaces consta de dos partes.
+La primera parte apunta a la situación exacta del manual en que
+aparece la instrucción o palabra clave; la segunda parte apunta al
+comienzo de la sección correspondiente del manual en la que aparece la
+instrucción o palabra clave.
+
 @printindex ky
 
 @node LilyPond index
 @appendix LilyPond index
+
+Además de todas las instrucciones y palabras clave de LilyPond, este
+índice es una lista de términos musicales y las palabras que tienen
+relación con cada uno de ellos, con enlaces a aquellas secciones del
+manual que describen o se ocupan de dicho término.  Cada uno de los
+enlaces consta de dos partes.  La primera parte apunta a la situación
+exacta del manual en que aparece el término; la segunda parte apunta
+al comienzo de la sección correspondiente del manual en la que se
+discute dicho término.
 
 @printindex cp
 

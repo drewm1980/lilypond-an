@@ -8,15 +8,16 @@
 
 #include "separation-item.hh"
 
+#include "accidental-placement.hh"
 #include "axis-group-interface.hh"
 #include "lookup.hh"
+#include "note-column.hh"
 #include "note-head.hh"
-#include "stencil.hh"
-#include "skyline.hh"
 #include "paper-column.hh"
-#include "warn.hh"
 #include "pointer-group-interface.hh"
-#include "accidental-placement.hh"
+#include "skyline-pair.hh"
+#include "stencil.hh"
+#include "warn.hh"
 
 void
 Separation_item::add_item (Grob *s, Item *i)
@@ -101,7 +102,18 @@ Separation_item::boxes (Grob *me, Grob *left)
   if (left)
     elts = Accidental_placement::get_relevant_accidentals (read_only_elts, left);
   else
-    elts = read_only_elts;
+    {
+      elts = read_only_elts;
+
+      /* This is a special-case for NoteColumn: we want to include arpeggio in its
+	 skyline (so spacing takes it into account) but we don't want to include it
+	 in the NoteColumn's extent because some spanners (eg. Hairpin) bound themselves
+	 on the NoteColumn and we don't want them to include arpeggios in their bounds.
+      */
+      if (Grob *a = Note_column::arpeggio (me)) {
+	elts.push_back (a);
+      }
+    }
 
   Grob *ycommon = common_refpoint_of_array (elts, me, Y_AXIS);
   
@@ -123,12 +135,15 @@ Separation_item::boxes (Grob *me, Grob *left)
       Interval y (il->pure_height (ycommon, 0, very_large));
       Interval x (il->extent (pc, X_AXIS));
 
-      Interval extra = robust_scm2interval (elts[i]->get_property ("extra-spacing-width"),
-					    Interval (-0.1, 0.1));
-      x[LEFT] += extra[LEFT];
-      x[RIGHT] += extra[RIGHT];
-      if (to_boolean (elts[i]->get_property ("infinite-spacing-height")))
-	y = Interval (-infinity_f, infinity_f);
+      Interval extra_width = robust_scm2interval (elts[i]->get_property ("extra-spacing-width"),
+						  Interval (-0.1, 0.1));
+      Interval extra_height = robust_scm2interval (elts[i]->get_property ("extra-spacing-height"),
+						   Interval (-0.1, 0.1));
+
+      x[LEFT] += extra_width[LEFT];
+      x[RIGHT] += extra_width[RIGHT];
+      y[DOWN] += extra_height[DOWN];
+      y[UP] += extra_height[UP];
  
       if (!x.is_empty () && !y.is_empty ())
       out.push_back (Box (x, y));
@@ -137,7 +152,6 @@ Separation_item::boxes (Grob *me, Grob *left)
   return out;      
 }
 
-extern bool debug_skylines;
 MAKE_SCHEME_CALLBACK (Separation_item, print, 1)
 SCM
 Separation_item::print (SCM smob)

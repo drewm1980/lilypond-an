@@ -81,7 +81,7 @@ assign_context_def (Output_def * m, SCM transdef)
 /* find the translator for NAME. NAME must be a symbol. */
 SCM
 find_context_def (Output_def const *m, SCM name)
-{  
+{
   Context_def *cd = unsmob_context_def (m->lookup_variable (name));
   return cd ? cd->self_scm () : SCM_EOL;
 }
@@ -137,7 +137,9 @@ Interval
 line_dimensions_int (Output_def *def, int n)
 {
   Real lw = def->get_dimension (ly_symbol2scm ("line-width"));
-  Real ind = n ? 0.0 : def->get_dimension (ly_symbol2scm ("indent"));
+  Real ind = n
+    ? def->get_dimension (ly_symbol2scm ("short-indent"))
+    : def->get_dimension (ly_symbol2scm ("indent"));
   return Interval (ind, lw);
 }
 

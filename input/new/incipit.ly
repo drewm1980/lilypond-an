@@ -1,4 +1,4 @@
-\version "2.11.39"
+\version "2.11.61"
 \header {
   lsrtags = "staff-notation,ancient-notation"
   texidoc = "Incipits can be added using the instrument name grob, but
@@ -51,7 +51,8 @@ global = {
   
   %make the staff lines invisible on staves
   \override Staff.BarLine #'transparent = ##t
-  \skip 1*8 % the actual music
+  % the actual music
+  \skip 1*8
 
   % let finis bar go through all staves
   \override Staff.BarLine #'transparent = ##f
@@ -61,13 +62,13 @@ global = {
 }
 
 discantusIncipit = <<
-  \new MensuralVoice = discantusIncipit <<
+  \new MensuralVoice = "discantusIncipit" <<
     \repeat unfold 9 { s1 \noBreak }
     {
       \clef "neomensural-c1"
       \key f \major
       \time 2/2
-      c''1. 
+      c''1.
     }
   >>
   \new Lyrics \lyricsto discantusIncipit { IV- }
@@ -81,7 +82,8 @@ discantusNotes = {
     c'4 e'4.( d'8 c' b |
     a4) b a2 |
     b4.( c'8 d'4) c'4 |
-    \once \override NoteHead #'transparent = ##t c'1 |
+    \once \override NoteHead #'transparent = ##t
+    c'1 |
     b\breve |
   }
 }
@@ -97,13 +99,13 @@ discantusLyrics = \lyricmode {
 }
 
 altusIncipit = <<
-  \new MensuralVoice = altusIncipit <<
+  \new MensuralVoice = "altusIncipit" <<
     \repeat unfold 9 { s1 \noBreak }
     {
       \clef "neomensural-c3"
       \key f \major
       \time 2/2
-      r1 f'1. 
+      r1 f'1.
     }
   >>
   \new Lyrics \lyricsto altusIncipit { IV- }
@@ -112,17 +114,20 @@ altusIncipit = <<
 altusNotes = {
   \transpose c' c'' {
     \clef "treble"
-    r2 g2. e4 fis g | % two bars
+    % two measures
+    r2 g2. e4 fis g |
     a2 g4 e |
     fis g4.( fis16 e fis4) |
     g1 |
-    \once \override NoteHead #'transparent = ##t g1 |
+    \once \override NoteHead #'transparent = ##t
+    g1 |
     g\breve |
   }
 }
 
 altusLyrics = \lyricmode {
-  Ju -- bi -- la -- te | % two bars
+  % two measures
+  Ju -- bi -- la -- te |
   De -- o, om -- |
   nis ter -- ra, |
   "..." |
@@ -130,7 +135,7 @@ altusLyrics = \lyricmode {
 }
 
 tenorIncipit = <<
-  \new MensuralVoice = tenorIncipit <<
+  \new MensuralVoice = "tenorIncipit" <<
     \repeat unfold 9 { s1 \noBreak }
     {
       \clef "neomensural-c4"
@@ -151,20 +156,23 @@ tenorNotes = {
     R1 |
     R1 |
     R1 |
-    r2 d'2. d'4 b e' | % two bars
-    \once \override NoteHead #'transparent = ##t e'1 |
+    % two measures
+    r2 d'2. d'4 b e' |
+    \once \override NoteHead #'transparent = ##t
+    e'1 |
     d'\breve |
   }
 }
 
 tenorLyrics = \lyricmode {
-  Ju -- bi -- la -- te | % two bars
+  % two measures
+  Ju -- bi -- la -- te |
   "..." |
   -us. 
 }
 
 bassusIncipit = <<
-  \new MensuralVoice = bassusIncipit <<
+  \new MensuralVoice = "bassusIncipit" <<
     \repeat unfold 9 { s1 \noBreak }
     {
       \clef "bass"
@@ -186,7 +194,8 @@ bassusNotes = {
     R1 |
     R1 |
     g2. e4 |
-    \once \override NoteHead #'transparent = ##t e1 |
+    \once \override NoteHead #'transparent = ##t
+    e1 |
     g\breve |
   }
 }
@@ -194,69 +203,73 @@ bassusNotes = {
 bassusLyrics = \lyricmode {
   Ju -- bi- |
   "..." |
-  -us. 
+  -us.
 }
 
 \score {
   <<
     \new StaffGroup = choirStaff <<
       \new Voice = "discantusNotes" <<
-        \global 
-        \set Staff.instrumentName = "Discantus"
+        \global
+        \set Staff.instrumentName = #"Discantus"
         \incipit \discantusIncipit
         \discantusNotes
       >>
       \new Lyrics = "discantusLyrics" \lyricsto discantusNotes { \discantusLyrics }
       \new Voice = "altusNotes" <<
-        \global 
-        \set Staff.instrumentName = "Altus"
+        \global
+        \set Staff.instrumentName = #"Altus"
         \incipit \altusIncipit
         \altusNotes
       >>
       \new Lyrics = "altusLyrics" \lyricsto altusNotes { \altusLyrics }
       \new Voice = "tenorNotes" <<
-        \global 
-        \set Staff.instrumentName = "Tenor"
+        \global
+        \set Staff.instrumentName = #"Tenor"
         \incipit \tenorIncipit
         \tenorNotes
       >>
       \new Lyrics = "tenorLyrics" \lyricsto tenorNotes { \tenorLyrics }
       \new Voice = "bassusNotes" <<
-        \set Staff.instrumentName = "Bassus"
+        \global
+        \set Staff.instrumentName = #"Bassus"
         \incipit \bassusIncipit
         \bassusNotes
       >>
     >>
-    \new Lyrics = "bassusLyrics" \lyricsto bassusNotes { \bassusLyrics } 
+    \new Lyrics = "bassusLyrics" \lyricsto bassusNotes { \bassusLyrics }
     %% Keep the bass lyrics outside of the staff group to avoid bar lines
     %% between the lyrics.
   >>
   \layout {
     \context {
       \Score
-      %% no bars in staves
+      %% no bar lines in staves
       \override BarLine #'transparent = ##t
     }
-    %% the next three instructions keep the lyrics between the barlines
+    %% the next three instructions keep the lyrics between the bar lines
     \context {
-      \Lyrics 
+      \Lyrics
       \consists "Bar_engraver" 
       \override BarLine #'transparent = ##t
     } 
-    \context { \StaffGroup \consists "Separating_line_group_engraver" }
+    \context {
+      \StaffGroup
+      \consists "Separating_line_group_engraver"
+    }
     \context {
       \Voice
       %% no slurs
       \override Slur #'transparent = ##t
       %% Comment in the below "\remove" command to allow line
-      %% breaking also at those barlines where a note overlaps
-      %% into the next bar.  The command is commented out in this
+      %% breaking also at those bar lines where a note overlaps
+      %% into the next measure.  The command is commented out in this
       %% short example score, but especially for large scores, you
       %% will typically yield better line breaking and thus improve
       %% overall spacing if you comment in the following command.
       %%\remove "Forbid_line_break_engraver"
     }
-    indent=6\cm
+    indent = 6\cm
     incipit-width = 4\cm
   }
 }

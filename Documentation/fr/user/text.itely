@@ -1,12 +1,12 @@
 @c -*- coding: utf-8; mode: texinfo; -*-
 @ignore
-    Translation of GIT committish: f7420240e4ce1fe2217646482a47d00f566af52c
+    Translation of GIT committish: bdf8540b74167817eab96ed3d13b35477217f9fe
 
     When revising a translation, copy the HEAD committish of the
     version that you are working on.  See TRANSLATION for details.
 @end ignore
 
-@c \version "2.11.38"
+@c \version "2.11.65"
 
 @c Translators: Jean-Charles Malahieude
 @c Translation checkers: Valentin Villenave, John Mandereau
@@ -14,8 +14,10 @@
 @node Text
 @section Text
 
-Nous allons voir ici comment insérer du texte, selon différents
-formatages, dans vos partitions.
+@lilypondfile[quote]{text-headword.ly}
+
+Nous allons voir ici comment insérer dans une partition du texte, avec
+différentes possibilité de formatage.
 
 @cindex Texte, autres langues
 Pour écrire des accents et autres caractères spéciaux, il suffit de
@@ -23,25 +25,10 @@ les insérer directement dans votre fichier LilyPond.  Ce fichier devra
 être sauvegardé avec l'encodage UTF-8.  Pour plus d'informations, voir
 @ref{Text encoding}.
 
-@lilypond[fragment,ragged-right,staffsize=16,quote]
-c'4^\markup { bla \bold bla }
-@end lilypond
-
-@lilypond[fragment,ragged-right,staffsize=16,quote]
-c'4^\markup { bla \bold bla }
-@end lilypond
-
-@lilypond[fragment,ragged-right,staffsize=16,quote]
-c'4^\markup { bla \bold bla }
-@end lilypond
-
-@lilypond[fragment,ragged-right,staffsize=16,quote]
-c'4^\markup { bla \bold bla }
-@end lilypond
-
 @menu
 * Writing text::                
-* Text markup::                 
+* Formatting text::             
+* Fonts::                       
 @end menu
 
 
@@ -53,7 +40,6 @@ c'4^\markup { bla \bold bla }
 * Text and line spanners::      
 * Text spanners::               
 * Text marks::                  
-* New dynamic marks::           
 @end menu
 
 @node Text scripts
@@ -69,7 +55,7 @@ c'4^\markup { bla \bold bla }
 @cindex ajout de texte
 
 Vous pouvez placer arbitrairement des chaînes de caractères, ou
-@ref{Text markup} en langage LilyPond, au dessus ou au dessous des
+@ref{Formatting text} en langage LilyPond, au dessus ou au dessous des
 notes en employant la syntaxe @code{c^"text"}.  Par défaut, ces
 indications n'affecteront en rien l'espacement des notes, sauf à
 utiliser la commande @code{\textLengthOn}.
@@ -89,7 +75,7 @@ c'4^\markup { bla \bold bla }
 @end lilypond
 
 La commande @code{\markup} est décrite plus en détails dans la section
-@ref{Text markup}.
+@ref{Formatting text}.
 
 
 @predefined
@@ -114,9 +100,9 @@ Vous pouvez cependant l'y forcer en définissant
 
 @seealso
 
-Dans ce manuel : @ref{Text markup}.
+Dans ce manuel : @ref{Formatting text}.
 
-Référence du programme : @internalsref{TextScript}.
+Référence du programme : @rinternals{TextScript}.
 
 
 @node Text and line spanners
@@ -155,7 +141,7 @@ régler vous-même :
 
 @lilypond[relative=2,ragged-right,verbatim,fragment]
 e2 \glissando f
-\once \override Glissando #'bound-details #'right #'Y = #-2
+\once \override Glissando #'(bound-details right Y) = #-2
 e2 \glissando f
 @end lilypond
 
@@ -176,7 +162,7 @@ dans l'exemple suivant :
 
 @lilypond[relative=2,ragged-right,verbatim,fragment]
 \override Glissando #'breakable = ##T 
-\override Glissando #'bound-details #'right-broken #'Y = #-3
+\override Glissando #'(bound-details right-broken Y) = #-3
 c1 \glissando \break
 f1
 @end lilypond
@@ -212,7 +198,7 @@ Marqueur qui sera analysé pour alimenter @code{stencil}.  On y trouve
 habituellement les @i{cresc.} ou @i{tr} des extenseurs horizontaux.
 
 @lilypond[quote,ragged-right,fragment,relative=2,verbatim]
-\override TextSpanner #'bound-details #'left #'text
+\override TextSpanner #'(bound-details left text)
    = \markup { \small \bold Slower }
 c2\startTextSpan b c a\stopTextSpan
 @end lilypond
@@ -226,11 +212,11 @@ vous pouvez décaler le coin du marqueur par rapport à l'extrémité de
 la ligne.
 
 @lilypond[relative=1,fragment,verbatim]
-\override TextSpanner #'bound-details #'left #'stencil-align-dir-y = #DOWN
-\override TextSpanner #'bound-details #'right #'stencil-align-dir-y = #UP
+\override TextSpanner #'(bound-details left stencil-align-dir-y) = #DOWN
+\override TextSpanner #'(bound-details right stencil-align-dir-y) = #UP
 
-\override TextSpanner #'bound-details #'left #'text = #"gggg"
-\override TextSpanner #'bound-details #'right #'text = #"hhhh"
+\override TextSpanner #'(bound-details left text) = #"gggg"
+\override TextSpanner #'(bound-details right text) = #"hhhh"
 c4^\startTextSpan c c c \stopTextSpan
 @end lilypond
 
@@ -247,11 +233,11 @@ début et la fin d'un glissando seraient en plein milieu des têtes de note.
 
 @seealso
 
-Référence du programme : @internalsref{TextSpanner},
-@internalsref{Glissando}, @internalsref{VoiceFollower},
-@internalsref{TrillSpanner}, @internalsref{line-spanner-interface}.
+Référence du programme : @rinternals{TextSpanner},
+@rinternals{Glissando}, @rinternals{VoiceFollower},
+@rinternals{TrillSpanner}, @rinternals{line-spanner-interface}.
 
-Exemples : @lsr{expressive,line-styles.ly}, @lsr{expressive,line-arrows.ly}
+Exemples : @rlsr{Expressive marks}.
 
 
 @node Text spanners
@@ -272,12 +258,12 @@ propriétés, comme ici :
 @lilypond[quote,ragged-right,fragment,relative=1,verbatim]
 c1
 \textSpannerDown
-\override TextSpanner #'bound-details #'left #'text =
+\override TextSpanner #'(bound-details left text) =
   \markup { \upright "rall" } 
 c2\startTextSpan b c\stopTextSpan a
 \break
 \textSpannerUp
-\override TextSpanner #'bound-details #'left #'text =
+\override TextSpanner #'(bound-details left text) =
   \markup { \italic "rit" } 
 c2\startTextSpan b c\stopTextSpan a
 @end lilypond
@@ -303,7 +289,7 @@ Pour obtenir une ligne pleine, utilisez
 
 @seealso
 
-Référence du programme : @internalsref{TextSpanner}.
+Référence du programme : @rinternals{TextSpanner}.
 
 
 @node Text marks
@@ -453,57 +439,16 @@ affectation à chacune des portées :
 
 @seealso
 
-Référence du programme : @internalsref{RehearsalMark}.
+Référence du programme : @rinternals{RehearsalMark}.
 
 
-@node New dynamic marks
-@unnumberedsubsubsec New dynamic marks
-
-Grâce à la commande @code{make-dynamic-script}, vous pouvez créer de
-nouvelles marques textuelles de nuances que vous combinerez
-éventuellement avec les signes de nuances.
-Notez bien que la police des nuances en contient que les caractères
-@code{f,m,p,r,s} and @code{z}. 
-
-Certains composants, tels que les marques de nuances, possèdent des
-propriétés particulières et prédéfinies quant à leur police.  Lorsque
-vous créez du texte en pareille situation, nous vous recommandons
-d'utiliser @code{normal-text} pour annuler ces propriétés.  Voir 
-@ref{Overview of text markup commands} pour plus de détails.
-
-@cindex make-dynamic-script
-
-@lilypond[quote,verbatim,ragged-right]
-sfzp = #(make-dynamic-script "sfzp")
-\relative c' {
-  c4 c c\sfzp c
-}
-@end lilypond
-
-@cindex Nuances éditoriales
-@cindex Nuances, entre parenthèses
-
-Vous pouvez aussi encadrer les nuances entre parenthèses ou entre
-crochets.  Ceci est souvent utilisé pour ajouter des nuances propres à
-une édition donnée.
-
-@lilypond[quote,verbatim,ragged-right]
-rndf = \markup{ \center-align {\line { \bold{\italic (}
-  \dynamic f \bold{\italic )} }} }
-boxf = \markup{ \bracket { \dynamic f } }
-{ c'1_\rndf c'1_\boxf }
-@end lilypond
-
-
-
-@node Text markup
-@subsection Text markup
+@node Formatting text
+@subsection Formatting text
 
 @menu
 * Text markup introduction::    
 * Nested scores::               
 * Page wrapping text::          
-* Font selection::              
 @end menu
 
 @node Text markup introduction
@@ -528,11 +473,11 @@ c1_\markup { "\special {weird} #characters" }
 
 @noindent
 Pour une liste des différentes commandes disponibles, consultez
-@ref{Overview of text markup commands}. 
+@ref{Text markup commands}. 
 
 
 @code{\markup} est avant tout conçu pour gérer les
-@internalsref{TextScript}s, mais rien ne s'oppose à son utilisation
+@rinternals{TextScript}s, mais rien ne s'oppose à son utilisation
 pour traiter du texte avec LilyPond.
 
 @lilypond[quote,verbatim]
@@ -545,7 +490,7 @@ pour traiter du texte avec LilyPond.
 
     \set Staff.instrumentName = \markup{ \column{ Alto solo } }
     c2^\markup{ don't be \flat }
-    \override TextSpanner #'bound-details #'left #'text = \markup{\italic rit }
+    \override TextSpanner #'(bound-details left text) = \markup{\italic rit }
     b2\startTextSpan
     a2\mark \markup{ \large \bold Fine }
     r2\stopTextSpan
@@ -586,17 +531,17 @@ En mode @emph{markup}, vous pouvez composer des expressions comme
 en mathématiques, des documents XML ou bien les expressions musicales.
 Vous pouvez empiler ces expressions grâce à la commande
 @code{\column}, ou les centrer par rapport à leur milieu avec
-@code{\center-align}. 
+@code{\center-column}. 
 
 @lilypond[quote,verbatim,fragment,relative=1]
 c1^\markup { \column { a bbbb \line { c d } } }
-c1^\markup { \center-align { a bbbb c } }
+c1^\markup { \center-column { a bbbb c } }
 c1^\markup { \line { a b c } }
 @end lilypond
 
 Des listes non précédées de commande ne sont pas isolées. Ainsi, 
 @example
-\center-align @{ @{ a b @} @{ c d @} @}
+\center-column @{ @{ a b @} @{ c d @} @}
 @end example
 
 @noindent
@@ -604,7 +549,7 @@ Des listes non précédées de commande ne sont pas isolées. Ainsi,
 est la même expression que
 
 @example
-\center-align @{ a b c d @}
+\center-column @{ a b c d @}
 @end example
 
 @noindent
@@ -614,10 +559,10 @@ différencier les listes de mots.
 
 @lilypond[quote,verbatim,fragment,relative=1]
 \textLengthOn
-c4^\markup{ \center-align { on three lines } }
-c4^\markup{ \center-align { "all one line" } }
-c4^\markup{ \center-align { { on three lines } } }
-c4^\markup{ \center-align { \line { on one line } } }
+c4^\markup{ \center-column { on three lines } }
+c4^\markup{ \center-column { "all one line" } }
+c4^\markup{ \center-column { { on three lines } } }
+c4^\markup{ \center-column { \line { on one line } } }
 @end lilypond
 
 Vous pouvez stocker les étiquettes textuelles en tant que variables,
@@ -630,7 +575,7 @@ allegro = \markup @{ \bold \large @{ Allegro @} @}
 Certains objets possèdent leurs propres procédures d'alignement, qui
 annuleront toute spécification d'alignement que vous pourriez affecter
 à un argument de type @emph{markup} que vous leur auriez fourni.  Par
-exemple, les @internalsref{RehearsalMark} sont centrées
+exemple, les @rinternals{RehearsalMark} sont centrées
 horizontalement ; de fait, utiliser 
 @code{\mark \markup @{ \left-align .. @}} sera sans effet.
 
@@ -652,14 +597,14 @@ Certaines situations particulières, telles que les indications de
 nuance, possèdent des propriétés prédéfinies quant à leur police.
 Nous vous conseillons, en pareil cas, de réinitialiser ces propriétés
 en utilisant @code{normal-text}.  Pour plus d'informations, consultez
-@ref{Overview of text markup commands}. 
+@ref{Text markup commands}. 
 
 
 @seealso
 
-Dans ce manuel : @ref{Overview of text markup commands}.
+Dans ce manuel : @ref{Text markup commands}.
 
-Référence du programme : @internalsref{TextScript}.
+Référence du programme : @rinternals{TextScript}.
 
 Fichiers d'initialisation : @file{scm/@/new@/-markup@/.scm}.
 
@@ -727,11 +672,11 @@ tour des lignes de texte, comme ici :
 @end verbatim
 
 Les différentes commandes permettant de générer des listes de lignes
-se trouve dans @ref{Overview of text markup list commands}.
+se trouve dans @ref{Text markup list commands}.
 
 @seealso
 
-Dans ce manuel : @ref{Overview of text markup list commands}, 
+Dans ce manuel : @ref{Text markup list commands}, 
 @ref{New markup list command definition}.
 
 @predefined
@@ -740,8 +685,8 @@ Dans ce manuel : @ref{Overview of text markup list commands},
 @code{\markuplines}
 
 
-@node Font selection
-@unnumberedsubsubsec Font selection
+@node Fonts
+@subsection Fonts
 
 @cindex sélection de polices
 @cindex grossissement des polices
@@ -848,6 +793,5 @@ du texte respectivement en roman, sans serif et monospace, comme ici :
 
 @seealso
 
-Exemples : @lsr{text,font@/-family@/-override.ly}.
-
+Exemples : @rlsr{Text}.
 

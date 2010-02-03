@@ -1,13 +1,13 @@
-@c -*- coding: utf-8; mode: texinfo; -*-
+@c -*- coding: utf-8; mode: texinfo; documentlanguage: es -*-
 @c This file is part of lilypond.tely
 @ignore
-    Translation of GIT committish: 7cc6b12897031c450e3399d59cdb22ca9df4fd8c
+    Translation of GIT committish: 0646758d26f727fc27fc13a87df2362388909e5d
 
     When revising a translation, copy the HEAD committish of the
     version that you are working on.  See TRANSLATION for details.
 @end ignore
 
-@c \version "2.11.38"
+@c \version "2.11.61"
 
 @node Working on LilyPond projects
 @chapter Working on LilyPond projects
@@ -19,9 +19,9 @@ que lea este capítulo.
 
 
 @menu
-* Suggestions for writing LilyPond files::  
-* When things don't work::      
-* Scores and parts::            
+* Suggestions for writing LilyPond files::
+* When things don't work::
+* Scores and parts::
 @end menu
 
 
@@ -38,7 +38,7 @@ salida que usted pretendía, realmente no importa mucho qué aspecto
 tengan sus archivos.  Sin embargo existen algunas otras cosas a tener
 en cuenta cuando se escriben archivos de LilyPond.
 
-@itemize @bullet
+@itemize
 @item ¿Qué ocurre si comete un fallo?  La estructura de un archivo
 de LilyPond puede hacer que ciertos errores se hagan más fáciles (o
 más difíciles) de encontrar.
@@ -58,11 +58,11 @@ fáciles (o más difíciles) de actualizar.
 @end itemize
 
 @menu
-* General suggestions::         
-* Typesetting existing music::  
-* Large projects::              
-* Saving typing with variables and functions::  
-* Style sheets::                
+* General suggestions::
+* Typesetting existing music::
+* Large projects::
+* Saving typing with variables and functions::
+* Style sheets::
 @end menu
 
 
@@ -72,7 +72,7 @@ fáciles (o más difíciles) de actualizar.
 Presentamos algunas sugerencias que le pueden servir de ayuda para evitar
 o corregir problemas:
 
-@itemize @bullet
+@itemize
 @item @strong{Incluya los números de @code{\version} en todos los archivos}.  Dese cuenta de que todas las
 plantillas contienen información sobre la @code{\version}.  Le
 recomendamos mucho que siempre incluya la @code{\version}, sin
@@ -82,8 +82,8 @@ el número de versión de LilyPond que estaba usando hace unos años.
 @code{convert-ly} requiere que declare qué versión de LilyPond
 utilizó.
 
-@item @strong{Incluya comprobaciones}: @ruser{Bar and barnumber checks},
-@ruser{Octave check}.  Si incluye comprobaciones de vez en cuando, en
+@item @strong{Incluya comprobaciones}: @rglos{baritone},
+@ruser{Absolute octave entry}.  Si incluye comprobaciones de vez en cuando, en
 caso de que cometa un error podrá localizarlo mucho más rápidamente.
 ¿Con qué frecuencia es @q{de vez en cuando}?  Depende de la
 complejidad de la música.  Para una música muy sencilla, quizá tan
@@ -128,13 +128,13 @@ si reelabora la música más tarde.
 Si está introduciendo música a partir de una partitura existente (es decir, tipografiando una hoja
 de música ya impresa),
 
-@itemize @bullet
+@itemize
 
 @item Introduzca un sistema del manuscrito (la copia física) cada vez (pero mantenga
 la práctica de escribir un compás por línea de texto), y compruebe
-cada sistema cuando lo haya terminado.  Puede usar la instrucción
-@code{showLastLength} para acelerar el proceso -- ver @ruser{Skipping
-corrected music} -- .
+cada sistema cuando lo haya terminado.  Puede usar las instrucciones
+@code{showLastLength} o @code{showFirstLength} para acelerar el
+proceso -- ver @ruser{Skipping corrected music} -- .
 
 @item Defina @code{mBreak = @{ \break @}} e inserte @code{\mBreak}
 dentro del archivo de entrada donde el manuscrito tenga un saldo de línea.  De esta forma
@@ -153,7 +153,7 @@ más oportuno.
 Al trabajar en proyecto grande se hace esencial tener una estructura clara
 en los archivos de LilyPond
 
-@itemize @bullet
+@itemize
 
 @item @strong{Utilice un identificador para cada voz}, con un mínimo de
 estructura dentro de la definición.  La estructura de la sección
@@ -212,9 +212,9 @@ hornNotes = \relative c'' { c4 b dis c }
 Incluso se dará cuenta de que esto puede ser útil en música minimalista:
 
 @lilypond[quote,verbatim,ragged-right]
-fragA = \relative c'' { a4 a8. b16 }
-fragB = \relative c'' { a8. gis16 ees4 }
-violin = \new Staff { \fragA \fragA \fragB \fragA }
+fragmentA = \relative c'' { a4 a8. b16 }
+fragmentB = \relative c'' { a8. gis16 ees4 }
+violin = \new Staff { \fragmentA \fragmentA \fragmentB \fragmentA }
 \score {
   {
     \violin
@@ -263,6 +263,9 @@ violin = \relative c'' @{
   @}
 @}
 @end example
+
+@c TODO Replace the following with a better example  -td
+@c Skylining handles this correctly without padText
 
 Hasta ahora hemos contemplado la sustitución estática: cuando LilyPond
 se encuentra con @code{\padText}, lo sustituye con aquello que
@@ -550,13 +553,14 @@ Yo utilizo media docena de archivos de
 \include "../iniciar/iniciar-papel.ly"
 @end example
 
+
 @node When things don't work
 @section When things don't work
 
 @menu
-* Updating old files::          
-* Troubleshooting (taking it all apart)::  
-* Minimal examples::            
+* Updating old files::
+* Troubleshooting (taking it all apart)::
+* Minimal examples::
 @end menu
 
 @node Updating old files

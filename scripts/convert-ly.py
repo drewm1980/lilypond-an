@@ -21,6 +21,8 @@ import re
 import lilylib as ly
 global _;_=ly._
 
+ly.require_python_version ()
+
 import convertrules
 
 lilypond_version_re_str = '\\\\version *\"([0-9.]+)"'
@@ -32,8 +34,8 @@ _ ('''Update LilyPond input to newer version.  By default, update from the
 version taken from the \\version command, to the current LilyPond version.''')
 + _ ("Examples:")
 + '''
-  convert-ly -e old.ly
-  convert-ly --from=2.3.28 --to 2.5.21 foobar.ly
+  $ convert-ly -e old.ly
+  $ convert-ly --from=2.3.28 --to=2.5.21 foobar.ly > foobar-new.ly
 ''')
 
 copyright = ('Jan Nieuwenhuizen <janneke@gnu.org>',
@@ -105,7 +107,7 @@ def get_option_parser ():
               default=False)
     
     p.add_option ("-s", '--show-rules',
-              help=_ ("show rules [default: --from=0, --to=%s]") % program_version,
+              help=_ ("show rules [default: -f 0, -t %s]") % program_version,
               dest='show_rules',
               action='store_true', default=False)
     
@@ -116,7 +118,7 @@ def get_option_parser ():
               dest="to_version",
               default='')
 
-    p.add_option_group (ly.display_encode (_ ('Bugs')),
+    p.add_option_group ('',
                         description=(_ ("Report bugs via")
                                      + ''' http://post.gmane.org/post.php'''
                                      '''?group=gmane.comp.gnu.lilypond.bugs\n'''))
@@ -172,7 +174,7 @@ string."""
         error_file_write ('\n'
                           + _ ("Error while converting")
                           + '\n'
-                          + _ ("Stopping at last succesful rule")
+                          + _ ("Stopping at last successful rule")
                           + '\n')
 
     return (last_conversion, str)

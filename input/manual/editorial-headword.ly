@@ -1,4 +1,4 @@
-\version "2.11.38"
+\version "2.11.61"
 \include "english.ly"
 #(set-global-staff-size 15)
 \paper{
@@ -7,6 +7,13 @@
   indent=0\cm
 }
  
+\layout {
+  \context { \Score
+    \override PaperColumn #'keep-inside-line = ##t
+    \override NonMusicalPaperColumn #'keep-inside-line = ##t
+  }
+}
+
 % NR 1.7 Editorial annotations
 
 % Beethoven, Op. 31, No. 3
@@ -35,23 +42,23 @@
       |
       \set doubleSlurs = ##f
       bf'8.. (
-      af'32-1
-      g'8-2 ) \staccato
-      f'8-3 \staccato
+      af'32
+      g'8 ) \staccato
+      f'8 \staccato
       |
       e'4-2
       r8
       \once \override Script #'script-priority = #-100
       \afterGrace
-         f'8 ( \trill ^ \markup { \finger "3-5-3-5" }
-         { e'16-2 [ f'16-3 ] }
+         f'8 ( \trill ^ \markup { \finger "3-2" }
+         { e'16 [ f'16 ] }
       |
-      g'8..-5
+      g'8..-3
       f'32
-      e'8-3 ) \staccato
+      e'8-1 ) \staccato
       d'8-2 \staccato
       |
-      c'4-3
+      c'4
       r4
    }
    
@@ -76,18 +83,18 @@
       g8-1 ) \staccato
       f8 \staccato
       |
-      e4-3
+      e4
       r8
       \afterGrace
          f8 ( \trill _ \markup { \finger "2-1" }
-         { e16-3 [ f16 ] }
+         { e16 [ f16 ] }
       |
       g8..-1
       f32
-      e8-3 ) \staccato
-      d8-2 \staccato
+      e8 ) \staccato
+      d8 \staccato
       |
-      c4-3
+      c4
       r4
    }
 

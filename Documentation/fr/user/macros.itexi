@@ -1,6 +1,6 @@
 @c -*- coding: utf-8; mode: texinfo; -*-
 @ignore
-    Translation of GIT committish: d30aabb4adc9e13c7a5a99a22230e97a0f164255
+    Translation of GIT committish: 8135382760aa0adfac5aed987a272c394e59dbdb
 
     When revising a translation, copy the HEAD committish of the
     version that you are working on.  See TRANSLATION for details.
@@ -8,15 +8,21 @@
 
 @include version.itexi
 
+@c don't replace quotes with directed quotes
+@set txicodequoteundirected
+@set txicodequotebacktick
+
 @c   ***** Displaying text *****
 
-@c we need this since @q{\} doesn't work with makeinfo 4.8 --
-@c say @q{@value{backslash}} instead
-@set backslash \
+@c we need this since @q{\} doesn't work with makeinfo 4.11 --
+@c say @q{@bs} instead
+@macro bs
+\\
+@end macro
 
 @c to get decent quotes in `foo' and ``foo''
-@c  these need to be split up so that "@qq{foo}." looks nice.  :(
-@iftex
+@c FIXME: use thin spaces for @qq
+@ifnotinfo
 @macro q{TEXT}
 @quoteleft{}\TEXT\@quoteright{}
 @end macro
@@ -24,8 +30,7 @@
 @macro qq{TEXT}
 @guillemetleft{}@tie{}\TEXT\@tie{}@guillemetright{}
 @end macro
-@end iftex
-
+@end ifnotinfo
 
 @ifinfo
 @macro q{TEXT}
@@ -39,36 +44,14 @@
 
 
 @ifhtml
-@macro q{TEXT}
-@html
-&lsquo;\TEXT\&rsquo;
-@end html
-@end macro
-
-@c FIXME: hack unbreakable thin spaces
-@macro qq{TEXT}
-@html
-&laquo;&nbsp;\TEXT\&nbsp;&raquo;
-@end html
+@macro warning{TEXT}
+@cartouche
+@b{Note :} \TEXT\
+@end cartouche
 @end macro
 @end ifhtml
 
-
-@ifdocbook
-@macro q{TEXT}
-@xml
-&lsquo;\TEXT\&rsquo;
-@end xml
-@end macro
-
-@c FIXME: hack unbreakable thin spaces
-@macro qq{TEXT}
-@xml
-&laquo;&nbsp;\TEXT\&nbsp;&raquo;
-@end xml
-@end macro
-@end ifdocbook
-
+@ifnothtml
 @macro warning{TEXT}
 @quotation
 @quotation
@@ -78,6 +61,7 @@
 @end quotation
 @end quotation
 @end macro
+@end ifnothtml
 
 @ifnotinfo
 @macro notation{TEXT}
@@ -150,16 +134,9 @@
 
 @end macro
 
-@c obsolete, remove when translation is fully updated
-@macro context{TEXT}
-@vindex \TEXT\
-@code{\TEXT\}@c should use internalsref
-@end macro
+@macro lydoctitle {TEXT}
+@emph{\TEXT\}
 
-@c obsolete, remove when translation is fully updated
-@macro refcommand{TEXT}
-@vindex \TEXT\
-@code{\TEXT\}
 @end macro
 
 @macro funindex {TEXT}
@@ -171,63 +148,32 @@
 
 @c   **** Links and references ****
 
-@c WARNING: new @lsr macro in English docs takes 3 arguments
-@c and new @lsrdir takes two arguments
-
-@c obsolete
-@c usage: @lsr{ancient,custodes.ly}
-@macro lsr{DIR,TEXT}
-@ifhtml
-@uref{source/input/lsr/\DIR\/collated-files.html#\TEXT\,@file{\DIR\/\TEXT\}}
-@end ifhtml
-@ifnothtml
-@file{\DIR\/\TEXT\}
-@end ifnothtml
-@end macro
-
-@c don't update until this macro is correctly set up in English docs
-@macro lsrdir{DIR}
-@ifhtml
-@uref{source/input/lsr/\DIR\/collated-files.html,@file{\DIR\}/}
-@end ifhtml
-@ifnothtml
-@file{\DIR\}
-@end ifnothtml
-@end macro
-
-
-
-
 @c  Definitions for references:
-@c     @internalsref
 @c     @rglos
-@c     @rprogram
-@c     @ruser
 @c     @rlearning
+@c     @ruser
+@c     @rprogram
+@c     @rlsr
+@c     @rinternals
+@c  all these also have a @...named version, which allows to specify the
+@c  displayed text for the reference as second argument
 
-@ifhtml
-@c ***** HTML *****
+
+@c ***** HTML + bigpage is a special case (other manual names), all other
+@c formats are treated similarly
+
+@ifnottex
 
 @ifset bigpage
-
-@macro internalsref{TEXT}
-@vindex \TEXT\
-@ref{\TEXT\,,,lilypond-internals-big-page,Référence des propriétés internes}
-@end macro
 
 @macro rglos{TEXT}
 @vindex \TEXT\
 @ref{\TEXT\,,,music-glossary-big-page,Glossaire}
 @end macro
 
-@macro rprogram{TEXT}
+@macro rglosnamed{TEXT,DISPLAY}
 @vindex \TEXT\
-@ref{\TEXT\,,,lilypond-program-big-page,Manuel d'utilisation du programme}
-@end macro
-
-@macro ruser{TEXT}
-@vindex \TEXT\
-@ref{\TEXT\,,,lilypond-big-page,Manuel de notation}
+@ref{\TEXT\,,\DISPLAY\,music-glossary-big-page,Glossaire}
 @end macro
 
 @macro rlearning{TEXT}
@@ -235,24 +181,73 @@
 @ref{\TEXT\,,,lilypond-learning-big-page,Manuel d'initiation}
 @end macro
 
+@macro rlearningnamed{TEXT,DISPLAY}
+@vindex \TEXT\
+@ref{\TEXT\,,\DISPLAY\,lilypond-learning-big-page,Manuel d'initiation}
+@end macro
+
+@macro ruser{TEXT}
+@vindex \TEXT\
+@ref{\TEXT\,,,lilypond-big-page,Manuel de notation}
+@end macro
+
+@macro rusernamed{TEXT,DISPLAY}
+@vindex \TEXT\
+@ref{\TEXT\,,\DISPLAY\,lilypond-big-page,Manuel de notation}
+@end macro
+
+@macro rprogram{TEXT}
+@vindex \TEXT\
+@ref{\TEXT\,,,lilypond-program-big-page,Manuel d'utilisation du programme}
+@end macro
+
+@macro rprogramnamed{TEXT,DISPLAY}
+@vindex \TEXT\
+@ref{\TEXT\,,\DISPLAY\,lilypond-program-big-page,Manuel d'utilisation du programme}
+@end macro
+
+@macro rlsr{TEXT}
+@vindex \TEXT\
+@ref{\TEXT\,,,lilypond-snippets-big-page,Exemples de code}
+@end macro
+
+@macro rlsrnamed{TEXT,DISPLAY}
+@ref{\TEXT\,,\DISPLAY\,lilypond-snippets-big-page,Exemples de code}
+@end macro
+
+@macro rinternals{TEXT}
+@vindex \TEXT\
+@ref{\TEXT\,,,lilypond-internals-big-page,Référence des propriétés internes}
+@end macro
+
+@macro rinternalsnamed{TEXT,DISPLAY}
+@vindex \TEXT\
+@ref{\TEXT\,,,lilypond-internals-big-page,Référence des propriétés internes}
+@end macro
+
 @end ifset
 
 
 @ifclear bigpage
 
-@macro internalsref{TEXT}
-@vindex \TEXT\
-@ref{\TEXT\,,,lilypond-internals,Référence des propriétés internes}
-@end macro
-
 @macro rglos{TEXT}
 @vindex \TEXT\
 @ref{\TEXT\,,,music-glossary,Glossaire}
 @end macro
 
-@macro rprogram{TEXT}
+@macro rglosnamed{TEXT,DISPLAY}
 @vindex \TEXT\
-@ref{\TEXT\,,,lilypond-program,Manuel d'utilisation du programme}
+@ref{\TEXT\,,\DISPLAY\,music-glossary,Glossaire}
+@end macro
+
+@macro rlearning{TEXT}
+@vindex \TEXT\
+@ref{\TEXT\,,,lilypond-learning,Manuel d'initiation}
+@end macro
+
+@macro rlearningnamed{TEXT,DISPLAY}
+@vindex \TEXT\
+@ref{\TEXT\,,\DISPLAY\,lilypond-learning,Manuel d'initiation}
 @end macro
 
 @macro ruser{TEXT}
@@ -260,104 +255,138 @@
 @ref{\TEXT\,,,lilypond,Manuel de notation}
 @end macro
 
-@macro rlearning{TEXT}
+@macro rusernamed{TEXT,DISPLAY}
 @vindex \TEXT\
-@ref{\TEXT\,,,lilypond-learning,Manuel d'initiation}
+@ref{\TEXT\,,\DISPLAY\,lilypond,Manuel de notation}
+@end macro
+
+@macro rprogram{TEXT}
+@vindex \TEXT\
+@ref{\TEXT\,,,lilypond-program,Manuel d'utilisation du programme}
+@end macro
+
+@macro rprogramnamed{TEXT,DISPLAY}
+@vindex \TEXT\
+@ref{\TEXT\,,\DISPLAY\,lilypond-program,Manuel d'utilisation du programme}
+@end macro
+
+@macro rlsr{TEXT}
+@vindex \TEXT\
+@ref{\TEXT\,,,lilypond-snippets,Exemples de code}
+@end macro
+
+@macro rlsrnamed{TEXT,DISPLAY}
+@ref{\TEXT\,,\DISPLAY\,lilypond-snippets,Exemples de code}
+@end macro
+
+@macro rinternals{TEXT}
+@vindex \TEXT\
+@ref{\TEXT\,,,lilypond-internals,Référence des propriétés internes}
+@end macro
+
+@macro rinternalsnamed{TEXT,DISPLAY}
+@vindex \TEXT\
+@ref{\TEXT\,,,lilypond-internals,Référence des propriétés internes}
 @end macro
 
 @end ifclear
 
-@end ifhtml
-
-
-@ifdocbook
-@c ***** DOCBOOK-XML *****
-
-@macro internalsref{TEXT}
-@vindex \TEXT\
-@ref{\TEXT\,,,lilypond-internals,Référence des propriétés internes}
-@end macro
-
-@macro rglos{TEXT}
-@vindex \TEXT\
-@ref{\TEXT\,,,music-glossary,Glossaire}
-@end macro
-
-@macro rprogram{TEXT}
-@vindex \TEXT\
-@ref{\TEXT\,,,lilypond-program,Manuel d'utilisation du programme}
-@end macro
-
-@macro ruser{TEXT}
-@vindex \TEXT\
-@ref{\TEXT\,,,lilypond,Manuel de notation}
-@end macro
-
-@macro rlearning{TEXT}
-@vindex \TEXT\
-@ref{\TEXT\,,,lilypond-learning,Manuel d'initiation}
-@end macro
-
-@end ifdocbook
-
-
-@ifinfo
-@c **** INFO ****
-
-@macro internalsref{NAME}
-@vindex \NAME\
-@inforef{\NAME\,,lilypond-internals,Référence des propriétés internes}
-@end macro
-
-@macro rglos{NAME}
-@vindex \NAME\
-@inforef{\NAME\,,music-glossary,Glossaire}
-@end macro
-
-@macro rprogram{TEXT}
-@vindex \TEXT\
-@ref{\TEXT\,,,lilypond-program,Manuel d'utilisation du programme}
-@end macro
-
-@macro ruser{TEXT}
-@vindex \TEXT\
-@ref{\TEXT\,,,lilypond,Manuel de notation}
-@end macro
-
-@macro rlearning{TEXT}
-@vindex \TEXT\
-@ref{\TEXT\,,,lilypond-learning,Manuel d'initiation}
-@end macro
-
-@end ifinfo
+@end ifnottex
 
 
 @c **** TEX ****
 @iftex
 
-@macro internalsref{TEXT}
-@vindex \TEXT\
-@code{\TEXT\}
-@end macro
-
-@macro rglos {TEXT}
+@macro rglos{TEXT}
 @vindex \TEXT\
 @ref{\TEXT\,,,music-glossary,Glossaire}
 @end macro
 
-@macro rprogram{TEXT}
-@ref{\TEXT\,,,lilypond-program.fr,Manuel d'utilisation du programme}
-@end macro
-
-@macro ruser{TEXT}
-@ref{\TEXT\,,,lilypond.fr,Manuel de notation}
+@macro rglosnamed{TEXT,DISPLAY}
+@vindex \TEXT\
+@ref{\TEXT\,,\DISPLAY\,music-glossary,Glossaire}
 @end macro
 
 @macro rlearning{TEXT}
+@vindex \TEXT\
 @ref{\TEXT\,,,lilypond-learning.fr,Manuel d'initiation}
+@end macro
+
+@macro rlearningnamed{TEXT,DISPLAY}
+@vindex \TEXT\
+@ref{\TEXT\,,\DISPLAY\,lilypond-learning.fr,Manuel d'initiation}
+@end macro
+
+@macro ruser{TEXT}
+@vindex \TEXT\
+@ref{\TEXT\,,,lilypond.fr,Manuel de notation}
+@end macro
+
+@macro rusernamed{TEXT,DISPLAY}
+@vindex \TEXT\
+@ref{\TEXT\,,\DISPLAY\,lilypond.fr,Manuel de notation}
+@end macro
+
+@macro rprogram{TEXT}
+@vindex \TEXT\
+@ref{\TEXT\,,,lilypond-program.fr,Manuel d'utilisation du programme}
+@end macro
+
+@macro rprogramnamed{TEXT,DISPLAY}
+@vindex \TEXT\
+@ref{\TEXT\,,\DISPLAY\,lilypond-program.fr,Manuel d'utilisation du programme}
+@end macro
+
+@macro rlsr{TEXT}
+@ref{\TEXT\,,,lilypond-snippets,Exemples de code}
+@end macro
+
+@macro rlsrnamed{TEXT,DISPLAY}
+@ref{\TEXT\,,\DISPLAY\,lilypond-snippets,Exemples de code}
+@end macro
+
+@macro rinternals{TEXT}
+@vindex \TEXT\
+@ref{\TEXT\,,,lilypond-internals,Référence des propriétés internes}
+@end macro
+
+@macro rinternalsnamed{TEXT,DISPLAY}
+@vindex \TEXT\
+@ref{\TEXT\,,,lilypond-internals,Référence des propriétés internes}
 @end macro
 
 @end iftex
 
 
-@c EOF
+@c **** Macros specific to translated docs ****
+
+@c ugh, cannot set/define global variable 'translationof' in some way?
+@iftex
+@macro translationof{TEXT}
+@end macro
+@end iftex
+
+@ifinfo
+@macro
+@macro translationof{TEXT}
+@set translationof \TEXT\
+@end macro
+@end ifinfo
+
+@c TODO when @translationof is used in translated docs
+@c see if it's feasible to say @value{translationof}
+@macro englishref
+Cette section n'est pas encore encore traduite, veuillez
+vous reporter à la documentation correspondante en anglais.
+@end macro
+
+@ifhtml
+@macro untranslated
+UNTRANSLATED NODE: IGNORE ME
+@end macro
+@end ifhtml
+
+@ifnothtml
+@macro untranslated
+@end macro
+@end ifnothtml

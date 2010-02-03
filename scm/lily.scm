@@ -17,6 +17,11 @@
 (read-enable 'positions)
 (debug-enable 'debug)
 
+(define-public PLATFORM
+  (string->symbol
+   (string-downcase
+    (car (string-tokenize (utsname:sysname (uname)))))))
+
 (define scheme-options-definitions
   `(
 
@@ -55,6 +60,10 @@ ensure that all refs to parsed objects are dead.  This is an internal option, an
     (include-eps-fonts #t "Include fonts in separate-system EPS files.")
     (job-count #f "Process in parallel") 
     (log-file #f "redirect output to log FILE.log")
+    (midi-extension ,(if (eq? PLATFORM 'windows)
+			 "mid"
+			 "midi")
+		    "set the default file extension for MIDI")
 
     (old-relative #f
 		  "relative for simultaneous music works
@@ -141,7 +150,7 @@ on errors, and print a stack trace.")
 ;;; have a more sensible default.
 
 (if (or (ly:get-option 'verbose)
-	(ly:get-option 'trace-memory-frequencency)
+	(ly:get-option 'trace-memory-frequency)
 	(ly:get-option 'trace-scheme-coverage)
 	)
     (begin
@@ -179,22 +188,6 @@ on errors, and print a stack trace.")
     (primitive-load file-name)
     (if (ly:get-option 'verbose)
 	(ly:progress "]"))))
-
-;; Cygwin
-;; #(CYGWIN_NT-5.1 Hostname 1.5.12(0.116/4/2) 2004-11-10 08:34 i686)
-;;
-;; Debian
-;; #(Linux hostname 2.4.27-1-686 #1 Fri Sep 3 06:28:00 UTC 2004 i686)
-;;
-;; Mingw
-;; #(Windows XP HOSTNAME build 2600 5.01 Service Pack 1 i686)
-;;
-
-;; ugh, code dup.
-(define-public PLATFORM
-  (string->symbol
-   (string-downcase
-    (car (string-tokenize (vector-ref (uname) 0) char-set:letter)))))
 
 (define-public DOS
   (let ((platform (string-tokenize
@@ -337,8 +330,11 @@ The syntax is the same as `define*-public'."
 	    "font.scm"
 	    "encoding.scm"
 	    
+	    "flag-styles.scm"
 	    "fret-diagrams.scm"
-	    "define-markup-commands.scm"
+	    "harp-pedals.scm"
+	    "predefined-fretboards.scm"
+            "define-markup-commands.scm"
 	    "define-grob-properties.scm"
 	    "define-grobs.scm"
 	    "define-grob-interfaces.scm"
@@ -546,6 +542,8 @@ The syntax is the same as `define*-public'."
 
 
 (define (multi-fork count)
+  "Split this process in COUNT helpers. Returns either a list of pids,
+or the number of the process."
   (define (helper count acc)
     (if (> count 0)
       (let*
@@ -593,7 +591,6 @@ The syntax is the same as `define*-public'."
   
   (if (and (number? (ly:get-option 'job-count))
 	   (>= (length files) (ly:get-option 'job-count)))
-      
       (let*
 	  ((count (ly:get-option 'job-count))
 	   (split-todo (split-list files count)) 
@@ -605,8 +602,9 @@ The syntax is the same as `define*-public'."
 	
 	(if (number? joblist)
 	    (begin
-	      (ly:set-option 'log-file (format "~a-~a"
-					       (ly:get-option 'log-file) joblist))
+	      (ly:set-option
+	       'log-file (format "~a-~a"
+				 (ly:get-option 'log-file) joblist))
 	      (set! files (vector-ref split-todo joblist)))
 
 	    (begin
@@ -616,25 +614,29 @@ The syntax is the same as `define*-public'."
 		 (let* ((stat (cdr (waitpid pid))))
 		   
 		   (if (not (= stat 0))
-		       (set! errors (acons (list-element-index joblist pid) stat errors)))))
+		       (set! errors
+			     (acons (list-element-index joblist pid)
+				    stat errors)))))
 	       joblist)
 
 	      (for-each
 	       (lambda (x)
 		 (let* ((job (car x))
 			(state (cdr x))
-			(logfile  (format "~a-~a.log"
+			(logfile (format "~a-~a.log"
 					  (ly:get-option 'log-file) job))
 			(log (ly:gulp-file logfile))
 			(len (string-length log))
 			(tail (substring  log (max 0 (- len 1024)))))
 
 		   (if (status:term-sig state)
-		       (ly:message "\n\n~a\n"
-				   (format (_ "job ~a terminated with signal: ~a")
-					   job
-					   (status:term-sig state)))
-		       (ly:message (_ "logfile ~a (exit ~a):\n~a") logfile (status:exit-val state) tail))))
+		       (ly:message
+			"\n\n~a\n"
+			(format (_ "job ~a terminated with signal: ~a")
+				job (status:term-sig state)))
+		       (ly:message
+			(_ "logfile ~a (exit ~a):\n~a")
+			logfile (status:exit-val state) tail))))
 
 	       errors)
 
@@ -646,18 +648,15 @@ The syntax is the same as `define*-public'."
 		  (dump-profile "lily-run-total" '(0 0) (profile-measurements)))
 
 	    (exit (if (null? errors) 0 1))))))
-	      
 	   
   (if (string-or-symbol? (ly:get-option 'log-file))
       (ly:stderr-redirect (format "~a.log" (ly:get-option 'log-file)) "w"))
-
   
   (let ((failed (lilypond-all files)))
     (if (ly:get-option 'trace-scheme-coverage)
 	(begin
 	  (coverage:show-all (lambda (f) (string-contains f "lilypond"))
 			     )))
-	  
     
     (if (pair? failed)
 	(begin
@@ -671,6 +670,11 @@ The syntax is the same as `define*-public'."
 (define-public (lilypond-all files)
   (let* ((failed '())
 	 (separate-logs (ly:get-option 'separate-log-files))
+	 (ping-log
+	  (if separate-logs
+	      (open-file (if (string-or-symbol? (ly:get-option 'log-file))
+			     (format "~a.log" (ly:get-option 'log-file))
+			     "/dev/tty") "a") #f))
 	 (do-measurements (ly:get-option 'dump-profile))
 	 (handler (lambda (key failed-file)
 		    (set! failed (append (list failed-file) failed)))))
@@ -687,6 +691,9 @@ The syntax is the same as `define*-public'."
 
 	 (if separate-logs
 	     (ly:stderr-redirect (format "~a.log" base) "w"))
+	 (if ping-log
+	     (format ping-log "Procesing ~a\n" base))
+	      
 	 (if (ly:get-option 'trace-memory-frequency) 
 	     (mtrace:start-trace  (ly:get-option 'trace-memory-frequency)))
 	 
@@ -718,12 +725,9 @@ The syntax is the same as `define*-public'."
      files)
 
     ;; we want the failed-files notice in the aggregrate logfile.
-    (if (ly:get-option 'separate-logs)
-	(ly:stderr-redirect
-	 (if (string-or-symbol? (ly:get-option 'log-file))
-	     (format "~a.log" (ly:get-option 'log-file))
-	     "/dev/tty") "a"))
-
+    (if ping-log
+	(format ping-log "Failed files: ~a\n" failed))
+	 
     (if (ly:get-option 'dump-profile)
 	(dump-profile "lily-run-total" '(0 0) (profile-measurements)))
 

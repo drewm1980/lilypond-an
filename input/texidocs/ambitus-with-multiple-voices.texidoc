@@ -1,0 +1,14 @@
+  doctitlees = "Ámbitos con varias voces"
+  texidoces = "
+La adición del grabador @code{Ambitus_engraver} al contexto de
+@code{Staff} crea un solo ámbito por pentagrama, incluso en el caso de
+pentagramas con varias voces.
+
+"
+
+texidocde = "
+Indem man den @code{Ambitus_engraver} im @code{Staff}-Kontext
+hinzufügt, erhält man einen einzigen Ambitus pro System, auch in dem
+Fall, dass mehrere Stimmen sich im gleichen System befinden.
+"
+  doctitlede = "Ambitus mit vielen Stimmen"

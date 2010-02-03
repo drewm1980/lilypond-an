@@ -452,7 +452,7 @@ AC_DEFUN(STEPMAKE_FLEXLEXER_LOCATION, [
 using namespace std;
 #include <FlexLexer.h>
 EOF
-	FLEXLEXER_FILE=`$CXX -E conftest.cc | \
+	FLEXLEXER_FILE=`eval $ac_cpp conftest.cc | \
 	  sed 's!# 1 "\(.*FlexLexer.h\)"!@FLEXLEXER@\1@@!g' | grep '@@' | \
 	  sed 's!.*@FLEXLEXER@\(.*\)@@.*$!\1!g' ` 1> /dev/null 2> /dev/null
 	rm conftest.cc
@@ -1029,18 +1029,22 @@ AC_DEFUN(STEPMAKE_PYTHON_DEVEL, [
 	    fi
 	    ])
     
-    if test "$cross_compiling" = "no" -a -z "$PYTHON_CFLAGS"; then
+    AC_CHECK_PROGS(PYTHON_CONFIG, python-config, no)
+
+    if test -z "$PYTHON_CFLAGS" -a "$PYTHON_CONFIG" != "no"; then
+        # Clean out junk: http://bugs.python.org/issue3290
+	# Python headers may need some -f* flags, leave them in.
+	PYTHON_CFLAGS=`$PYTHON_CONFIG --cflags | sed -e 's/ -\(W\|D\|O\|m\)\(\w\|-\|=\)\+//g'`
+	PYTHON_LDFLAGS=`$PYTHON_CONFIG --ldflags`
+    fi
+    
+    if test -z "$PYTHON_CFLAGS" -a "$cross_compiling" = "no"; then
 	changequote(<<, >>)#dnl
 	# alternatively, for python >= 2.0
 	# 'import sys, distutils.sysconfig; sys.stdout.write (distutils.sysconfig.get_python_inc ())'
 	PYTHON_INCLUDE=`$PYTHON -c 'import sys; sys.stdout.write ("%s/include/python%s" % (sys.prefix, sys.version[:3]))'`
 	PYTHON_CFLAGS="-I$PYTHON_INCLUDE"
 	changequote([, ])#dnl
-    fi
-    
-    if test "$cross_compiling" = "yes" -a -z "$PYTHON_CFLAGS"; then
-	PYTHON_CFLAGS=`python-config --cflags`
-	PYTHON_LDFLAGS=`python-config --ldflags`
     fi
     
     if test -z "$PYTHON_HEADER"; then
@@ -1082,6 +1086,7 @@ AC_DEFUN(STEPMAKE_TEXMF_DIRS, [
 
 AC_DEFUN(STEPMAKE_TEXMF, [
     STEPMAKE_PROGS(METAFONT, mf-nowin mf mfw mfont, $1)
+    STEPMAKE_PROGS(METAPOST, mpost, $1)
     # STEPMAKE_PROGS(INIMETAFONT, inimf inimfont "$METAFONT -ini", $1)
 
     AC_MSG_CHECKING(for working metafont mode)

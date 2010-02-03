@@ -1,31 +1,23 @@
-\input texinfo @c -*- coding: utf-8; mode: texinfo; -*-
+\input texinfo @c -*- coding: utf-8; mode: texinfo; documentlanguage: es -*-
 @ignore
-    Translation of GIT committish: 0184e537d7eda6265b92fe20f3565de0f0411869
+    Translation of GIT committish: 470afe4ab29825194827f7dfcf031addb68771ce
 
     When revising a translation, copy the HEAD committish of the
     version that you are working on.  See TRANSLATION for details.
 @end ignore
-@setfilename lilypond-program.info
-@settitle GNU LilyPond program usage
 @documentencoding UTF-8
-@documentlanguage en
+@documentlanguage es
+@setfilename lilypond-program.info
+@settitle GNU LilyPond: manual de utilización del programa
 
 @include macros.itexi
 
-@iftex
 @afourpaper
-@c don't replace quotes with directed quotes
-@tex
-\gdef\SETtxicodequoteundirected{Foo}
-\gdef\SETtxicodequotebacktick{Bla}
-@end tex
-@end iftex
-
 
 @c don't remove this comment.
 @ignore
 @omfcreator Han-Wen Nienhuys, Jan Nieuwenhuizen and Graham Percival
-@omfdescription User manual of the LilyPond music engraving system
+@omfdescription Program Usage of the LilyPond music engraving system
 @omftype program usage
 @omfcategory Applications|Publishing
 @omflanguage English
@@ -33,9 +25,15 @@
 
 @c Translators: Francisco Vila
 
+@ifnottex
+@node Top
+@top GNU LilyPond: Manual de utilización del programa
+@c HJJ: Info needs `@top', which is a synonym for `@unnumbered' in TeX.
+@end ifnottex
+
 @ifhtml
-Este documento está disponible también en formato
-@uref{source/Documentation/user/lilypond-program.pdf,PDF} y como
+Este documento también está disponible en formato
+@uref{source/Documentation/user/lilypond-program.es.pdf,PDF} y como
 @uref{source/Documentation/user/lilypond-program-big-page.html,una sola página}.
 @end ifhtml
 
@@ -54,15 +52,15 @@ Este documento está disponible también en formato
 @author El equipo de desarrollo de LilyPond
 
 
-Copyright @copyright{} 1999--2007 por los autores
-
-@emph{The translation of the following copyright notice is provided
-for courtesy to non-English speakers, but only the notice in English
-legally counts.}
+Copyright @copyright{} 1999--2008 por los autores
 
 @emph{La traducción de la siguiente nota de copyright se ofrece como
 cortesía para las personas de habla no inglesa, pero únicamente la
 nota en inglés tiene validez legal.}
+
+@emph{The translation of the following copyright notice is provided
+for courtesy to non-English speakers, but only the notice in English
+legally counts.}
 
 @quotation
 Se otorga permiso para copiar, distribuir y/o modificar este documento
@@ -89,15 +87,15 @@ Para LilyPond versión @version{}
 
 
 @copying
-Copyright @copyright{} 1999--2007 por los autores
-
-@emph{The translation of the following copyright notice is provided
-for courtesy to non-English speakers, but only the notice in English
-legally counts.}
+Copyright @copyright{} 1999--2008 por los autores
 
 @emph{La traducción de la siguiente nota de copyright se ofrece como
 cortesía para las personas de habla no inglesa, pero únicamente la
 nota en inglés tiene validez legal.}
+
+@emph{The translation of the following copyright notice is provided
+for courtesy to non-English speakers, but only the notice in English
+legally counts.}
 
 @quotation
 Se otorga permiso para copiar, distribuir y/o modificar este documento
@@ -121,15 +119,15 @@ Free Documentation License''.
 @ifnottex
 Este archivo es la documentación de la utilización del programa GNU LilyPond.
 
-Copyright 1999--2007 por los autores
-
-@emph{The translation of the following copyright notice is provided
-for courtesy to non-English speakers, but only the notice in English
-legally counts.}
+Copyright 1999--2008 por los autores
 
 @emph{La traducción de la siguiente nota de copyright se ofrece como
 cortesía para las personas de habla no inglesa, pero únicamente la
 nota en inglés tiene validez legal.}
+
+@emph{The translation of the following copyright notice is provided
+for courtesy to non-English speakers, but only the notice in English
+legally counts.}
 
 @quotation
 Se otorga permiso para copiar, distribuir y/o modificar este documento
@@ -151,18 +149,18 @@ Free Documentation License''.
 @end ifnottex
 
 @ifnottex
-@node Top
-@top GNU LilyPond --- program usage
-@c HJJ: Info needs `@top', which is a synonym for `@unnumbered' in TeX.
+El presente documento es el manual de utilización del programa GNU
+LilyPond, versión @version{}.  Para ver más información sobre la
+relación entre éste y el resto de los documentos, consulte
+@rlearning{About the documentation}.
 
-El presente documento es el manual de utilización del programa GNU LilyPond, versión @version{}.
-
-@cindex web site
+@cindex web, página
+@cindex página web
 @cindex URL
 
-Se puede ampliar información en
-@uref{http://@/www@/.lilypond@/.org/}.  La página web incluye copias en línea
-de esta documentación y otras.
+Se puede encontrar más información en
+@uref{http://@/www@/.lilypond@/.org/}.  La página web incluye copias
+en línea de la presente documentación y de otras.
 
 @menu
 * Install::                        Cómo instalarlo o compilarlo.
@@ -180,7 +178,6 @@ Apéndices
 
 @contents
 
-
 @include install.itely
 @include setup.itely
 @include running.itely
@@ -195,4 +192,3 @@ Apéndices
 @printindex cp
 
 @bye
-

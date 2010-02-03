@@ -6,20 +6,13 @@
     version that you are working on.  See TRANSLATION for details.
 @end ignore
 @setfilename lilypond.info
-@settitle GNU LilyPond User Manual
+@settitle GNU LilyPond Notation Reference
 @documentencoding UTF-8
 @documentlanguage en
 
 @include macros.itexi
 
-@iftex
 @afourpaper
-@c don't replace quotes with directed quotes
-@tex
-\gdef\SETtxicodequoteundirected{Foo}
-\gdef\SETtxicodequotebacktick{Bla}
-@end tex
-@end iftex
 
 @c  Keep this here, since it pertains to the direntry below.
 @ignore
@@ -66,6 +59,13 @@ Distributions will want to install lilypond.info in postinstall, doing:
 @omflanguage English
 @end ignore
 
+@ifnottex
+@node Top
+@top GNU LilyPond --- Notation Reference
+@chapheading The music typesetter
+@c HJJ: Info needs `@top', which is a synonym for `@unnumbered' in TeX.
+@end ifnottex
+
 
 @ifhtml
 This document is also available as a
@@ -87,7 +87,7 @@ This document is also available as a
 @titlefont{Notation Reference}
 @author The LilyPond development team
 
-Copyright @copyright{} 1999--2007 by the authors
+Copyright @copyright{} 1999--2008 by the authors
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -104,7 +104,7 @@ For LilyPond version @version{}
 @end titlepage
 
 @copying
-Copyright @copyright{} 1999--2007 by the authors
+Copyright @copyright{} 1999--2008 by the authors
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -119,7 +119,7 @@ Free Documentation License''.
 @ifnottex
 This file documents GNU LilyPond.
 
-Copyright 1999--2007 by the authors
+Copyright 1999--2008 by the authors
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -132,11 +132,9 @@ Free Documentation License''.
 @end ifnottex
 
 @ifnottex
-@node Top
-@top GNU LilyPond --- The music typesetter
-@c HJJ: Info needs `@top', which is a synonym for `@unnumbered' in TeX.
-
-This is the User Manual for GNU LilyPond version @version{}.
+This is the Notation Reference (NR) for GNU LilyPond version @version{}.
+For more information about how this fits with the other
+documentation, see @rlearning{About the documentation}.
 
 @cindex web site
 @cindex URL
@@ -151,9 +149,8 @@ of this and other documentation.
 * Musical notation::               Musical notation.
 * Specialist notation::            Notation which is only used for
     specific purposes.
-* Input syntax::                   General information about
-    lilypond input files.
-* Non-musical notation::           Output that is not musical notation.
+* General input and output::       General information about
+    lilypond input and output.
 * Spacing issues::                 Display of output on paper.
 * Changing defaults::              Tuning output.
 * Interfaces for programmers::     Expert usage.
@@ -176,7 +173,6 @@ Appendices
 @include specialist.itely
 
 @include input.itely
-@include non-music.itely
 @include spacing.itely
 
 @include changing-defaults.itely
@@ -191,14 +187,25 @@ Appendices
 @node LilyPond command index
 @appendix LilyPond command index
 
-This index does blah blah blah.
+This index lists all the LilyPond commands and keywords with links
+to those sections of the manual which describe or discuss their
+use.  Each link is in two parts.  The first part points to the
+exact location in the manual where the command or keyword appears;
+the second part points to the start of the section of the manual
+in which the command or keyword appears.
 
 @printindex ky
 
 @node LilyPond index
 @appendix LilyPond index
 
-In contrast, this index does blaz blaz blaz.
+In addition to all the LilyPond commands and keywords, this index
+lists musical terms and words which relate to each of them, with
+links to those sections of the manual which describe or discuss
+that topic.  Each link is in two parts.  The first part points to
+the exact location in the manual where the topic appears; the
+second part points to the start of the section of the manual where
+that topic is discussed.
 
 @printindex cp
 

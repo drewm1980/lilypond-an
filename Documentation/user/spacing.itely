@@ -7,11 +7,48 @@
     version that you are working on.  See TRANSLATION for details.
 @end ignore
 
-@c \version "2.11.38"
+@c \version "2.11.64"
 
-@c A menu is needed before every deeper *section nesting of @node's; run
-@c     M-x texinfo-all-menus-update
-@c to automatically fill in these menus before saving changes
+@ignore
+GDP TODO list
+
+Negative numbers are allowed:
+> Are you sure? The following works well
+> \paper{
+>   first-page-number = -2
+> }
+> and prints page number -1 on the second page, for example.
+
+
+In 5.2.1 the @refbugs (line 495 in spacing.itely on master) it
+states:
+
+"@code{layout-set-staff-size} does not change the distance between
+the
+staff lines."
+
+Could we add a sentence:
+"Use instead the pair               fontSize = #@var{N}
+            \override StaffSymbol #'staff-space = #(magstep
+@var{N})
+inside the Staff context to change the size of the font and the
+distance between
+staff lines accordingly."
+
+Actually I found, that the @internalsref{StaffSymbol} at line 481
+sends to an uncomplete
+documentation. The property staff-space is not explained here. I
+thought Y-extent might be of
+help, but it is in turn explained by x-space which again is
+missing from the list. Who has the
+knowledge to fix this?
+
+
+Clarify
+http://code.google.com/p/lilypond/issues/detail?id=68
+
+@end ignore
+
 
 @node Spacing issues
 @chapter Spacing issues
@@ -30,14 +67,23 @@ estimated.  Finally, a page breaking and line breaking combination is chosen
 so that neither the horizontal nor the vertical spacing is too cramped
 or stretched.
 
+Settings which influence layout may be placed in two blocks.
+The @code{\paper @{...@}} block is placed outside any
+@code{\score @{...@}} blocks and contains settings that
+relate to the entire document.  The @code{\layout @{...@}}
+block is placed within a @code{\score @{...@}} block and
+contains settings for that particular score.  If you have
+only one @code{\score @{...@}} block the two have the same
+effect.  In general the commands shown in this chapter can
+be placed in either.
+
 @menu
-* Paper and pages::             
-* Music layout::                
-* Displaying spacing::          
-* Breaks::                      
-* Vertical spacing::            
-* Horizontal spacing::          
-* Page layout MOVED FROM LM::   
+* Paper and pages::
+* Music layout::
+* Breaks::
+* Vertical spacing::
+* Horizontal spacing::
+* Fitting music onto fewer pages::
 @end menu
 
 
@@ -45,11 +91,11 @@ or stretched.
 @section Paper and pages
 
 This section deals with the boundaries that define the area
-that music can be printed inside.
+within which music can be printed.
 
 @menu
-* Paper size::                  
-* Page formatting::             
+* Paper size::
+* Page formatting::
 @end menu
 
 
@@ -58,243 +104,175 @@ that music can be printed inside.
 
 @cindex paper size
 @cindex page size
-@funindex papersize
 
-To change the paper size, there are two commands,
+Two functions are available for changing the paper size:
+@code{set-default-paper-size} and @code{set-paper-size}.
+@code{set-default-paper-size} must be placed in the toplevel
+scope, and @code{set-paper-size} must be placed in a @code{\paper}
+block:
+
 @example
 #(set-default-paper-size "a4")
+@end example
+
+@example
 \paper @{
   #(set-paper-size "a4")
 @}
 @end example
 
-The first command sets the size of all pages.  The second command sets the
-size
-of the pages that the @code{\paper} block applies to -- if the @code{\paper}
-block is at the top of the file, then it will apply to all pages.  If the
-@code{\paper} block is inside a @code{\book}, then the paper size will only
-apply to that book.
+@noindent
+@code{set-default-paper-size} sets the size of all pages, whereas
+@code{set-paper-size} only sets the size of the pages that the
+@code{\paper} block applies to.  For example, if the @code{\paper}
+block is at the top of the file, then it will apply the paper size
+to all pages.  If the @code{\paper} block is inside a
+@code{\book}, then the paper size will only apply to that book.
 
-Support for the following paper sizes are included by default,
-@code{a6}, @code{a5}, @code{a4}, @code{a3}, @code{legal}, @code{letter},
-@code{11x17} (also known as tabloid).
+Common paper sizes are available, including @code{a4},
+@code{letter}, @code{legal}, and @code{11x17} (also known as
+tabloid).  Many more paper sizes are supported by default.  For
+details, see @file{scm/@/paper@/.scm}, and search for the
+definition of @code{paper-alist}.
 
-Extra sizes may be added by editing the definition for
-@code{paper-alist} in the initialization file @file{scm/paper.scm}.
+@c TODO add a new appendix for paper sizes (auto-generated) -pm
+
+@warning{The default paper size is @code{a4}.}
+
+Extra sizes may be added by editing the definition of
+@code{paper-alist} in the initialization file
+@file{scm/@/paper@/.scm}, however they will be overridden on a
+subsequent install.
 
 @cindex orientation
 @cindex landscape
 
-If the symbol @code{landscape} is supplied as an argument to
-@code{set-default-paper-size}, the pages will be rotated by 90 degrees,
-and wider line widths will be set correspondingly.
+If the symbol @code{'landscape} is supplied as an argument to
+@code{set-default-paper-size}, pages will be rotated by 90
+degrees, and wider line widths will be set accordingly.
 
 @example
 #(set-default-paper-size "a6" 'landscape)
 @end example
 
-Setting the paper size will adjust a number of @code{\paper} variables
-(such as margins).  To use a particular paper size with altered
-@code{\paper} variables, set the paper size before setting the variables.
+Setting the paper size will adjust a number of @code{\paper}
+variables, such as margins.  To use a particular paper size with
+altered @code{\paper} variables, set the paper size before setting
+the variables.
+
+
+@seealso
+
+Installed Files:
+@file{scm/@/paper@/.scm}.
+
+Snippets:
+@rlsr{Spacing}.
 
 
 @node Page formatting
 @subsection Page formatting
 
-@cindex page formatting
-@cindex margins
-@cindex header, page
-@cindex footer, page
+Margins, headers, and footers and other layout variables are
+automatically set according to the paper size.
 
-LilyPond will do page layout, set margins, and add headers and
-footers to each page.
+This section lists and describes a number of paper variables that
+may be altered.
 
-The default layout responds to the following settings in the
-@code{\paper} block.
+@menu
+* Vertical dimensions::
+* Horizontal dimensions::
+* Other layout variables::
+@end menu
+
+
+@node Vertical dimensions
+@unnumberedsubsubsec Vertical dimensions
+
+These variables are used to set different vertical dimensions on a
+page:
 
 @funindex \paper
 
-@quotation
 @table @code
-@funindex first-page-number
-@item first-page-number
-The value of the page number of the first page.  Default is@tie{}1.
 
-@funindex print-first-page-number
-@item print-first-page-number
-If set to true, will print the page number in the first page.  Default is
-false.
+@item after-title-space
+@funindex after-title-space
 
-@funindex print-page-number
-@item print-page-number
-If set to false, page numbers will not be printed.  Default is true.
+The amount of space between the title and the first system.
+Default: @code{5\mm}.
 
-@funindex paper-width
-@item paper-width
-The width of the page.  The default is taken from the current paper size,
-see @ref{Paper size}. 
+@item before-title-space
+@funindex before-title-space
 
-@funindex paper-height
-@item paper-height
-The height of the page.  The default is taken from the current paper size,
-see @ref{Paper size}. 
+Amount of space between the last system of the previous piece and the
+title of the next.  Default: @code{10\mm}.
 
-@funindex top-margin
-@item top-margin
-Margin between header and top of the page.  Default is@tie{}5mm.
-
-@funindex bottom-margin
-@item bottom-margin
-Margin between footer and bottom of the page.  Default is@tie{}6mm.
-
-@funindex left-margin
-@item left-margin
-Margin between the left side of the page and the beginning of the
-music.  Unset by default, which means that the margins is determined
-based on the @code{paper-width} and @code{line-width} to center the
-score on the paper. 
-
-@funindex line-width
-@item line-width
-The length of the systems.  Default is @code{paper-width} minus @tie{}20mm.
-
-@funindex head-separation
-@item head-separation
-Distance between the top-most music system and the page header.  Default
-is@tie{}4mm. 
-
-@funindex foot-separation
-@item foot-separation
-Distance between the bottom-most music system and the page
-footer.  Default is@tie{}4mm.
-
-@funindex page-top-space
-@item page-top-space
-Distance from the top of the printable area to the center of the first
-staff.  This only works for staves which are vertically small.  Big staves
-are set with the top of their bounding box aligned to the top of the
-printable area.  Default is@tie{}12mm.
-
-@funindex ragged-bottom
-@item ragged-bottom
-If set to true, systems will not be spread vertically across the page.  This
-does not affect the last page.  Default is false.
-
-This should be set to true for pieces that have only two or three
-systems per page, for example orchestral scores.
-
-@funindex ragged-last-bottom
-@item ragged-last-bottom
-If set to false, systems will be spread vertically to fill the last
-page.  Default is true.
-
-Pieces that amply fill two pages or more should have this set to
-true.
-
-@funindex system-count
-@item system-count
-This variable, if set, specifies into how many lines a score should be
-broken.  Unset by default.
-
-@funindex between-system-space
-@item between-system-space
-This dimensions determines the distance between systems.  It is the
-ideal distance between the center of the bottom staff of one system
-and the center of the top staff of the next system.  Default is@tie{}20mm.
-
-Increasing this will provide a more even appearance of the page at the
-cost of using more vertical space.
-
-@funindex between-system-padding
 @item between-system-padding
-This dimension is the minimum amount of white space that will always
-be present between the bottom-most symbol of one system, and the
-top-most of the next system.  Default is@tie{}4mm.
+@funindex between-system-padding
+
+The minimum amount of white space that will always be present
+between the bottom-most symbol of one system, and the top-most of
+the next system.  Default: @code{4\mm}.
 
 Increasing this will put systems whose bounding boxes almost touch
 farther apart.
 
-@funindex page-breaking-between-system-padding
-@item page-breaking-between-system-padding
-This variable tricks the page breaker into thinking that
-@code{between-system-padding} is set to something different than it
-really is.  For example, if this variable is set to something substantially
-larger than @code{between-system-padding}, then the page-breaker will put
-fewer systems on each page.
+@item between-system-space
+@funindex between-system-space
 
-@funindex horizontal-shift
-@item horizontal-shift
-All systems (including titles and system separators) are shifted by
-this amount to the right.  Page markup, such as headers and footers are
-not affected by this.  The purpose of this variable is to make space
-for instrument names at the left.  Default is@tie{}0.
+The distance between systems.  It is the ideal distance between
+the center of the bottom staff of one system and the center of the
+top staff of the next system.  Default: @code{20\mm}.
 
-@funindex after-title-space
-@item after-title-space
-Amount of space between the title and the first system.  Default is@tie{}5mm.
+Increasing this value will provide a more even appearance of the
+page at the cost of using more vertical space.
 
-@funindex before-title-space
-@item before-title-space
-Amount of space between the last system of the previous piece and the
-title of the next.  Default is@tie{}10mm.
-
-@funindex between-title-space
 @item between-title-space
+@funindex between-title-space
+
 Amount of space between consecutive titles (e.g., the title of the
-book and the title of a piece).  Default is@tie{}2mm.
+book and the title of a piece).  Default: @code{2\mm}.
 
-@funindex printallheaders
-@item printallheaders
-Setting this to #t will print all headers for each \score in the
-output.  Normally only the piece and opus \headers are printed.
+@item bottom-margin
+@funindex bottom-margin
 
-@funindex systemSeparatorMarkup
-@item systemSeparatorMarkup
-This contains a markup object, which will be inserted between
-systems.  This is often used for orchestral scores.  Unset by default.
+The margin between footer and bottom of the page.  Default:
+@code{6\mm}.
 
-The markup command @code{\slashSeparator} is provided as a sensible
-default,  for example
+@item foot-separation
+@funindex foot-separation
 
-@lilypond[ragged-right]
-#(set-default-paper-size "a6" 'landscape)
-\book {
-  \score {
-    \relative { c1 \break c1 }
-  }
-  \paper {
-    systemSeparatorMarkup = \slashSeparator
-  }
-}
-@end lilypond
+Distance between the bottom-most music system and the page
+footer.  Default: @code{4\mm}.
 
-@funindex blank-page-force
-@item blank-page-force
-The penalty for having a blank page in the middle of a
-score.  This is not used by @code{ly:optimal-breaking} since it will
-never consider blank pages in the middle of a score.  Default value
-is 10.
+@item head-separation
+@funindex head-separation
 
-@funindex blank-last-page-force
-@item blank-last-page-force
-The penalty for ending the score on an odd-numbered page.
-Default value is 0.
+Distance between the top-most music system and the page header.
+Default: @code{4\mm}.
 
-@funindex page-spacing-weight
-@item page-spacing-weight
-The relative importance of page (vertical) spacing and line (horizontal)
-spacing.  High values will make page spacing more important.  Default
-value is 10.
+@item page-top-space
+@funindex page-top-space
 
-@funindex auto-first-page-number
-@item auto-first-page-number
-The page breaking algorithm is affected by the first page number being
-odd or even.  If this variable is set to #t, the page breaking algorithm
-will decide whether to start with an odd or even number.  This will 
-result in the first page number remaining as is or being increased by one.
+Distance from the top of the printable area to the center of the
+first staff.  This only works for staves that are vertically
+small.  Big staves are set with the top of their bounding box
+aligned to the top of the printable area.  Default: @code{12\mm}.
+
+@item paper-height
+@funindex paper-height
+
+The height of the page.  Default: the height of the current paper
+size.  For details, see @ref{Paper size}.
+
+@item top-margin
+@funindex top-margin
+
+The margin between header and top of the page.  Default:
+@code{5\mm}.
 
 @end table
-@end quotation
 
 
 @snippets
@@ -331,7 +309,7 @@ Example:
 @}
 @end example
 
-This second example centers page numbers at the bottom of every page. 
+This second example centers page numbers at the bottom of every page.
 
 @example
 \paper @{
@@ -345,7 +323,7 @@ This second example centers page numbers at the bottom of every page.
   evenFooterMarkup = \markup @{ \fill-line @{
      \bold \fontsize #3 \on-the-fly #print-page-number-check-first
      \fromproperty #'page:page-number-string @} @}
-@} 
+@}
 @end example
 
 You can also define these values in Scheme.  In that case @code{mm},
@@ -371,11 +349,258 @@ how much space can be spent on a page, the latter creates the actual
 page given the system to put on it.
 
 
+@seealso
+
+Notation Reference:
+@ref{Vertical spacing between systems}.
+
+Snippets:
+@rlsr{Spacing}.
+
+
+@node Horizontal dimensions
+@unnumberedsubsubsec Horizontal dimensions
+
+@warning{If @code{paper-width} is manually set, @code{line-width},
+@code{left-margin}, @code{indent}, and @code{short-indent} may
+have to be adjusted as well.}
+
+There are a few variables that determine the horizontal dimensions
+on a page:
+
+@table @code
+
+@item horizontal-shift
+@funindex horizontal-shift
+
+The amount that all systems (including titles and system
+separators) are shifted to the right.  Default: @code{0.0}.
+
+@item indent
+@funindex indent
+
+The level of indentation for the first system in a score.
+Default: @code{paper-width} divided by @code{14}, as determined by
+@code{set-default-paper-size} or @code{set-paper-size}.
+
+@item left-margin
+@funindex left-margin
+
+The margin between the left edge of the page and the beginning of
+each system.  Default: @code{10\mm}, as determined by
+@code{set-default-paper-size} or @code{set-paper-size}.
+
+@item line-width
+@funindex line-width
+
+The width of music systems.  Default: @code{paper-width} minus
+@code{20\mm}, as determined by @code{set-default-paper-size} or
+@code{set-paper-size}.
+
+@item paper-width
+@funindex paper-width
+
+The width of the page.  Default: the width of the current paper
+size.  For details, see @ref{Paper size}.
+
+@item short-indent
+@funindex short-indent
+
+The level of indentation for all systems in a score besides the
+first system.  Default: @code{0}, as determined by
+@code{set-default-paper-size} or @code{set-paper-size}.
+
+@end table
+
+
+@seealso
+
+Snippets:
+@rlsr{Spacing}.
+
+
 @knownissues
 
-The option right-margin is defined but doesn't set the right margin
-yet.  The value for the right margin has to be defined adjusting the
-values of @code{left-margin} and @code{line-width}.
+The option @code{right-margin} is defined but doesn't set the
+right margin yet.  The value for the right margin has to be
+defined by adjusting the values of @code{left-margin} and
+@code{line-width}.
+
+
+@node Other layout variables
+@unnumberedsubsubsec Other layout variables
+
+These variables can be used to adjust page layout in general.
+
+@table @code
+
+@item auto-first-page-number
+@funindex auto-first-page-number
+
+The page breaking algorithm is affected by the first page number
+being odd or even.  If set to true, the page breaking algorithm
+will decide whether to start with an odd or even number.  This
+will result in the first page number remaining as is or being
+increased by one.  Default: @code{##f}.
+
+@ignore
+
+FIXME: this variable is used, but I don't know what it does. -pm
+@item blank-after-score-page-force
+@funindex blank-after-score-page-force
+
+Default: @code{2}.
+
+@end ignore
+
+@item blank-last-page-force
+@funindex blank-last-page-force
+
+The penalty for ending the score on an odd-numbered page.
+Default: @code{0}.
+
+@item blank-page-force
+@funindex blank-page-force
+
+The penalty for having a blank page in the middle of a
+score.  This is not used by @code{ly:optimal-breaking} since it will
+never consider blank pages in the middle of a score.  Default:
+@code{5}.
+
+@item first-page-number
+@funindex first-page-number
+
+The value of the page number on the first page.  Default:
+@code{#1}.
+
+@item page-breaking-between-system-padding
+@funindex page-breaking-between-system-padding
+
+Tricks the page breaker into thinking that
+@code{between-system-padding} is set to something different than
+it really is.  For example, if this variable is set to something
+substantially larger than @code{between-system-padding}, then the
+page-breaker will put fewer systems on each page.  Default: unset.
+
+@item page-count
+@funindex page-count
+
+The number of pages to be used for a score.  Default: unset.
+
+@item page-limit-inter-system-space
+@funindex page-limit-inter-system-space
+
+If set to true, limits space between systems on a page with a lot
+of space left.  Default: @code{##f}.  For details, see
+@ref{Vertical spacing between systems}.
+
+@item page-limit-inter-system-space-factor
+@funindex page-limit-inter-system-space-factor
+
+The factor used by @code{page-limit-inter-system-space}.  Default:
+@code{1.4}.  For details, see
+@ref{Vertical spacing between systems}.
+
+@item page-spacing-weight
+@funindex page-spacing-weight
+
+The relative importance of page (vertical) spacing and line
+(horizontal) spacing.  High values will make page spacing more
+important.  Default: @code{#10}.
+
+@item print-all-headers
+@funindex print-all-headers
+
+If set to true, this will print all headers for each \score in the
+output.  Normally only the piece and opus header variables are
+printed.  Default: @code{##f}.
+
+@item print-first-page-number
+@funindex print-first-page-number
+
+If set to true, a page number is printed on the first page.
+Default: @code{##f}.
+
+@item print-page-number
+@funindex print-page-number
+
+If set to false, page numbers are not printed.  Default:
+@code{##t}.
+
+@item ragged-bottom
+@funindex ragged-bottom
+
+If set to true, systems will not spread vertically across the
+page.  This does not affect the last page.  Default: @code{##f}.
+
+This should be set to true for pieces that have only two or three
+systems per page, for example orchestral scores.
+
+@item ragged-last
+@funindex ragged-last
+
+If set to true, the last system in the score will not fill the
+line width.  Instead the last system ends at its natural
+horizontal length.  Default: @code{##f}.
+
+@item ragged-last-bottom
+@funindex ragged-last-bottom
+
+If set to false, systems will spread vertically across the last
+page.  Default: @code{##t}.
+
+Pieces that amply fill two pages or more should have this set to
+true.
+
+It also affects the last page of book parts, ie parts of a book created
+with @code{\bookpart} blocks.
+
+@item ragged-right
+@funindex ragged-right
+
+If set to true, systems will not fill the line width.  Instead,
+systems end at their natural horizontal length.  Default:
+@code{##f}.
+
+If the score has only one system, the default value is @code{##t}.
+
+@item system-separator-markup
+@funindex system-separator-markup
+
+A markup object that is inserted between systems.  This is often
+used for orchestral scores.  Default: unset.
+
+The markup command @code{\slashSeparator} is provided as a sensible
+default,  for example
+
+@lilypond[quote,ragged-right]
+#(set-default-paper-size "a6" 'landscape)
+\book {
+  \score {
+    \relative { c1 \break c1 }
+  }
+  \paper {
+    system-separator-markup = \slashSeparator
+  }
+}
+@end lilypond
+
+@item system-count
+@funindex system-count
+
+The number of systems to be used for a score.
+Default: unset.
+
+@end table
+
+
+@seealso
+
+Snippets:
+@rlsr{Spacing}.
+
+
+@knownissues
 
 The default page header puts the page number and the @code{instrument}
 field from the @code{\header} block on a line.
@@ -389,8 +614,8 @@ add space between the titles and the first system of the score.
 @section Music layout
 
 @menu
-* Setting the staff size::      
-* Score layout::                
+* Setting the staff size::
+* Score layout::
 @end menu
 
 
@@ -400,6 +625,9 @@ add space between the titles and the first system of the score.
 @cindex font size, setting
 @cindex staff size, setting
 @funindex layout file
+
+The default @strong{staff size} is set to 20 points.
+This may be changed in two ways:
 
 To set the staff size globally for all scores in a file (or
 in a @code{book} block, to be precise), use @code{set-global-staff-size}.
@@ -412,7 +640,7 @@ in a @code{book} block, to be precise), use @code{set-global-staff-size}.
 This sets the global default size to 14pt staff height and scales all
 fonts accordingly.
 
-To set the staff size individually for each score, use 
+To set the staff size individually for each score, use
 @example
 \score@{
   ...
@@ -481,16 +709,21 @@ The recommended font sizes are listed in the following table:
 
 These fonts are available in any sizes.  The context property
 @code{fontSize} and the layout property @code{staff-space} (in
-@internalsref{StaffSymbol}) can be used to tune the size for individual
+@rinternals{StaffSymbol}) can be used to tune the size for individual
 staves.  The sizes of individual staves are relative to the global size.
 
 @example
 
 @end example
 
+
 @seealso
 
-This manual: @ref{Selecting notation font size}.
+Notation Reference:
+@ref{Selecting notation font size}.
+
+Snippets:
+@rlsr{Spacing}.
 
 
 @knownissues
@@ -524,52 +757,26 @@ layout.
 
 @seealso
 
-This manual: @ref{Changing context default settings}.
+Notation Reference:
+@ref{Changing context default settings}.
 
-
-@node Displaying spacing
-@section Displaying spacing
-
-@funindex annotate-spacing
-@cindex Spacing, display of properties
-
-To graphically display the dimensions of vertical properties that may
-be altered for page formatting, set @code{annotate-spacing} in the
-@code{\paper} block, like this
-
-
-@c need to have \book{} otherwise we get  the separate systems. -hwn
-@lilypond[verbatim]
-#(set-default-paper-size "a6" 'landscape)
-
-\book {
-  \score { { c4 } }
-  \paper { annotate-spacing = ##t }
-}
-@end lilypond
-
-
-@c  TODO: really bad vagueness due to bug in annotate-spacing.  -gp
-@noindent
-Some unit dimensions are measured in staff spaces, while others
-are measured in millimeters.
-The pairs
-(@var{a},@var{b}) are intervals, where @var{a} is the lower edge and
-@var{b} the upper edge of the interval.
+Snippets:
+@rlsr{Spacing}.
 
 
 @node Breaks
 @section Breaks
 
 @menu
-* Line breaking::               
-* Page breaking::               
-* Optimal page breaking::       
-* Optimal page turning::        
-* Minimal page breaking::       
-* Explicit breaks::             
-* Using an extra voice for breaks::  
+* Line breaking::
+* Page breaking::
+* Optimal page breaking::
+* Optimal page turning::
+* Minimal page breaking::
+* Explicit breaks::
+* Using an extra voice for breaks::
 @end menu
+
 
 @node Line breaking
 @subsection Line breaking
@@ -577,24 +784,55 @@ The pairs
 @cindex line breaks
 @cindex breaking lines
 
-Line breaks are normally computed automatically.  They are chosen so
-that lines look neither cramped nor loose, and that consecutive lines
-have similar density.
+Line breaks are normally determined automatically. They are chosen
+so that lines look neither cramped nor loose, and consecutive
+lines have similar density.  Occasionally you might want to
+override the automatic breaks; you can do this by specifying
+@code{\break}. This will force a line break at this point.  However,
+line breaks can only occur at the end of @q{complete} bars, i.e.,
+where there are no notes or tuplets left @q{hanging} over the bar
+line.  If you want to have a line break where there is no bar line,
+you can force an invisible bar line by entering @code{\bar ""},
+although again there must be no notes left hanging over in any of
+the staves at this point, or it will be ignored.
 
-Occasionally you might want to override the automatic breaks; you can
-do this by specifying @code{\break}.  This will force a line break at
-this point.  Line breaks can only occur at places where there are bar
-lines.  If you want to have a line break where there is no bar line,
-you can force an invisible bar line by entering @code{\bar
-""}.  Similarly, @code{\noBreak} forbids a line break at a
-point.
+The opposite command, @code{\noBreak}, forbids a line break at the
+bar line where it is inserted.
+
+The most basic settings influencing line spacing are @code{indent}
+and @code{line-width}. They are set in the @code{\layout} block.
+They control the indentation of the first line of music, and the
+lengths of the lines.
+
+If @code{ragged-right} is set to true in the @code{\layout} block,
+then systems end at their natural horizontal length, instead of
+being spread horizontally to fill the whole line. This is useful
+for short fragments, and for checking how tight the natural
+spacing is.
+
+@c TODO Check and add para on default for ragged-right
+
+The option @code{ragged-last} is similar to @code{ragged-right},
+but affects only the last line of the piece.
+
+@example
+\layout @{
+indent = #0
+line-width = #150
+ragged-last = ##t
+@}
+@end example
+
 
 
 @cindex regular line breaks
 @cindex four bar music.
 
 For line breaks at regular intervals use @code{\break} separated by
-skips and repeated with @code{\repeat}:
+skips and repeated with @code{\repeat}.  For example, this would
+cause the following 28 measures (assuming 4/4 time) to be broken
+every 4 measures, and only there:
+
 @example
 << \repeat unfold 7 @{
          s1 \noBreak s1 \noBreak
@@ -603,25 +841,30 @@ skips and repeated with @code{\repeat}:
 >>
 @end example
 
-@noindent
-This makes the following 28 measures (assuming 4/4 time) be broken every
-4 measures, and only there.
-
-@predefined
-
-@code{\break}, and @code{\noBreak}.
-@funindex \break
-@funindex \noBreak
-
-@seealso
-
-Internals: @internalsref{LineBreakEvent}.
-
+@c TODO Check this
 A linebreaking configuration can be saved as a @code{.ly} file
 automatically.  This allows vertical alignments to be stretched to
 fit pages in a second formatting run.  This is fairly new and
 complicated.  More details are available in
-@c @lsrdir{spacing}
+@rlsr{Spacing}.
+
+
+@predefined
+
+@funindex \break
+@code{\break},
+@funindex \noBreak
+@code{\noBreak}.
+
+
+@seealso
+
+Internals Reference:
+@rinternals{LineBreakEvent}.
+
+Snippets:
+@rlsr{Spacing}.
+
 
 @knownissues
 
@@ -644,12 +887,12 @@ with the music.
   \remove Forbid_line_break_engraver
 } {
   c4 c2 << c2 {s4 \break } >>  % now the break is allowed
-  c2 c4 
+  c2 c4
 }
 @end lilypond
 
 Similarly, line breaks are normally forbidden when beams cross bar
-lines.  This behavior can be changed by setting 
+lines.  This behavior can be changed by setting
 @code{\override Beam #'breakable = ##t}.
 
 
@@ -666,6 +909,14 @@ a line break.
 The @code{\pageBreak} and @code{\noPageBreak} commands may also be
 inserted at top-level, between scores and top-level markups.
 
+There are also analogous settings to @code{ragged-right} and
+@code{ragged-last} which have the same effect on vertical spacing:
+@code{ragged-bottom} and @code{ragged-last-bottom}.  If set to
+@code{##t} the systems on all pages or just the last page
+respectively will not be justified vertically.
+
+For more details see @ref{Vertical spacing}.
+
 Page breaks are computed by the @code{page-breaking} function.  LilyPond
 provides three algorithms for computing page breaks,
 @code{ly:optimal-breaking}, @code{ly:page-turn-breaking} and
@@ -678,16 +929,56 @@ but the value can be changed in the @code{\paper} block:
 @}
 @end example
 
+@c TODO Check this -td
 The old page breaking algorithm is called
 @code{optimal-page-breaks}.  If you are having trouble with the new page
 breakers, you can enable the old one as a workaround.
 
+@funindex \bookpart
+
+When a book has many scores and pages, the page breaking problem may be
+difficult to solve, requiring large processing time and memory.  To ease
+the page breaking process, @code{\bookpart} blocks are used to divide
+the book into several parts: the page breaking occurs separately on each
+part.  Different page breaking functions may also be used in different
+book parts.
+
+@example
+\bookpart @{
+  \header @{
+    subtitle = "Preface"
+  @}
+  \paper @{
+     %% In a part consisting mostly of text,
+     %% ly:minimal-breaking may be prefered
+     #(define page-breaking ly:minimal-breaking)
+  @}
+  \markup @{ @dots{} @}
+  @dots{}
+@}
+\bookpart @{
+  %% In this part, consisting of music, the default optimal
+  %% page breaking function is used.
+  \header @{
+    subtitle = "First movement"
+  @}
+  \score @{ @dots{} @}
+  @dots{}
+@}
+@end example
+
 @predefined
 
 @funindex \pageBreak
-@code{\pageBreak}
+@code{\pageBreak},
 @funindex \noPageBreak
-@code{\noPageBreak}
+@code{\noPageBreak}.
+
+
+@seealso
+
+Snippets:
+@rlsr{Spacing}.
 
 
 @node Optimal page breaking
@@ -699,6 +990,12 @@ The @code{ly:optimal-breaking} function is LilyPond's default method of
 determining page breaks.  It attempts to find a page breaking that minimizes
 cramping and stretching, both horizontally and vertically.  Unlike
 @code{ly:page-turn-breaking}, it has no concept of page turns.
+
+
+@seealso
+
+Snippets:
+@rlsr{Spacing}.
 
 
 @node Optimal page turning
@@ -766,19 +1063,28 @@ The page turning commands, @code{\pageTurn}, @code{\noPageTurn} and
 @code{\allowPageTurn}, may also be used at top-level, between scores and
 top-level markups.
 
+
 @predefined
 
 @funindex \pageTurn
-@code{\pageTurn}
+@code{\pageTurn},
 @funindex \noPageTurn
-@code{\noPageTurn}
+@code{\noPageTurn},
 @funindex \allowPageTurn
-@code{\allowPageTurn}
+@code{\allowPageTurn}.
+
+
+@seealso
+
+Snippets:
+@rlsr{Spacing}.
+
 
 @knownissues
 
 There should only be one @code{Page_turn_engraver} in a score.  If there is more
 than one, they will interfere with each other.
+
 
 @node Minimal page breaking
 @subsection Minimal page breaking
@@ -796,6 +1102,13 @@ too slow or memory demanding, or a lot of texts.  It is enabled using:
   #(define page-breaking ly:minimal-breaking)
 @}
 @end example
+
+
+@seealso
+
+Snippets:
+@rlsr{Spacing}.
+
 
 @node Explicit breaks
 @subsection Explicit breaks
@@ -840,6 +1153,12 @@ page breaks at explicit @code{\pageBreak} commands and nowhere else.
 @end lilypond
 
 
+@seealso
+
+Snippets:
+@rlsr{Spacing}.
+
+
 @node Using an extra voice for breaks
 @subsection Using an extra voice for breaks
 
@@ -858,7 +1177,7 @@ Line- and page-breaking information usually appears within note entry directly.
 This makes @code{\break} and @code{\pageBreak} commands easy to enter but mixes
 music entry with information that specifies how music should lay out
 on the page.  You can keep music entry and line- and page-breaking
-information in two separate places by introducing an extra voice to 
+information in two separate places by introducing an extra voice to
 contain the  breaks.  This extra voice
 contains only skips together with @code{\break}, @code{pageBreak} and other
 breaking layout information.
@@ -918,6 +1237,15 @@ This pattern becomes especially helpful when overriding
 @end lilypond
 
 
+@seealso
+
+Notation Reference:
+@ref{Vertical spacing}.
+
+Snippets:
+@rlsr{Spacing}.
+
+
 @node Vertical spacing
 @section Vertical spacing
 
@@ -930,11 +1258,11 @@ space between systems, and the amount of space between
 staves inside a system.
 
 @menu
-* Vertical spacing inside a system::  
-* Vertical spacing between systems::  
-* Explicit staff and system positioning::  
-* Two-pass vertical spacing::   
-* Vertical collision avoidance::  
+* Vertical spacing inside a system::
+* Vertical spacing between systems::
+* Explicit staff and system positioning::
+* Two-pass vertical spacing::
+* Vertical collision avoidance::
 @end menu
 
 
@@ -955,7 +1283,7 @@ in having more systems per page.
 Normally staves are stacked vertically.  To make staves maintain a
 distance, their vertical size is padded.  This is done with the
 property @code{minimum-Y-extent}.  When applied to a
-@internalsref{VerticalAxisGroup}, it controls the size of a horizontal
+@rinternals{VerticalAxisGroup}, it controls the size of a horizontal
 line, such as a staff or a line of lyrics.  @code{minimum-Y-extent}
 takes a pair of numbers, so
 if you want to make it smaller than its default @code{#'(-4 . 4)}
@@ -977,7 +1305,7 @@ After page breaks are determined, the vertical spacing within each
 system is reevaluated in order to fill the page more evenly; if a page
 has space left over, systems are stretched in order to fill that space.
 The amount of stretching can be configured though the @code{max-stretch}
-property of the @internalsref{VerticalAlignment} grob. By default,
+property of the @rinternals{VerticalAlignment} grob. By default,
 @code{max-stretch} is set to zero, disabling stretching. To enable
 stretching, a sane value for @code{max-stretch}
 is @code{ly:align-interface::calc-max-stretch}.
@@ -987,7 +1315,7 @@ leaving some parts fixed.  For example, if a piano part occurs in the
 middle of an orchestral score, you may want to leave the piano staves
 close to each other while stretching the rest of the score.  The
 @code{keep-fixed-while-stretching} property of
-@internalsref{VerticalAxisGroup} can be used to achieve this.  When set
+@rinternals{VerticalAxisGroup} can be used to achieve this.  When set
 to @code{##t}, this property keeps its staff (or line of lyrics) from
 moving relative to the one directly above it.  In the example above,
 you would override @code{keep-fixed-while-stretching} to @code{##t} in
@@ -1035,15 +1363,23 @@ the second piano staff:
 }
 @end lilypond
 
+Vertical alignment of staves is handled by the
+@code{VerticalAlignment} object.  The context parameters
+specifying the vertical extent are described in connection with
+the @code{Axis_group_engraver}.
+
+
 @seealso
 
-Internals: Vertical alignment of staves is handled by the
-@internalsref{VerticalAlignment} object.  The context parameters
-specifying the vertical extent are described in connection with
-the @internalsref{Axis_group_engraver}.
+Snippets:
+@rlsr{Spacing}.
 
-Example files: @c @lsr{spacing,page-spacing.ly},
+@c @lsr{spacing,page-spacing.ly},
 @c @lsr{spacing,alignment-vertical-spacing.ly}.
+
+Internals Reference:
+@rinternals{VerticalAlignment},
+@rinternals{Axis_group_engraver}.
 
 
 @node Vertical spacing between systems
@@ -1097,6 +1433,13 @@ the last one.
 }
 @end lilypond
 
+
+@seealso
+
+Snippets:
+@rlsr{Spacing}.
+
+
 @node Explicit staff and system positioning
 @subsection Explicit staff and system positioning
 
@@ -1114,7 +1457,7 @@ vertical positions on the page.
 @code{NonMusicalPaperColumn #'line-break-system-details} accepts an associative
 list of five different settings:
 
-@itemize 
+@itemize
 @item @code{X-offset}
 @item @code{Y-offset}
 @item @code{alignment-offsets}
@@ -1160,20 +1503,29 @@ example @code{NonMusicalPaperColumn} overrides with the special
 To understand how each of these different settings work, we begin
 by looking at an example that includes no overrides at all.
 
-@lilypond[quote,ragged-right]
-\new Score <<
-  \new Staff <<
-    \new Voice {
-      s1 * 6 \break
-      s1 * 6 \break
-      s1 * 6 \break
-    }
-    \new Voice { \repeat unfold 18 { c'4 c'4 c'4 c'4 } }
-  >>
-  \new Staff {
-    \repeat unfold 18 { d'4 d'4 d'4 d'4 }
+@c \book { } is required in these examples to ensure the spacing
+@c overrides can be seen between systems. -np
+
+@lilypond[quote]
+\header { tagline = ##f }
+\paper { left-margin = 0\mm }
+\book {
+  \score {
+    <<
+      \new Staff <<
+        \new Voice {
+          s1*5 \break
+          s1*5 \break
+          s1*5 \break
+        }
+        \new Voice { \repeat unfold 15 { c'4 c' c' c' } }
+      >>
+      \new Staff {
+        \repeat unfold 15 { d'4 d' d' d' }
+      }
+    >>
   }
->>
+}
 @end lilypond
 
 This score isolates line- and page-breaking information in a dedicated
@@ -1187,26 +1539,32 @@ the vertical startpoint of each system explicitly, we can set
 the @code{Y-offset} pair in the @code{line-break-system-details}
 attribute of the @code{NonMusicalPaperColumn} grob:
 
-@lilypond[quote,ragged-right]
-\new Score <<
-  \new Staff <<
-    \new Voice {
-      \overrideProperty #"Score.NonMusicalPaperColumn"
-        #'line-break-system-details #'((Y-offset . 0))
-      s1 * 6 \break
-      \overrideProperty #"Score.NonMusicalPaperColumn"
-        #'line-break-system-details #'((Y-offset . 40))
-      s1 * 6 \break
-      \overrideProperty #"Score.NonMusicalPaperColumn"
-        #'line-break-system-details #'((Y-offset . 80))
-      s1 * 6 \break
-    }
-    \new Voice { \repeat unfold 18 { c'4 c'4 c'4 c'4 } }
-  >>
-  \new Staff {
-    \repeat unfold 18 { d'4 d'4 d'4 d'4 }
+@lilypond[quote]
+\header { tagline = ##f }
+\paper { left-margin = 0\mm }
+\book {
+  \score {
+    <<
+      \new Staff <<
+        \new Voice {
+          \overrideProperty #"Score.NonMusicalPaperColumn"
+            #'line-break-system-details #'((Y-offset . 0))
+          s1*5 \break
+          \overrideProperty #"Score.NonMusicalPaperColumn"
+            #'line-break-system-details #'((Y-offset . 40))
+          s1*5 \break
+          \overrideProperty #"Score.NonMusicalPaperColumn"
+            #'line-break-system-details #'((Y-offset . 80))
+          s1*5 \break
+        }
+        \new Voice { \repeat unfold 15 { c'4 c' c' c' } }
+      >>
+      \new Staff {
+        \repeat unfold 15 { d'4 d' d' d' }
+      }
+    >>
   }
->>
+}
 @end lilypond
 
 Note that @code{line-break-system-details} takes an associative list of
@@ -1219,29 +1577,35 @@ explicitly, we can also set the vertical startpoint of each staff
 within each system manually.  We do this using the @code{alignment-offsets}
 subproperty of @code{line-break-system-details}.
 
-@lilypond[quote,ragged-right]
-\new Score <<
-  \new Staff <<
-    \new Voice {
-      \overrideProperty #"Score.NonMusicalPaperColumn"
-        #'line-break-system-details #'((Y-offset . 20)
-          (alignment-offsets . (0 -15)))
-      s1 * 6 \break
-      \overrideProperty #"Score.NonMusicalPaperColumn"
-        #'line-break-system-details #'((Y-offset . 60)
-          (alignment-offsets . (0 -15)))
-      s1 * 6 \break
-      \overrideProperty #"Score.NonMusicalPaperColumn"
-        #'line-break-system-details #'((Y-offset . 100)
-          (alignment-offsets . (0 -15)))
-      s1 * 6 \break
-    }
-    \new Voice { \repeat unfold 18 { c'4 c'4 c'4 c'4 } }
-  >>
-  \new Staff {
-    \repeat unfold 18 { d'4 d'4 d'4 d'4 }
+@lilypond[quote]
+\header { tagline = ##f }
+\paper { left-margin = 0\mm }
+\book {
+  \score {
+    <<
+      \new Staff <<
+        \new Voice {
+          \overrideProperty #"Score.NonMusicalPaperColumn"
+            #'line-break-system-details #'((Y-offset . 20)
+                                           (alignment-offsets . (0 -15)))
+          s1*5 \break
+          \overrideProperty #"Score.NonMusicalPaperColumn"
+            #'line-break-system-details #'((Y-offset . 60)
+                                           (alignment-offsets . (0 -15)))
+          s1*5 \break
+          \overrideProperty #"Score.NonMusicalPaperColumn"
+            #'line-break-system-details #'((Y-offset . 100)
+                                           (alignment-offsets . (0 -15)))
+          s1*5 \break
+        }
+        \new Voice { \repeat unfold 15 { c'4 c' c' c' } }
+      >>
+      \new Staff {
+        \repeat unfold 15 { d'4 d' d' d' }
+      }
+    >>
   }
->>
+}
 @end lilypond
 
 Note that here we assign two different values to the
@@ -1254,34 +1618,36 @@ additional spacing parameters (including, for example, a corresponding
 every system and every staff.  Finally, note that @code{alignment-offsets}
 specifies the vertical positioning of staves but not of staff groups.
 
-@lilypond[quote,ragged-right]
-\new Score <<
-  \new Staff <<
-    \new Voice {
-      \overrideProperty #"Score.NonMusicalPaperColumn"
-      #'line-break-system-details #'((Y-offset . 0)
-        (alignment-offsets . (0 -30 -40)))
-      s1 * 6 \break
-      \overrideProperty #"Score.NonMusicalPaperColumn"
-      #'line-break-system-details #'((Y-offset . 60)
-        (alignment-offsets . (0 -10 -20)))
-      s1 * 6 \break
-      \overrideProperty #"Score.NonMusicalPaperColumn"
-      #'line-break-system-details #'((Y-offset . 100)
-        (alignment-offsets . (0 -10, -40)))
-      s1 * 6 \break
-    }
-    \new Voice { \repeat unfold 18 { c'4 c'4 c'4 c'4 } }
-  >>
-  \new StaffGroup <<
-    \new Staff {
-      \repeat unfold 18 { d'4 d'4 d'4 d'4 }
-    }
-    \new Staff {
-      \repeat unfold 18 { e'4 e'4 e'4 e'4 }
-    }
-  >>
->>
+@lilypond[quote]
+\header { tagline = ##f }
+\paper { left-margin = 0\mm }
+\book {
+  \score {
+    <<
+      \new Staff <<
+        \new Voice {
+          \overrideProperty #"Score.NonMusicalPaperColumn"
+            #'line-break-system-details #'((Y-offset . 0)
+                                           (alignment-offsets . (0 -30 -40)))
+          s1*5 \break
+          \overrideProperty #"Score.NonMusicalPaperColumn"
+            #'line-break-system-details #'((Y-offset . 60)
+                                           (alignment-offsets . (0 -10 -20)))
+          s1*5 \break
+          \overrideProperty #"Score.NonMusicalPaperColumn"
+            #'line-break-system-details #'((Y-offset . 100)
+                                           (alignment-offsets . (0 -10 -40)))
+          s1*5 \break
+        }
+        \new Voice { \repeat unfold 15 { c'4 c' c' c' } }
+      >>
+      \new StaffGroup <<
+        \new Staff { \repeat unfold 15 { d'4 d' d' d' } }
+        \new Staff { \repeat unfold 15 { e'4 e' e' e' } }
+      >>
+    >>
+  }
+}
 @end lilypond
 
 Some points to consider:
@@ -1302,12 +1668,18 @@ passed to these different settings will avoid this.
 @end itemize
 
 
+@seealso
+
+Snippets:
+@rlsr{Spacing}.
+
+
 @node Two-pass vertical spacing
 @subsection Two-pass vertical spacing
 
-Warning: two-pass vertical spacing is deprecated and will be removed in
+@warning{Two-pass vertical spacing is deprecated and will be removed in
 a future version of LilyPond.  Systems are now stretched automatically
-in a single pass.  See @ref{Vertical spacing inside a system}.
+in a single pass.  See @ref{Vertical spacing inside a system}.}
 
 In order to automatically stretch systems so that they should fill the
 space left on a page, a two-pass technique can be used:
@@ -1361,6 +1733,12 @@ lilypond <file>.ly
 @end example
 
 
+@seealso
+
+Snippets:
+@rlsr{Spacing}.
+
+
 @node Vertical collision avoidance
 @subsection Vertical collision avoidance
 
@@ -1398,8 +1776,8 @@ r2.
 \once \override TextScript #'outside-staff-priority = #1
 c4_"Text"\pp % this time the text will be closer to the staff
 r2.
-% by setting outside-staff-priority to a non-number, we
-% disable the automatic collision avoidance
+% by setting outside-staff-priority to a non-number,
+% we disable the automatic collision avoidance
 \once \override TextScript #'outside-staff-priority = ##f
 \once \override DynamicLineSpanner #'outside-staff-priority = ##f
 c4_"Text"\pp % now they will collide
@@ -1438,19 +1816,24 @@ c''2
 @end lilypond
 
 
+@seealso
+
+Snippets:
+@rlsr{Spacing}.
+
 
 @node Horizontal spacing
-@section Horizontal Spacing
+@section Horizontal spacing
 
 @cindex horizontal spacing
 @cindex spacing, horizontal
 
 @menu
-* Horizontal spacing overview::  
-* New spacing area::            
-* Changing horizontal spacing::  
-* Line length::                 
-* Proportional notation::       
+* Horizontal spacing overview::
+* New spacing area::
+* Changing horizontal spacing::
+* Line length::
+* Proportional notation::
 @end menu
 
 
@@ -1461,7 +1844,7 @@ The spacing engine translates differences in durations into stretchable
 distances (@q{springs}) of differing lengths.  Longer durations get
 more space, shorter durations get less.  The shortest durations get a
 fixed amount of space (which is controlled by
-@code{shortest-duration-space} in the @internalsref{SpacingSpanner}
+@code{shortest-duration-space} in the @rinternals{SpacingSpanner}
 object).  The longer the duration, the more space it gets: doubling a
 duration adds a fixed amount (this amount is controlled by
 @code{spacing-increment}) of space to the note.
@@ -1499,7 +1882,7 @@ an 8th note.  The shortest duration is printed when you run
 @code{lilypond} with the @code{--verbose} option.
 
 These durations may also be customized.  If you set the
-@code{common-shortest-duration} in @internalsref{SpacingSpanner}, then
+@code{common-shortest-duration} in @rinternals{SpacingSpanner}, then
 this sets the base duration for spacing.  The maximum duration for this
 base (normally an 8th), is set through @code{base-shortest-duration}.
 
@@ -1521,9 +1904,9 @@ c2 c4. c8 c4. c16[ c] c4. c8 c8 c8 c4 c4 c4
 In the introduction (see @rlearning{Engraving}), it was explained that stem
 directions influence spacing.  This is controlled with the
 @code{stem-spacing-correction} property in the
-@internalsref{NoteSpacing}, object.  These are generated for every
-@internalsref{Voice} context.  The @code{StaffSpacing} object
-(generated in @internalsref{Staff} context) contains the same property
+@rinternals{NoteSpacing}, object.  These are generated for every
+@rinternals{Voice} context.  The @code{StaffSpacing} object
+(generated in @rinternals{Staff} context) contains the same property
 for controlling the stem/bar line spacing.  The following example shows
 these corrections, once with default settings, and once with
 exaggerated corrections:
@@ -1544,9 +1927,14 @@ Proportional notation is supported; see @ref{Proportional notation}.
 
 @seealso
 
-Internals: @internalsref{SpacingSpanner}, @internalsref{NoteSpacing},
-@internalsref{StaffSpacing}, @internalsref{SeparationItem}, and
-@internalsref{SeparatingGroupSpanner}.
+Snippets:
+@rlsr{Spacing}.
+
+Internals Reference:
+@rinternals{SpacingSpanner},
+@rinternals{NoteSpacing},
+@rinternals{StaffSpacing},
+@rinternals{SeparationItem}.
 
 
 @knownissues
@@ -1564,7 +1952,7 @@ No work-around exists for decreasing the amount of space.
 @subsection New spacing area
 
 New sections with different spacing parameters can be started with
-@code{newSpacingSection}.  This is useful when there are  
+@code{newSpacingSection}.  This is useful when there are
 sections with a different notions of long and short notes.
 
 In the following example, the time signature change introduces a new
@@ -1572,17 +1960,25 @@ section, and hence the 16ths notes are spaced wider.
 
 @lilypond[relative,fragment,verbatim,quote]
 \time 2/4
-c4 c8 c 
+c4 c8 c
 c8 c c4 c16[ c c8] c4
 \newSpacingSection
 \time 4/16
 c16[ c c8]
 @end lilypond
 
-
 The @code{\newSpacingSection} command creates a new
-@internalsref{SpacingSpanner} object, and hence new @code{\override}s
+@code{SpacingSpanner} object, and hence new @code{\override}s
 may be used in that location.
+
+
+@seealso
+
+Snippets:
+@rlsr{Spacing}.
+
+Internals Reference:
+@rinternals{SpacingSpanner}.
 
 
 @node Changing horizontal spacing
@@ -1597,7 +1993,7 @@ music.  Note that @code{ly:make-moment} constructs
 a duration, so @code{1 4} is a longer duration
 than @code{1 16}.
 
-@lilypond[relative,verbatim,line-width=12\cm]
+@lilypond[verbatim,line-width=12\cm]
 \score {
   \relative c'' {
     g4 e e2 | f4 d d2 | c4 d e f | g4 g g2 |
@@ -1608,7 +2004,7 @@ than @code{1 16}.
 }
 @end lilypond
 
-@lilypond[relative,verbatim,line-width=12\cm]
+@lilypond[verbatim,line-width=12\cm]
 \score {
   \relative c'' {
     g4 e e2 | f4 d d2 | c4 d e f | g4 g g2 |
@@ -1654,7 +2050,6 @@ property can only be changed at the beginning of a score,
 >>
 @end lilypond
 
-
 When @code{strict-note-spacing} is set, notes are spaced without
 regard for clefs, bar lines, and grace notes,
 
@@ -1662,6 +2057,12 @@ regard for clefs, bar lines, and grace notes,
 \override Score.SpacingSpanner #'strict-note-spacing = ##t
 \new Staff { c8[ c \clef alto c \grace { c16[ c] } c8 c c]  c32[ c32] }
 @end lilypond
+
+
+@seealso
+
+Snippets:
+@rlsr{Spacing}.
 
 
 @node Line length
@@ -1709,6 +2110,12 @@ paragraph, the last line simply takes its natural horizontal length.
   ragged-last = ##t
 @}
 @end example
+
+
+@seealso
+
+Snippets:
+@rlsr{Spacing}.
 
 
 @node Proportional notation
@@ -2054,175 +2461,84 @@ to break across systems and pages.  See the respective parts of the manual
 for these related settings.
 
 
+@seealso
 
-@node Page layout MOVED FROM LM
-@section Page layout MOVED FROM LM
+Notation Reference:
+@ref{New spacing area}.
 
-@menu
-* Introduction to layout::      
-* Global sizes::                
-* Line breaks::                 
-* Page breaks::                 
-* Fitting music onto fewer pages::  
-@end menu
+Snippets:
+@rlsr{Spacing}.
 
-@node Introduction to layout
-@subsection Introduction to layout
-
-The global paper layout is determined by three factors: 
-the page layout, the line breaks, and the spacing. These all 
-influence each other. The choice of spacing determines how 
-densely each system of music is set. This influences where line 
-breaks are chosen, and thus ultimately, how many pages a piece 
-of music takes.
-
-Settings which influence layout may be placed in two blocks.
-The @code{\paper @{...@}} block is placed outside any
-@code{\score @{...@}} blocks and contains settings that
-relate to the entire document.  The @code{\layout @{...@}}
-block is placed within a @code{\score @{...@}} block and
-contains settings for that particular score.  If you have
-only one @code{\score @{...@}} block the two have the same
-effect.  In general the commands shown in this section can
-be placed in either.
-
-Much more detail on the options for tweaking the laying out
-of music are contained in @ruser{Spacing issues}.
-
-@node Global sizes
-@subsection Global sizes
-
-TODO Check all these examples
-
-The default @strong{paper size} which LilyPond assumes in laying
-out the music is A4.  This may be changed in two ways:
-
-@example
-#(set-default-paper-size "a6")
-
-\paper @{
-#(set-paper-size "letter")
-@}
-@end example
-
-@noindent
-The first command sets the size of all pages. The second command
-sets the size of the pages to which the \paper block applies -- if
-the \paper block is at the top of the file, then it will apply
-to all pages.  Support for the following paper sizes is available:
-a6, a5, a4, a3, legal, letter, 11x17 (also known as tabloid).
-Setting the paper size automatically sets suitable margins and
-line length.
-
-If the symbol @code{landscape} is supplied as an argument to
-@code{set-default-paper-size}, the pages will be rotated by 90
-degrees, and wider line widths will be set correspondingly, e.g.
-
-@example
-#(set-default-paper-size "a6" 'landscape)
-@end example
-
-The default @strong{staff size} is set to 20 points.
-This may be changed in two ways:
-
-@example
-#(set-global-staff-size 14)
-
-\paper @{
-#(set-global-staff-size 16)
-@}
-@end example
-
-@noindent
-The first command sets the size in all pages. The second command
-sets the size in the pages to which the \paper block applies - if
-the \paper block is at the top of the file, then it will apply
-to all pages.  All the fonts are automatically scaled to suit
-the new value of the staff size.
-
-@node Line breaks
-@subsection Line breaks
-
-Line breaks are normally determined automatically. They are chosen
-so that lines look neither cramped nor loose, and consecutive
-lines have similar density.  Occasionally you might want to
-override the automatic breaks; you can do this by specifying
-@code{\break}. This will force a line break at this point.  However,
-line breaks can only occur at the end of @q{complete} bars, i.e.,
-where there are no notes or tuplets left @q{hanging} over the bar
-line.  If you want to have a line break where there is no bar line,
-you can force an invisible bar line by entering @code{\bar ""},
-although again there must be no notes left hanging over in any of
-the staves at this point, or it will be ignored.
-
-The opposite command, @code{\noBreak}, forbids a line break at the
-bar line where it is inserted.
-
-The most basic settings influencing line spacing are @code{indent}
-and @code{line-width}. They are set in the @code{\layout} block.
-They control the indentation of the first line of music, and the
-lengths of the lines.
-
-If @code{ragged-right} is set to true in the @code{\layout} block,
-then systems end at their natural horizontal length, instead of
-being spread horizontally to fill the whole line. This is useful
-for short fragments, and for checking how tight the natural
-spacing is.
-
-The option @code{ragged-last} is similar to @code{ragged-right},
-but affects only the last line of the piece.
-
-@example
-\layout @{
-indent = #0
-line-width = #150
-ragged-last = ##t
-@}
-@end example
-
-@node Page breaks
-@subsection Page breaks
-
-The default page breaking may be overridden by inserting 
-@code{\pageBreak} or @code{\noPageBreak} commands.
-These commands are analogous to the @code{\break} and 
-@code{\noBreak} commands discussed above and force or forbid 
-a page-break at the point where they are inserted.
-Of course, the @code{\pageBreak} command also forces a line break.
-Like @code{\break}, the @code{\pageBreak} command is effective only
-at the end of a @q{complete} bar as defined above.  For more
-details see @ruser{Page breaking} and following sections.
-
-There are also analogous settings to @code{ragged-right} and
-@code{ragged-last} which have the same effect on vertical spacing:
-@code{ragged-bottom} and @code{ragged-last-bottom}.  If set to
-@code{##t} the systems on all pages or just the last page
-respectively will not be justified vertically.
-
-For more details see @ruser{Vertical spacing}.
 
 @node Fitting music onto fewer pages
-@subsection Fitting music onto fewer pages
+@section Fitting music onto fewer pages
 
 Sometimes you can end up with one or two staves on a second
 (or third, or fourth...) page.  This is annoying, especially
 if you look at previous pages and it looks like there is plenty
 of room left on those.
 
-When investigating layout issues, @code{annotate-spacing} is
-an invaluable tool.  This command prints the values of various
-layout spacing commands; see @ruser{Displaying spacing}, for more
-details.  From the output of @code{annotate-spacing}, we can
-see which margins we may wish to alter.
+When investigating layout issues, @code{annotate-spacing} is an
+invaluable tool.  This command prints the values of various layout
+spacing variables; for more details see the following section,
+@ref{Displaying spacing}.
+
+@menu
+* Displaying spacing::
+* Changing spacing::
+@end menu
+
+
+@node Displaying spacing
+@subsection Displaying spacing
+
+@funindex annotate-spacing
+@cindex spacing, display of layout
+
+To graphically display the dimensions of vertical layout variables
+that may be altered for page formatting, set
+@code{annotate-spacing} in the @code{\paper} block:
+
+@c need to have \book{} otherwise we get the separate systems. -hwn
+@lilypond[verbatim,quote]
+#(set-default-paper-size "a6" 'landscape)
+\book {
+  \score { { c4 } }
+  \paper { annotate-spacing = ##t }
+}
+@end lilypond
+
+@noindent
+All layout dimensions are displayed in staff spaces, regardless of
+the units specified in the @code{\paper} or @code{\layout} block.
+For example, @code{paper-height} has a value of 59.75 staff
+spaces, using the default staff size of 20 points, which is
+equivalent to 148 millimeters, the height of @code{a6} paper in
+landscape orientation.  The pairs (@var{a},@var{b}) are intervals,
+where @var{a} is the lower edge and @var{b} the upper edge of the
+interval.
+
+
+@seealso
+
+Snippets:
+@rlsr{Spacing}.
+
+
+@node Changing spacing
+@subsection Changing spacing
+
+The output of @code{annotate-spacing} reveals vertical dimensions
+in great detail.  For details about modifying margins and other
+layout variables, see @ref{Page formatting}.
 
 Other than margins, there are a few other options to save space:
 
 @itemize
 @item
-You may tell LilyPond to place systems as close together as
-possible (to fit as many systems as possible onto a page), but
-then to space those systems out so that there is no blank
-space at the bottom of the page.
+Force systems to move as close together as possible (to fit as
+many systems as possible onto a page) while being spaced so that
+there is no blank space at the bottom of the page.
 
 @example
 \paper @{
@@ -2234,9 +2550,9 @@ space at the bottom of the page.
 @end example
 
 @item
-You may force the number of systems (i.e., if LilyPond wants
-to typeset some music with 11 systems, you could force it to
-use 10).
+Force the number of systems.  For example, if the default layout
+has 11 systems, the following assignment will force a layout with
+10 systems.
 
 @example
 \paper @{
@@ -2245,27 +2561,25 @@ use 10).
 @end example
 
 @item
-Avoid (or reduce) objects which increase the vertical size of
-a system.  For example, volta repeats (or alternate repeats)
-require extra space.  If these repeats are spread over two
-systems, they will take up more space than one system with
-the volta repeats and another system without.
+Avoid (or reduce) objects that increase the vertical size of a
+system.  For example, volta repeats (or alternate repeats) require
+extra space.  If these repeats are spread over two systems, they
+will take up more space than one system with the volta repeats and
+another system without.  For example, dynamics that @q{stick out} of
+a system can be moved closer to the staff:
 
-Another example is moving dynamics which @q{stick out} of
-a system, as in the second bar here:
-
-@lilypond[verbatim,quote,fragment,ragged-right,relative=1]
+@lilypond[verbatim,quote,relative=1]
 e4 c g\f c
 \override DynamicText #'extra-offset = #'( -2.2 . 2.0)
 e4 c g\f c
 @end lilypond
 
 @item
-Alter the horizontal spacing via @code{SpacingSpanner}.  See
-@ruser{Changing horizontal spacing}, for more details.  Here's
-an example first showing the default behavior:
+Alter the horizontal spacing via @code{SpacingSpanner}.  For more
+details, see @ref{Changing horizontal spacing}.  The following
+example illustrates the default spacing:
 
-@lilypond[verbatim,quote,ragged-right]
+@lilypond[verbatim,quote]
 \score {
   \relative c'' {
     g4 e e2 |
@@ -2278,11 +2592,12 @@ an example first showing the default behavior:
 @end lilypond
 
 @noindent
-and now with @code{common-shortest-duration} increased from the
-value of @code{1/4} (a quarter note is the most common in this
-example) to @code{1/2}:
+The next example modifies @code{common-shortest-duration} from a
+value of @code{1/4} to @code{1/2}.  The quarter note is the most
+common and shortest duration in this example, so by making this
+duration longer, a @q{squeezing} effect occurs:
 
-@lilypond[verbatim,quote,ragged-right]
+@lilypond[verbatim,quote]
 \score {
   \relative c'' {
     g4 e e2 |
@@ -2295,21 +2610,25 @@ example) to @code{1/2}:
     \context {
       \Score
       \override SpacingSpanner
-                #'common-shortest-duration = #(ly:make-moment 1 2)
+        #'common-shortest-duration = #(ly:make-moment 1 2)
     }
   }
 }
 @end lilypond
 
 @noindent
-Note that this override cannot be modified dynamically, so it must
-always be placed in a @code{\context@{..@}} block so that it applies
-to the whole score.
-
-TODO Add description of using \context in this way earlier if it is
-not already anywhere  -td
+The @code{common-shortest-duration} property cannot be modified
+dynamically, so it must always be placed in a @code{\context}
+block so that it applies to the whole score.
 
 @end itemize
 
 
+@seealso
 
+Notation Reference:
+@ref{Page formatting},
+@ref{Changing horizontal spacing}.
+
+Snippets:
+@rlsr{Spacing}.

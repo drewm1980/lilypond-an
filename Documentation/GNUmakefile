@@ -6,14 +6,18 @@ SUBDIRS=user bibliography pictures topdocs misc po $(LANGS)
 STEPMAKE_TEMPLATES=documentation texinfo tex
 LOCALSTEPMAKE_TEMPLATES=lilypond ly
 LILYPOND_BOOK_FLAGS=--extra-options '-e "(ly:set-option (quote internal-type-checking) \#t)"'
-README_TOP_FILES= DEDICATION THANKS 
-EXTRA_DIST_FILES= texinfo.css TRANSLATION
+README_TOP_FILES= DEDICATION THANKS
+EXTRA_DIST_FILES= TRANSLATION
 
 include $(depth)/make/stepmake.make
 
+HTML_PAGE_NAMES= index devel translations
+OUT_HTML_FILES= $(HTML_PAGE_NAMES:%=$(outdir)/%.html)
+OUT_CSS_FILES= $(CSS_FILES:%.css=$(outdir)/%.css)
+
 default: local-doc
 
-local-WWW: txt-to-html $(outdir)/index.html $(outdir)/devel.html
+local-WWW-2: txt-to-html $(OUT_HTML_FILES)
 
 local-WWW-clean: deep-WWW-clean
 
@@ -26,6 +30,11 @@ OUT_TXT_FILES = $(addprefix $(outdir)/, $(addsuffix .txt, $(README_TOP_FILES)))
 txt-to-html:
 	$(foreach a, $(README_TOP_FILES), cp $(top-src-dir)/$(a) $(outdir)/$(a).txt && ) true
 	$(PYTHON) $(step-bindir)/text2html.py $(OUT_TXT_FILES)
+
+$(OUT_HTML_FILES): $(OUT_CSS_FILES)
+
+$(outdir)/%.css: %.css
+	ln -f $< $@
 
 po-update:
 	make -C po po-update
@@ -47,9 +56,13 @@ new-lang:
 	mv $(outdir)/*.*tely $(ISOLANG)/user
 	msgmerge -U po/lilypond-doc.pot $(outdir)/doc.pot
 	cp po/lilypond-doc.pot po/$(ISOLANG).po
-	@echo "***  Please add a language definition for $(ISOLANG) in buildscripts/langdefs.py  ***"
+	@echo "***  Please add a language definition for $(ISOLANG) in python/langdefs.py  ***"
 
 CHECKED_FILES = $(ISOLANG)/index.html.in $(shell find $(ISOLANG)/user/ -maxdepth 1 -name '*.*te??')
+
+ifneq ($(NO_COLOR),)
+CHECK_TRANSLATION_FLAGS = --no-color
+endif
 
 TELY_FILES = $(call src-wildcard,$(ISOLANG)/user/*.tely)
 skeleton-update:
@@ -59,14 +72,56 @@ skeleton-update:
 snippet-update:
 	$(PYTHON) $(buildscript-dir)/update-snippets.py user $(ISOLANG)/user '*.itely'
 
-endif
+DOCUMENTS_INCLUDES:=-I $(ISOLANG)/user \
+-I $(top-build-dir)/Documentation/$(ISOLANG)/user/out-www \
+-I $(top-src-dir)/input/lsr \
+-I $(top-build-dir)/input/lsr/out-www \
+-I user -I $(top-build-dir)/Documentation/user/out-www
+
+else # ISOLANG is empty
+
+DOCUMENTS_INCLUDES:=-I user \
+-I $(top-build-dir)/Documentation/user/out-www \
+-I $(top-src-dir)/input/lsr \
+-I $(top-build-dir)/input/lsr/out-www
+
+endif # ISOLANG
+
+check-xrefs:
+	$(PYTHON) $(buildscript-dir)/check_texi_refs.py --batch \
+	$(DOCUMENTS_INCLUDES) $(buildscript-dir)/manuals_definitions.py
+
+fix-xrefs:
+	$(PYTHON) $(buildscript-dir)/check_texi_refs.py --auto-fix \
+	$(DOCUMENTS_INCLUDES) $(buildscript-dir)/manuals_definitions.py
 
 check-translation:
-	$(PYTHON) $(buildscript-dir)/check_translation.py $(buildscript-dir) $(CHECKED_FILES)
+	$(PYTHON) $(buildscript-dir)/check_translation.py $(CHECK_TRANSLATION_FLAGS) $(CHECKED_FILES)
 
 update-translation:
-	$(PYTHON) $(buildscript-dir)/check_translation.py --update $(buildscript-dir) $(CHECKED_FILES)
+	$(PYTHON) $(buildscript-dir)/check_translation.py --update $(CHECK_TRANSLATION_FLAGS) $(CHECKED_FILES)
 
 translation-status:
 	make -C po out=www messages
-	$(PYTHON) $(buildscript-dir)/translations-status.py $(buildscript-dir) po/out-www
+	$(PYTHON) $(buildscript-dir)/translations-status.py
+
+local-help: extra-local-help
+
+extra-local-help:
+	@echo -e "\
+  check-xrefs [ISOLANG=LL] validate Texinfo cross-references\n\
+  fix-xrefs [ISOLANG=LL]   interactively fix Texinfo cross-references (use with caution)\n\
+\n\
+Translations specific targets (see TRANSLATION for details):\n\
+  new-lang ISOLANG=LL  create and initialize subdirectory \'LL' for language \'LL\n\
+  po-update            update and replace PO files for documentation with msgmerged versions\n\
+  check-translation ISOLANG=LL   show changes in English docs since last translation update\n\
+  update-translation ISOLANG=LL  call $$$$EDITOR to help updating the translation\n\
+  skeleton-update ISOLANG=LL     update Texinfo skeleton files\n\
+  snippet-update ISOLANG=LL      update ly snippets in Texinfo translation according to\n\
+                              docs in English (use with caution)\n\
+\n\
+LL refers to the desired locale (most often only the ISO 639 language code).\n"
+
+info:
+	$(MAKE) -C user info

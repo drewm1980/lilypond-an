@@ -1,13 +1,13 @@
 \header
 {
     
-texidoc = "Music function are generic music transformation functions,
+texidoc = "Music functions are generic music transformation functions,
 which can be used to extend music syntax seamlessly.  Here we
 demonstrate a @code{\myBar} function, which works similar to
 @code{\bar}, but is implemented completely in Scheme."
 
 }
-\version "2.10.0"
+\version "2.11.51"
 
 myBar = #(define-music-function (parser location bar-type) (string?)
           (context-spec-music

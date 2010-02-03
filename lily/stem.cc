@@ -313,7 +313,7 @@ Stem::calc_length (SCM smob)
 
   Real ss = Staff_symbol_referencer::staff_space (me);
   Real length = 7;
-  SCM s = scm_cdr (scm_assq (ly_symbol2scm ("lengths"), details));
+  SCM s = ly_assoc_get (ly_symbol2scm ("lengths"), details, SCM_EOL);
   if (scm_is_pair (s))
     length = 2 * scm_to_double (robust_list_ref (durlog - 2, s));
 
@@ -324,7 +324,7 @@ Stem::calc_length (SCM smob)
   Interval hp = head_positions (me);
   if (dir && dir * hp[dir] >= 0)
     {
-      SCM sshorten = scm_cdr (scm_assq (ly_symbol2scm ("stem-shorten"), details));
+      SCM sshorten = ly_assoc_get (ly_symbol2scm ("stem-shorten"), details, SCM_EOL);
       SCM scm_shorten = scm_is_pair (sshorten)
 	? robust_list_ref (max (duration_log (me) - 2, 0), sshorten) : SCM_EOL;
       Real shorten = 2* robust_scm2double (scm_shorten, 0);
@@ -570,29 +570,25 @@ Stem::stem_end_position (Grob *me)
   return robust_scm2double (me->get_property ("stem-end-position"), 0);
 }
 
-Stencil
-Stem::flag (Grob *me)
+MAKE_SCHEME_CALLBACK (Stem, calc_flag, 1);
+SCM
+Stem::calc_flag (SCM smob)
 {
-  int log = duration_log (me);
-  if (log < 3
-      || unsmob_grob (me->get_object ("beam")))
-    return Stencil ();
+  Grob *me = unsmob_grob (smob);
 
-  if (!is_normal_stem (me))
-    return Stencil ();
-  
+  int log = duration_log (me);
   /*
     TODO: maybe property stroke-style should take different values,
     e.g. "" (i.e. no stroke), "single" and "double" (currently, it's
     '() or "grace").  */
   string flag_style;
 
-  SCM flag_style_scm = me->get_property ("flag-style");
+   SCM flag_style_scm = me->get_property ("flag-style");
   if (scm_is_symbol (flag_style_scm))
     flag_style = ly_symbol2string (flag_style_scm);
 
   if (flag_style == "no-flag")
-    return Stencil ();
+    return Stencil ().smobbed_copy ();
 
   bool adjust = true;
 
@@ -607,14 +603,14 @@ Stem::flag (Grob *me)
     */
     {
       if (adjust)
-	{
-	  int p = (int) (rint (stem_end_position (me)));
-	  staffline_offs
-	    = Staff_symbol_referencer::on_line (me, p) ? "0" : "1";
-	}
+        {
+          int p = (int) (rint (stem_end_position (me)));
+          staffline_offs
+            = Staff_symbol_referencer::on_line (me, p) ? "0" : "1";
+        }
       else
-	staffline_offs = "2";
-    }
+        staffline_offs = "2";
+     }
   else
     staffline_offs = "";
 
@@ -631,17 +627,45 @@ Stem::flag (Grob *me)
     {
       string stroke_style = ly_scm2string (stroke_style_scm);
       if (!stroke_style.empty ())
-	{
-	  string font_char = to_string (dir) + stroke_style;
-	  Stencil stroke = fm->find_by_name ("flags." + font_char);
-	  if (stroke.is_empty ())
-	    me->warning (_f ("flag stroke `%s' not found", font_char));
-	  else
-	    flag.add_stencil (stroke);
-	}
-    }
+        {
+          string font_char = flag_style + to_string (dir) + stroke_style;
+          Stencil stroke = fm->find_by_name ("flags." + font_char);
+          if (stroke.is_empty ())
+            {
+              font_char = to_string (dir) + stroke_style;
+              stroke = fm->find_by_name ("flags." + font_char);
+            }
+          if (stroke.is_empty ())
+            me->warning (_f ("flag stroke `%s' not found", font_char));
+          else
+            flag.add_stencil (stroke);
+        }
+     }
 
-  return flag;
+  return flag.smobbed_copy ();
+}
+
+
+Stencil
+Stem::flag (Grob *me)
+{
+  int log = duration_log (me);
+  if (log < 3
+      || unsmob_grob (me->get_object ("beam")))
+    return Stencil ();
+
+  if (!is_normal_stem (me))
+    return Stencil ();
+
+  // This get_property call already evaluates the scheme function with
+  // the grob passed as argument! Thus, we only have to check if a valid
+  // stencil is returned.
+  SCM flag_style_scm = me->get_property ("flag");
+  if (Stencil *flag = unsmob_stencil (flag_style_scm)) {
+    return *flag;
+  } else {
+    return Stencil ();
+  }
 }
 
 MAKE_SCHEME_CALLBACK (Stem, width, 1);
@@ -868,7 +892,7 @@ Stem::calc_stem_info (SCM smob)
 
   /* Simple standard stem length */
   SCM details = me->get_property ("details");
-  SCM lengths = scm_cdr (scm_assq (ly_symbol2scm ("beamed-lengths"), details));
+  SCM lengths = ly_assoc_get (ly_symbol2scm ("beamed-lengths"), details, SCM_EOL);
   
   Real ideal_length
     = scm_to_double (robust_list_ref (beam_count - 1, lengths))
@@ -880,7 +904,7 @@ Stem::calc_stem_info (SCM smob)
     - 0.5 * beam_thickness;
 
   /* Condition: sane minimum free stem length (chord to beams) */
-  lengths = scm_cdr (scm_assq (ly_symbol2scm ("beamed-minimum-free-lengths"), details));
+  lengths = ly_assoc_get (ly_symbol2scm ("beamed-minimum-free-lengths"), details, SCM_EOL);
 
   Real ideal_minimum_free
     = scm_to_double (robust_list_ref (beam_count - 1, lengths))
@@ -952,8 +976,8 @@ Stem::calc_stem_info (SCM smob)
 
   ideal_y -= robust_scm2double (beam->get_property ("shorten"), 0);
 
-  SCM bemfl = scm_cdr (scm_assq (ly_symbol2scm ("beamed-extreme-minimum-free-lengths"),
-				 details));
+  SCM bemfl = ly_assoc_get (ly_symbol2scm ("beamed-extreme-minimum-free-lengths"),
+			    details, SCM_EOL);
   
   Real minimum_free
     = scm_to_double (robust_list_ref (beam_count - 1, bemfl))
@@ -1032,6 +1056,7 @@ ADD_INTERFACE (Stem,
 	       "details "
 	       "direction "
 	       "duration-log "
+	       "flag "
 	       "flag-style "
 	       "french-beaming "
 	       "length "

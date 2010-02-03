@@ -15,6 +15,56 @@
 
 @include version.itexi
 
+@macro lydoctitle{TEXT}
+@unnumberedsec \TEXT\
+@end macro
+
+@ifhtml
+
+@ifset bigpage
+
+@macro rlearning{NAME}
+See also Learning Manual, section
+@ref{\NAME\,,,lilypond-learning-big-page,Learning Manual}.
+@end macro
+
+@macro ruser{NAME}
+These snippets illustrate the Notation Reference,
+section @ref{\NAME\,,,lilypond-big-page,Notation Reference}.
+@end macro
+
+@end ifset
+
+
+@ifclear bigpage
+
+@macro rlearning{NAME}
+See also Learning Manual, section
+@ref{\NAME\,,,lilypond-learning,Learning Manual}.
+@end macro
+
+@macro ruser{NAME}
+These snippets illustrate the Notation Reference,
+section @ref{\NAME\,,,lilypond,Notation Reference}.
+@end macro
+
+@end ifclear
+
+@end ifhtml
+
+
+@ifnothtml
+
+@macro rlearning{NAME}
+See also @ref{\NAME\,,,lilypond-learning,Learning Manual}.
+@end macro
+
+@macro ruser{NAME}
+These snippets illustrate @ref{\NAME\,,,lilypond,Notation Reference}.
+@end macro
+
+@end ifnothtml
+
 @dircategory GNU LilyPond --- the music typesetter
 @direntry
 * LilyPond Snippets: (lilypond-snippets).       Short tricks, tips, and examples.
@@ -58,7 +108,7 @@ or figure for each example to see the corresponding input file.
 
 @ifnottex
 @node Top
-@top LilyPond examples
+@top GNU LilyPond --- Snippets List
 
 This document shows a selected set of LilyPond snippets from the
 @uref{http://lsr@/.dsi@/.unimi@/.it,LilyPond Snippet Repository}
@@ -86,7 +136,7 @@ Musical notation
 * Repeats::
 * Simultaneous notes::
 * Staff notation::
-* Editorial and educational use::
+* Editorial annotations::
 * Text::
 
 Specialist notation
@@ -96,7 +146,9 @@ Specialist notation
 * Percussion::
 * Fretted strings::
 * Unfretted strings::
+* Winds::
 * Ancient notation::
+* World music::
 
 Other collections
 * Contexts and engravers::
@@ -108,6 +160,8 @@ Other collections
 * Templates::
 @end menu
 
+@contents
+
 
 @c Please take care of naming every .itely
 @c with an existing tag name.
@@ -118,7 +172,7 @@ Other collections
 @include repeats.itely
 @include simultaneous-notes.itely
 @include staff-notation.itely
-@include editorial-and-educational-use.itely
+@include editorial-annotations.itely
 @include text.itely
 
 @include vocal-music.itely
@@ -127,8 +181,9 @@ Other collections
 @include percussion.itely
 @include fretted-strings.itely
 @include unfretted-strings.itely
-@c @include winds.itely
+@include winds.itely
 @include ancient-notation.itely
+@include world-music.itely
 
 @include contexts-and-engravers.itely
 @include tweaks-and-overrides.itely

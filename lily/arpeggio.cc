@@ -8,15 +8,16 @@
 
 #include "arpeggio.hh"
 
+#include "bezier.hh"
+#include "font-interface.hh"
 #include "grob.hh"
+#include "lookup.hh"
 #include "output-def.hh"
-#include "stem.hh"
+#include "pointer-group-interface.hh"
 #include "staff-symbol-referencer.hh"
 #include "staff-symbol.hh"
+#include "stem.hh"
 #include "warn.hh"
-#include "font-interface.hh"
-#include "lookup.hh"
-#include "pointer-group-interface.hh"
 
 Grob *
 Arpeggio::get_common_y (Grob *me)
@@ -96,6 +97,16 @@ Arpeggio::print (SCM smob)
   Font_metric *fm = Font_interface::get_default_font (me);
   Stencil squiggle = fm->find_by_name ("scripts.arpeggio");
 
+  /*
+    Compensate for rounding error which may occur when a chord
+    reaches the center line, resulting in an extra squiggle
+    being added to the arpeggio stencil.  This value is appreciably
+    larger than the rounding error, which is in the region of 1e-16
+    for a global-staff-size of 20, but small enough that it does not
+    interfere with smaller staff sizes.
+  */
+  const Real epsilon = 1e-3;
+
   Stencil arrow;
   if (dir)
     {
@@ -103,9 +114,10 @@ Arpeggio::print (SCM smob)
       heads[dir] -= dir * arrow.extent (Y_AXIS).length ();
     }
 
-  for (Real y = heads[LEFT]; y < heads[RIGHT];
-       y += squiggle.extent (Y_AXIS).length ())
-    mol.add_at_edge (Y_AXIS, UP, squiggle, 0.0);
+  while (mol.extent (Y_AXIS).length () + epsilon < heads.length ())
+    {
+      mol.add_at_edge (Y_AXIS, UP, squiggle, 0.0);
+    }
 
   mol.translate_axis (heads[LEFT], Y_AXIS);
   if (dir)
@@ -133,6 +145,28 @@ Arpeggio::brew_chord_bracket (SCM smob)
 
   Stencil mol (Lookup::bracket (Y_AXIS, Interval (0, dy), lt, x, lt));
   mol.translate_axis (heads[LEFT] - sp / 2.0, Y_AXIS);
+  return mol.smobbed_copy ();
+}
+
+MAKE_SCHEME_CALLBACK (Arpeggio, brew_chord_slur, 1);
+SCM
+Arpeggio::brew_chord_slur (SCM smob)
+{
+  Grob *me = unsmob_grob (smob);
+  Interval heads = robust_scm2interval (me->get_property ("positions"),
+					Interval())
+    * Staff_symbol_referencer::staff_space (me);
+
+  Real lt = me->layout ()->get_dimension (ly_symbol2scm ("line-thickness"));
+  Real dy = heads.length ();
+
+  Real height_limit = 1.5;
+  Real ratio = .33;
+  Bezier curve = slur_shape (dy, height_limit, ratio);
+  curve.rotate (M_PI / 2);
+
+  Stencil mol (Lookup::slur (curve, lt, lt));
+  mol.translate_axis (heads[LEFT], Y_AXIS);
   return mol.smobbed_copy ();
 }
 

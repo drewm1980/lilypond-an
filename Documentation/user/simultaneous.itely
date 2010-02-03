@@ -6,7 +6,8 @@
     version that you are working on.  See TRANSLATION for details.
 @end ignore
 
-@c \version "2.11.38"
+@c \version "2.11.61"
+
 
 @node Simultaneous notes
 @section Simultaneous notes
@@ -18,36 +19,49 @@ in a piece of music.  Polyphony in LilyPond refers to having more
 than one voice on the same staff.
 
 @menu
-* Single voice::                
-* Multiple voices::             
+* Single voice::
+* Multiple voices::
 @end menu
 
 
 @node Single voice
 @subsection Single voice
 
+This section discusses simultaneous notes inside the same voice.
+
 @menu
-* Chorded notes::                      
-* Clusters::                    
+* Chorded notes::
+* Simultaneous expressions::
+* Clusters::
 @end menu
 
+
 @node Chorded notes
-@subsubsection Chorded notes
+@unnumberedsubsubsec Chorded notes
 
 @cindex chords
 @cindex brackets, angle
+@cindex angle brackets
+@cindex relative pitch in chords
+
 @funindex <
 @funindex >
+@funindex <...>
 
-A chord is formed by a enclosing a set of pitches between @code{<} and
-@code{>}.  A chord may be followed by a duration and/or a set of
-articulations, just like simple notes:
+A chord is formed by enclosing a set of pitches between @code{<}
+and @code{>}.  A chord may be followed by a duration and/or a set
+of articulations, just like simple notes:
 
-@lilypond[verbatim,ragged-right,fragment,quote,relative=1]
-<c e g>1 <c e g>->
+@lilypond[verbatim,quote,relative=1]
+<c e g>2 <c f a>4-> <e g c>-.
 @end lilypond
 
-For more information about chords, see @ref{Modern chords}.
+Relative mode can be used for pitches in chords. The octave of each
+pitch is chosen using the preceding pitch as a reference except in
+the case of the first pitch in a chord: the reference for the first
+pitch is the @emph{first} pitch of the preceding chord.
+
+For more information about chords, see @ref{Chord notation}.
 
 @seealso
 
@@ -58,29 +72,64 @@ Learning Manual:
 @rlearning{Combining notes into chords}.
 
 Notation Reference:
-@ref{Modern chords}.
+@ref{Chord notation}.
 
 Snippets:
-@lsrdir{Simultaneous,Simultaneous-notes}.
+@rlsr{Simultaneous notes}.
 
-@knownissues
+@node Simultaneous expressions
+@unnumberedsubsubsec Simultaneous expressions
 
-Music expressions like @code{<< @{ g8 e8 @} a4 >>} are not printed
-accurately.  Use @code{<g a>8 <e a>8} instead.
+One or more music expressions enclosed in double angle brackets are
+taken to be simultaneous.  If the first expression begins with a
+single note or if the whole simultaneous expression appears
+explicitly within a single voice, the whole expression is placed on
+a single staff; otherwise the elements of the simultaneous
+expression are placed on separate staves.
+
+The following examples show simultaneous expressions on one staff:
+
+@lilypond[quote,verbatim,relative=2]
+\new Voice {  % explicit single voice
+  << {a4 b g2} {d4 g c,2} >>
+}
+@end lilypond
+
+@lilypond[quote,verbatim,relative=2]
+% single first note
+a << {a4 b g}  {d4 g c,} >>
+@end lilypond
+
+This can be useful if the simultaneous sections have identical
+rhythms, but attempts to attach notes with different durations
+to the same stem will cause errors.
+
+The following example shows how simultaneous expressions can
+generate multiple staves implicitly:
+
+@lilypond[quote,verbatim,relative=2]
+% no single first note
+<< {a4 b g2}  {d4 g2 c,4} >>
+@end lilypond
+
+Here different rhythms cause no problems.
 
 
 @node Clusters
-@subsubsection Clusters
+@unnumberedsubsubsec Clusters
 
 @cindex cluster
+@cindex note cluster
+
 @funindex \makeClusters
+@funindex makeClusters
 
-A cluster indicates a continuous range of pitches to be played.  They
-can be denoted as the envelope of a set of notes.  They are entered by
-applying the function @code{\makeClusters} to a sequence of chords,
-e.g.,
+A cluster indicates a continuous range of pitches to be played.
+They can be denoted as the envelope of a set of notes.  They are
+entered by applying the function @code{\makeClusters} to a sequence
+of chords, e.g.,
 
-@lilypond[quote,ragged-right,relative=2,fragment,verbatim]
+@lilypond[quote,relative=2,verbatim]
 \makeClusters { <g b>2 <c g'> }
 @end lilypond
 
@@ -94,269 +143,512 @@ Music Glossary:
 @rglos{cluster}.
 
 Snippets:
-@lsrdir{Simultaneous,Simultaneous-notes}.
+@rlsr{Simultaneous notes}.
 
 Internals Reference:
-@internalsref{ClusterSpanner},
-@internalsref{ClusterSpannerBeacon},
-@internalsref{Cluster_spanner_engraver}.
-
-@c Examples: @lsr{contemporary,cluster@/.ly}.
+@rinternals{ClusterSpanner},
+@rinternals{ClusterSpannerBeacon},
+@rinternals{Cluster_spanner_engraver}.
 
 @knownissues
 
-Clusters only look good if they span at least two chords; otherwise
+Clusters look good only if they span at least two chords; otherwise
 they appear too narrow.
 
-Clusters do not have a stem and can not indicate durations by
-themselves.  Separate clusters would need a separating rest between
-them.
+Clusters do not have a stem and cannot indicate durations by
+themselves, but the length of the printed cluster is determined by
+the durations of the defining chords.  Separate clusters need a
+separating rest between them.
+
+Clusters do not produce MIDI output.
 
 @node Multiple voices
 @subsection Multiple voices
 
+This section discusses simultaneous notes in multiple voices or
+multiple staves.
+
 @menu
-* Collision resolution::        
-* Automatic part combining::    
-* Writing music in parallel::   
+* Single-staff polyphony::
+* Voice styles::
+* Collision resolution::
+* Automatic part combining::
+* Writing music in parallel::
 @end menu
 
-@node Collision resolution
-@subsubsection Collision resolution
 
-@cindex merging notes
-@cindex note collisions
+@node Single-staff polyphony
+@unnumberedsubsubsec Single-staff polyphony
 
-Normally, note heads with a different number of dots are not
-merged, but when the object property
-@code{merge-differently-dotted} is set in the
-@internalsref{NoteCollision} object, they are merged:
+@cindex single-staff polyphony
+@cindex polyphony, single-staff
+@cindex voice
+@cindex lyrics assigned to one voice
 
-@lilypond[quote,verbatim,fragment,ragged-right,relative=2]
-\new Voice << {
-  g8 g8
-  \override Staff.NoteCollision
-    #'merge-differently-dotted = ##t
-  g8 g8
-} \\ { g8.[ f16] g8.[ f16] } >>
+@funindex \voiceOne
+@funindex voiceOne
+@funindex \voiceOne ... \voiceFour
+@funindex Voice
+@funindex \oneVoice
+@funindex oneVoice
+
+@strong{@i{Explicitly instantiating voices}}
+
+The basic structure needed to achieve multiple independent
+voices in a single staff is illustrated in the following example:
+
+@lilypond[quote,relative=3,verbatim]
+\new Staff <<
+  \new Voice = "first"
+    { \voiceOne r8 r16 g e8. f16 g8[ c,] f e16 d }
+  \new Voice= "second"
+    { \voiceTwo d16 c d8~ d16 b c8~ c16 b c8~ c16 b8. }
+>>
 @end lilypond
 
-Similarly, you can merge half note heads with eighth notes, by
-setting @code{merge-differently-headed}:
+Here, voices are instantiated explicitly and are given names. The
+@code{\voiceOne} ... @code{\voiceFour} commands set up the voices
+so that first and third voices get stems up, second and fourth
+voices get stems down, third and fourth voice note heads are
+horizontally shifted, and rests in the respective voices are
+automatically moved to avoid collisions.  The @code{\oneVoice}
+command returns all the voice settings to the neutral default
+directions.
 
-@lilypond[quote,ragged-right,fragment,relative=2,verbatim]
-\new Voice << {
-  c8 c4.
-  \override Staff.NoteCollision
-    #'merge-differently-headed = ##t
-c8 c4. } \\ { c2 c2 } >>
-@end lilypond
+@strong{@i{Temporary polyphonic passages}}
 
-@noindent
-@code{merge-differently-headed} and
-@code{merge-differently-dotted} only apply to opposing stem
-directions (i.e. Voice 1 & 2).
+A temporary polyphonic passage can be created with the following
+construct:
 
-LilyPond also vertically shifts rests that are opposite of a stem,
-for example
+@example
+<< @{ \voiceOne ... @}
+  \new Voice @{ \voiceTwo ... @}
+>> \oneVoice
+@end example
 
-@lilypond[quote,ragged-right,fragment,verbatim]
-\new Voice << c''4 \\ r4 >>
-@end lilypond
+Here, the first expression within a temporary polyphonic passage is
+placed into the @code{Voice} context which was in use immediately
+before the polyphonic passage, and that same @code{Voice} context
+continues after the temporary section.  Other expressions within
+the angle brackets are assigned to distinct temporary voices.
+This allows lyrics to be assigned to one continuing voice before,
+during and after a polyphonic section:
 
-@cindex shift note
-
-If three or more notes line up in the same column,
-@code{merge-differently-headed} cannot successfully complete the
-merge of the two notes that should be merged.  To allow the merge
-to work properly, apply a @code{\shift} to the note that should
-not be merged.  In the first measure of following example,
-@code{merge-differently-headed} does not work (the half-note head
-is solid).  In the second measure, @code{\shiftOn} is applied to
-move the top @code{g} out of the column, and
-@code{merge-differently-headed} works properly.
-
-@lilypond[quote,ragged-right,fragment,verbatim,relative=2]
-\override Staff.NoteCollision #'merge-differently-headed = ##t
+@lilypond[quote, verbatim, relative=2]
 <<
-  { d=''2 g2 } \\
-  { \oneVoice d=''8 c8 r4 e,8 c'8 r4 } \\
-  { \voiceFour e,,2 e'2}
+  \new Voice = "melody" {
+    a4
+    <<
+      {
+        \voiceOne
+        g f
+      }
+      \new Voice {
+        \voiceTwo
+        d2
+      }
+    >>
+    \oneVoice
+    e4
+  }
+  \new Lyrics \lyricsto "melody" {
+  This is my song.
+  }
 >>
+@end lilypond
+
+Here, the @code{\voiceOne} and @code{\voiceTwo} commands are
+required to define the settings of each voice.
+
+@strong{@i{The double backslash construct}}
+
+The @code{<< @{...@} \\ @{...@} >>} construct, where the two (or
+more) expressions are separated by double backslashes, behaves
+differently to the similar construct without the double backslashes:
+@emph{all} the expressions within this contruct are assigned
+to new @code{Voice} contexts.  These new @code{Voice} contexts
+are created implicitly and are given the fixed names @code{"1"},
+@code{"2"}, etc.
+
+The first example could be typeset as follows:
+
+@lilypond[quote,relative=3,verbatim]
 <<
-  { d'=''2 \shiftOn g2 } \\ 
-  { \oneVoice d=''8 c8 r4 e,8 c'8 r4 } \\
-  { \voiceFour e,,2 e'2}
+  { r8 r16 g e8. f16 g8[ c,] f e16 d }
+  \\
+  { d16 c d8~ d16 b c8~ c16 b c8~ c16 b8. }
 >>
 @end lilypond
 
-@cindex multiple voices
-@cindex polyphonic music
-@cindex shifting voices
+This syntax can be used where it does not matter that temporary
+voices are created and then discarded.  These implicitly created
+voices are given the settings equivalent to the effect of the
+@code{\voiceOne} ... @code{\voiceFour} commands, in the order in
+which they appear in the code.
 
-In some instances of complex polyphonic music, you may need
-additional voices to avoid collisions between notes.  Additional
-voices are added by defining an variable, as shown below:
+In the following example, the intermediate voice has stems up,
+therefore we enter it in the third place, so it becomes voice
+three, which has the stems up as desired.  Spacer rests are
+used to avoid printing doubled rests.
 
-@lilypond[quote,verbatim,ragged-right,relative=2]
-voiceFive = #(context-spec-music (make-voice-props-set 4) 'Voice)
-
-\relative c''' <<
-  { \voiceOne g4 ~  \stemDown g32[ f( es d c b a b64 )g] } \\
-  { \voiceThree  b4} \\
-  { \voiceFive d,} \\
-  { \voiceTwo g,}
+@lilypond[quote,relative=3,verbatim]
+<<
+  { r8 g g  g g f16 ees f8 d }
+  \\
+  { ees,8 r ees r d r d r }
+  \\
+  { d'8 s c s bes s a s }
 >>
 @end lilypond
 
+In all but the simplest works it is advisable to create explicit
+@code{Voice} contexts as explained in @rlearning{Contexts and engravers} and
+@rlearning{Explicitly instantiating voices}.
 
+@strong{@i{Identical rhythms}}
+
+In the special case that we want to typeset parallel pieces of music
+that have the same rhythm, we can combine them into a single
+@code{Voice} context, thus forming chords.  To achieve this, enclose
+them in a simple simultaneous music construct within an explicit voice:
+
+@lilypond[quote,relative=2,verbatim]
+\new Voice <<
+  { e4 f8 d e16 f g8 d4 }
+  { c4 d8 b c16 d e8 b4 }
+>>
+@end lilypond
+
+This method leads to strange beamings and warnings if the pieces of
+music do not have the same rhythm.
 
 @predefined
 
-@funindex \oneVoice
-@code{\oneVoice},
-@funindex \voiceOne
 @code{\voiceOne},
-@funindex \voiceTwo
 @code{\voiceTwo},
-@funindex \voiceThree
 @code{\voiceThree},
-@funindex \voiceFour
-@code{\voiceFour}.
+@code{\voiceFour},
+@code{\oneVoice}.
 
-@funindex \voiceNeutralStyle
+@seealso
+
+Learning Manual:
+@rlearning{Voices contain music},
+@rlearning{Explicitly instantiating voices}.
+
+Notation Reference:
+@ref{Percussion staves},
+@ref{Invisible rests}.
+
+Snippets:
+@rlsr{Simultaneous notes}.
+
+
+@node Voice styles
+@unnumberedsubsubsec Voice styles
+
+@cindex voice styles
+@cindex styles, voice
+@cindex coloring voices
 @funindex \voiceOneStyle
 @funindex \voiceTwoStyle
 @funindex \voiceThreeStyle
 @funindex \voiceFourStyle
-@example
-\voiceNeutralStyle
-\voiceOneStyle
-\voiceTwoStyle
-\voiceThreeStyle
-\voiceFourStyle
-@end example
+@funindex \voiceNeutralStyle
 
-@funindex \shiftOn
-@code{\shiftOn},
-@funindex \shiftOnn
-@code{\shiftOnn},
-@funindex \shiftOnnn
-@code{\shiftOnnn},
-@funindex \shiftOff
-@code{\shiftOff}: these commands specify the degree to which
-chords of the current voice should be shifted.  The outer voices
-(normally: voice one and two) have @code{\shiftOff}, while the
-inner voices (three and four) have @code{\shiftOn}.
-@code{\shiftOnn} and @code{\shiftOnnn} define further shift
-levels.
+Voices may be given distinct colors and shapes, allowing them to be
+easily identified:
 
-When LilyPond cannot cope, the @code{force-hshift} property of the
-@internalsref{NoteColumn} object and pitched rests can be used to
-override typesetting decisions.
-
-@lilypond[quote,verbatim,ragged-right]
-\relative <<
-{
-  <d g>
-  <d g>
-} \\ {
-  <b f'>
-  \once \override NoteColumn #'force-hshift = #1.7
-  <b f'>
-} >>
+@lilypond[quote,relative=2,verbatim]
+<<
+  { \voiceOneStyle d4 c2 b4 }
+  \\
+  { \voiceTwoStyle e,2 e }
+  \\
+  { \voiceThreeStyle b2. c4 }
+  \\
+  { \voiceFourStyle g'2 g }
+>>
 @end lilypond
 
+The @code{\voiceNeutralstyle} command is used to revert to the
+standard presentation.
+
+@predefined
+
+
+@code{\voiceOneStyle},
+
+@code{\voiceTwoStyle},
+@code{\voiceThreeStyle},
+@code{\voiceFourStyle},
+@code{\voiceNeutralStyle}.
 
 @seealso
 
+Learning Manual:
+@rlearning{I'm hearing Voices},
+@rlearning{Other sources of information}.
+
 Snippets:
-@lsrdir{Simultaneous,Simultaneous-notes}.
+@rlsr{Simultaneous notes}.
 
-Internals Reference: the objects responsible for resolving collisions
-are
-@internalsref{NoteCollision} and
-@internalsref{RestCollision}.
 
+@node Collision resolution
+@unnumberedsubsubsec Collision resolution
+
+@cindex merging notes
+@cindex note collisions
+@cindex collisions
+@cindex shift note
+@cindex multiple voices
+@cindex voices, multiple
+@cindex polyphonic music
+@cindex shifting voices
+@cindex voices, multiple
+@cindex shift rest, automatic
+@funindex \shiftOn
+@funindex shiftOn
+@funindex \shiftOnn
+@funindex shiftOnn
+@funindex \shiftOnnn
+@funindex shiftOnnn
+@funindex \shiftOff
+@funindex shiftOff
+@funindex \mergeDifferentlyDottedOn
+@funindex mergeDifferentlyDottedOn
+@funindex \mergeDifferentlyDottedOff
+@funindex mergeDifferentlyDottedOff
+@funindex \mergeDifferentlyHeadedOn
+@funindex mergeDifferentlyHeadedOn
+@funindex \mergeDifferentlyHeadedOff
+@funindex mergeDifferentlyHeadedOff
+
+The note heads of notes in different voices with the same pitch,
+same note head and opposite stem direction are automatically
+merged, but notes with different note heads or the same stem
+direction are not.  Rests opposite a stem in a different voice
+are shifted vertically.
+
+@lilypond[quote,verbatim,relative=2]
+<<
+  {
+    c8 d e d c d c4
+    g'2 fis
+  } \\ {
+    c2 c8. b16 c4
+    e,2 r
+  } \\ {
+    \oneVoice
+    s1
+    e8 a b c d2
+  }
+>>
+@end lilypond
+
+Notes with different note heads may be merged, with the
+exception of half-note heads and quarter-note heads:
+
+@lilypond[quote,verbatim,relative=2]
+<<
+  {
+    \mergeDifferentlyHeadedOn
+    c8 d e d c d c4
+    g'2 fis
+  } \\ {
+    c2 c8. b16 c4
+    e,2 r
+  } \\ {
+    \oneVoice
+    s1
+    e8 a b c d2
+  }
+>>
+@end lilypond
+
+Note heads with different dots may be merged:
+
+@lilypond[quote,relative=2,verbatim]
+<<
+  {
+    \mergeDifferentlyHeadedOn
+    \mergeDifferentlyDottedOn
+    c8 d e d c d c4
+    g'2 fis
+  } \\ {
+    c2 c8. b16 c4
+    e,2 r
+  } \\ {
+    \oneVoice
+    s1
+    e8 a b c d2
+  }
+>>
+@end lilypond
+
+
+The half note and eighth note at the start of the second measure
+are incorrectly merged because @code{\mergeDifferentlyHeadedOn}
+cannot successfully complete the merge when three or more notes
+line up in the same column, and in this case a warning is given.
+To allow the merge to work properly a @code{\shift} must be applied
+to the note that should not be merged.  Here, @code{\shiftOn} is
+applied to move the top @notation{g} out of the column, and
+@code{\mergeDifferentlyHeadedOn} then works properly.
+
+@lilypond[quote,relative=2,verbatim]
+<<
+  {
+    \mergeDifferentlyHeadedOn
+    \mergeDifferentlyDottedOn
+    c8 d e d c d c4
+    \shiftOn
+    g'2 fis
+  } \\ {
+    c2 c8. b16 c4
+    e,2 r
+  } \\ {
+    \oneVoice
+    s1
+    e8 a b c d2
+  }
+
+>>
+@end lilypond
+
+The @code{\shiftOn}, @code{\shiftOnn}, and @code{\shiftOnnn}
+commands specify the degree to which chords of the current voice
+should be shifted.  The outer voices (normally: voices one and
+two) have @code{\shiftOff}, while the inner voices (three and
+four) have @code{\shiftOn}.  @code{\shiftOnn} and
+@code{\shiftOnnn} define further shift levels.
+
+Notes are only merged if they have opposing stem directions (e.g. in
+@code{Voice} 1 and 2).
+
+
+@predefined
+
+@code{\mergeDifferentlyDottedOn},
+@code{\mergeDifferentlyDottedOff},
+@code{\mergeDifferentlyHeadedOn},
+@code{\mergeDifferentlyHeadedOff}.
+
+@code{\shiftOn},
+@code{\shiftOnn},
+@code{\shiftOnnn},
+@code{\shiftOff}.
+
+@snippets
+
+@lilypondfile[verbatim,lilyquote,texidoc,doctitle]
+{additional-voices-to-avoid-collisions.ly}
+
+@lilypondfile[verbatim,lilyquote,texidoc,doctitle]
+{forcing-horizontal-shift-of-notes.ly}
+
+@seealso
+
+Music Glossary:
+@rglos{polyphony}.
+
+Learning Manual:
+@rlearning{Multiple notes at once},
+@rlearning{Voices contain music},
+@rlearning{Collisions of objects}.
+
+Snippets:
+@rlsr{Simultaneous notes}.
+
+Internals Reference:
+@rinternals{NoteColumn},
+@rinternals{NoteCollision},
+@rinternals{RestCollision}.
 
 @knownissues
 
-When using @code{merge-differently-headed} with an upstem eighth
-or a shorter note, and a downstem half note, the eighth note gets
-the wrong offset.
+When using @code{\mergeDifferentlyHeadedOn} with an upstem eighth
+or a shorter note, and a downstem half note, the eighth note stem
+gets a slightly wrong offset because of the different width of the
+half note head symbol.
 
-There is no support for clusters where the same note occurs with
+@ignore
+@c TODO investigate! Sometimes it works, sometimes not. --FV
+The requirements for successfully merging different note heads that
+are at the same time differently dotted are not clear.
+@end ignore
+
+There is no support for chords where the same note occurs with
 different accidentals in the same chord.  In this case, it is
 recommended to use enharmonic transcription, or to use special
 cluster notation (see @ref{Clusters}).
 
 
 @node Automatic part combining
-@subsubsection Automatic part combining
+@unnumberedsubsubsec Automatic part combining
+
 @cindex automatic part combining
 @cindex part combiner
 @cindex combining parts
+@cindex a due part
+@cindex solo part
+@funindex \partcombine
+@funindex partcombine
 
 Automatic part combining is used to merge two parts of music onto
 a staff.  It is aimed at typesetting orchestral scores.  When the
 two parts are identical for a period of time, only one is shown.
 In places where the two parts differ, they are typeset as separate
 voices, and stem directions are set automatically.  Also, solo and
-@emph{a due} parts are identified and can be marked.
+@notation{a due} parts are identified and marked by default.
 
-The syntax for part combining is
+The syntax for part combining is:
 
 @example
 \partcombine @var{musicexpr1} @var{musicexpr2}
 @end example
 
-
 The following example demonstrates the basic functionality of the
-part combiner: putting parts on one staff, and setting stem
-directions and polyphony.
+part combiner: putting parts on one staff and setting stem
+directions and polyphony.  The same variables are used for the
+independent parts and the combined staff.
 
-@lilypond[quote,verbatim,ragged-right,fragment]
-\new Staff \partcombine
-  \relative g' { g g a( b) c c r r }
-  \relative g' { g g r4 r e e g g }
-@end lilypond
+@lilypond[quote,verbatim]
+instrumentOne = \relative c' {
+  c4 d e f
+  R1
+  d'4 c b a
+  b4 g2 f4
+  e1
+}
 
-The first @code{g} appears only once, although it was specified
-twice (once in each part).  Stem, slur, and tie directions are set
-automatically, depending whether there is a solo or unisono.  The
-first part (with context called @code{one}) always gets up stems,
-and @q{Solo}, while the second (called @code{two}) always gets
-down stems and @q{Solo II}.
+instrumentTwo = \relative g' {
+  R1
+  g4 a b c
+  d c b a
+  g f( e) d
+  e1
+}
 
-If you just want the merging parts, and not the textual markings,
-you may set the property @code{printPartCombineTexts} to false.
-
-@lilypond[quote,verbatim,ragged-right,fragment,relative=2]
-\new Staff <<
-  \set Staff.printPartCombineTexts = ##f
-  \partcombine
-    \relative g' { g a( b) r }
-    \relative g' { g r4 r f }
+<<
+  \new Staff \instrumentOne
+  \new Staff \instrumentTwo
+  \new Staff \partcombine \instrumentOne \instrumentTwo
 >>
 @end lilypond
 
-To change the text that is printed for solos or merging, you may
-set the @code{soloText}, @code{soloIIText}, and @code{aDueText}
-properties.
-
-@lilypond[quote,verbatim,ragged-right,fragment,relative=2]
-\new Staff <<
-  \set Score.soloText = #"ichi"
-  \set Score.soloIIText = #"ni"
-  \set Score.aDueText = #"tachi"
-  \partcombine
-    \relative g' { g4 g a( b) r }
-    \relative g' { g4 g r r f }
->>
-@end lilypond
+The notes in the third measure appear only once, although they were
+specified in both parts.  Stem, slur, and tie directions are set
+automatically, depending whether there is a solo or unison.  When
+needed in polyphony situations, the first part (with context called
+@code{one}) always gets up stems, while the second (called @code{two})
+always gets down stems.  In solo situations, the first and second
+parts get marked with @q{Solo} and @q{Solo II}, respectively.  The
+unisono (@notation{a due}) parts are marked by default with the text
+@qq{a2}.
 
 Both arguments to @code{\partcombine} will be interpreted as
-@internalsref{Voice} contexts.  If using relative octaves,
+@code{Voice} contexts.  If using relative octaves,
 @code{\relative} should be specified for both music expressions,
 i.e.,
 
@@ -371,19 +663,33 @@ A @code{\relative} section that is outside of @code{\partcombine}
 has no effect on the pitches of @var{musicexpr1} and
 @var{musicexpr2}.
 
+@snippets
+
+@lilypondfile[verbatim,lilyquote,texidoc,doctitle]
+{combining-two-parts-on-the-same-staff.ly}
+
+@lilypondfile[verbatim,lilyquote,texidoc,doctitle]
+{changing-partcombine-texts.ly}
+
 @seealso
 
 Music Glossary:
-@rglos{a due}.
+@rglos{a due},
+@rglos{part}.
+
+Notation Reference:
+@ref{Writing parts}.
 
 Snippets:
-@lsrdir{Simultaneous,Simultaneous-notes}.
+@rlsr{Simultaneous notes}.
 
 Internals Reference:
-@internalsref{PartCombineMusic},
-@internalsref{Voice}.
+@rinternals{PartCombineMusic},
+@rinternals{Voice}.
 
 @knownissues
+
+@code{\partcombine} can only accept two voices.
 
 When @code{printPartCombineTexts} is set, if the two voices play
 the same notes on and off, the part combiner may typeset @code{a2}
@@ -394,82 +700,133 @@ more than once in a measure.
 @code{\partcombine} cannot be inside @code{\relative}.
 
 Internally, the @code{\partcombine} interprets both arguments as
-@code{Voice}s named @code{one} and @code{two}, and then decides
-when the parts can be combined.  Consequently, if the arguments
-switch to differently named @internalsref{Voice} contexts, the
-events in those will be ignored.
+@code{Voice}s and decides when the parts can be combined.  When they have
+different durations they cannot be combined and are given the names
+@code{one} and @code{two}.  Consequently, if the arguments switch to
+differently named @rinternals{Voice} contexts, the events in those will
+be ignored.  Likewise, partcombining isn't designed to work with lyrics;
+when one of the voices is explicitly named in order to attach lyrics to
+it, the partcombining stops working.
+
+@code{\partcombine} only observes onset times of notes. It cannot
+determine whether a previously started note is playing or not, leading
+to various problems.
 
 
 @node Writing music in parallel
-@subsubsection Writing music in parallel
+@unnumberedsubsubsec Writing music in parallel
 
-@cindex Writing music in parallel
-@cindex Interleaved music
+@cindex writing music in parallel
+@cindex interleaved music
+@cindex parallel music
+@funindex \parallelMusic
+@funindex parallelMusic
 
-Music for multiple parts can be interleaved:
+Music for multiple parts can be interleaved in input code.  The
+function @code{\parallelMusic} accepts a list with the names of a
+number of variables to be created, and a musical expression.  The
+content of alternate measures from the expression become the value
+of the respective variables, so you can use them afterwards to
+print the music.
 
-@lilypond[quote,fragment,verbatim]
-\parallelMusic #'(voiceA voiceB) {
-  r8 g'16[ c''] e''[ g' c'' e''] r8 g'16[ c''] e''[ g' c'' e''] |
-  c'2                               c'2                         |
-  r8 a'16[ d''] f''[ a' d'' f''] r8 a'16[ d''] f''[ a' d'' f''] |
-  c'2                               c'2                         |
+@warning{Bar checks @code{|} must be used, and the measures must
+be of the same length.}
+
+@lilypond[quote,verbatim]
+\parallelMusic #'(voiceA voiceB voiceC) {
+  % Bar 1
+  r8 g'16 c'' e'' g' c'' e'' r8 g'16 c'' e'' g' c'' e'' |
+  r16 e'8.~   e'4            r16 e'8.~   e'4            |
+  c'2                        c'2                        |
+
+  % Bar 2
+  r8 a'16 d'' f'' a' d'' f'' r8 a'16 d'' f'' a' d'' f'' |
+  r16 d'8.~   d'4            r16 d'8.~   d'4            |
+  c'2                        c'2                        |
+
 }
 \new StaffGroup <<
-  \new Staff \new Voice \voiceA
-  \new Staff \new Voice \voiceB
+  \new Staff << \voiceA \\ \voiceB >>
+  \new Staff { \clef bass \voiceC }
 >>
 @end lilypond
 
-This works quite well for piano music.
+Relative mode may be used.  Note that the @code{\relative} command
+is not used inside @code{\parallelMusic} itself.  The notes are
+relative to the preceding note in the voice, not to the previous
+note in the input -- in other words, relative notes for
+@code{voiceA} ignore the notes in @code{voiceB}.
 
-@c  It would be nice if the first bar fit onto one 66-char line.
-@c  Maybe simplify the example?  -gp
 @lilypond[quote,verbatim]
-music = {
-  \key c \major
-  \time 4/4
-  \parallelMusic #'(voiceA voiceB voiceC voiceD) {
-    % Bar 1
-    r8  g'16[ c''] e''[ g' c'' e'']
-      r8 g'16[ c''] e''[ g' c'' e''] |
-    c'2
-      c'2 |
-    r8  a16[ d'] f'[ a d' f']
-      r8  a16[ d'] f'[ a d' f'] |
-    c2
-      c2 |
+\parallelMusic #'(voiceA voiceB voiceC) {
+  % Bar 1
+  r8 g16 c e g, c e r8 g,16 c e g, c e  |
+  r16 e8.~ e4       r16 e8.~  e4        |
+  c2                c                   |
 
-    % Bar 2
-    a'8 b'      c'' d''    e'' f''    g'' a'' |
-    d'4         d'         d'         d' |
-    c16 d e f   d e f g    e f g a    f g a b |
-    a,4         a,4        a,4        a,4 |
+  % Bar 2
+  r8 a,16 d f a, d f r8 a,16 d f a, d f |
+  r16 d8.~  d4       r16 d8.~  d4       |
+  c2                 c                  |
 
-    % Bar 3 ...
-  }
+ }
+\new StaffGroup <<
+  \new Staff << \relative c'' \voiceA \\ \relative c' \voiceB >>
+  \new Staff \relative c' { \clef bass \voiceC }
+>>
+@end lilypond
+
+This works quite well for piano music.  This example maps four
+consecutive measures to four variables:
+
+@lilypond[quote,verbatim]
+global = {
+  \key g \major
+  \time 2/4
+}
+
+\parallelMusic #'(voiceA voiceB voiceC voiceD) {
+  % Bar 1
+  a8    b     c   d     |
+  d4          e         |
+  c16 d e fis d e fis g |
+  a4          a         |
+
+  % Bar 2
+  e8      fis  g     a   |
+  fis4         g         |
+  e16 fis g  a fis g a b |
+  a4           a         |
+
+  % Bar 3 ...
 }
 
 \score {
   \new PianoStaff <<
-    \music
-    \new Staff <<
-      \voiceA \\
-      \voiceB
-    >>
-    \new Staff {
-      \clef bass
-      <<
-        \voiceC \\
-        \voiceD
-      >>
-    }
+     \new Staff {
+       \global
+       <<
+         \relative c'' \voiceA
+         \\
+         \relative c'  \voiceB
+       >>
+     }
+     \new Staff {
+       \global \clef bass
+       <<
+         \relative c \voiceC
+         \\
+         \relative c \voiceD
+       >>
+     }
   >>
 }
 @end lilypond
 
 @seealso
 
-Snippets:
-@lsrdir{Simultaneous,Simultaneous-notes}.
+Learning Manual:
+@rlearning{Organizing pieces with variables}.
 
+Snippets:
+@rlsr{Simultaneous notes}.

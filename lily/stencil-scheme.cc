@@ -270,14 +270,14 @@ LY_DEFINE (ly_bracket, "ly:bracket",
 	   4, 0, 0,
 	   (SCM a, SCM iv, SCM t, SCM p),
 	   "Make a bracket in direction@tie{}@var{a}.  The extent of the"
-	   " bracket is given by @var{iv}.  The wings protude by an amount"
+	   " bracket is given by @var{iv}.  The wings protrude by an amount"
 	   " of@tie{}@var{p}, which may be negative.  The thickness is given"
 	   " by@tie{}@var{t}.")
 {
   LY_ASSERT_TYPE (is_axis, a, 1);
   LY_ASSERT_TYPE (is_number_pair, iv, 2);
-  LY_ASSERT_TYPE (scm_is_number, t,3);
-  LY_ASSERT_TYPE (scm_is_number, p,4);
+  LY_ASSERT_TYPE (scm_is_number, t, 3);
+  LY_ASSERT_TYPE (scm_is_number, p, 4);
 
   return Lookup::bracket ((Axis)scm_to_int (a), ly_scm2interval (iv),
 			  scm_to_double (t),
@@ -288,12 +288,13 @@ LY_DEFINE (ly_bracket, "ly:bracket",
 LY_DEFINE (ly_stencil_rotate, "ly:stencil-rotate",
 	   4, 0, 0, (SCM stil, SCM angle, SCM x, SCM y),
 	   "Return a stencil @var{stil} rotated @var{angle} degrees around"
-	   " point (@var{x}, @var{y}).")
+	   " the relative offset (@var{x}, @var{y}). E.g. an offset of"
+	   " (-1, 1) will rotate the stencil around the left upper corner.")
 {
   Stencil *s = unsmob_stencil (stil);
   LY_ASSERT_SMOB (Stencil, stil, 1);
   LY_ASSERT_TYPE (scm_is_number, angle, 2);
-  LY_ASSERT_TYPE (scm_is_number, x,3);
+  LY_ASSERT_TYPE (scm_is_number, x, 3);
   LY_ASSERT_TYPE (scm_is_number, y, 4);
   Real a = scm_to_double (angle);
   Real x_off = scm_to_double (x);
@@ -302,6 +303,26 @@ LY_DEFINE (ly_stencil_rotate, "ly:stencil-rotate",
   SCM new_s = s->smobbed_copy ();
   Stencil *q = unsmob_stencil (new_s);
   q->rotate_degrees (a, Offset (x_off, y_off));
+  return new_s;
+}
+
+LY_DEFINE (ly_stencil_rotate_absolute, "ly:stencil-rotate-absolute",
+	   4, 0, 0, (SCM stil, SCM angle, SCM x, SCM y),
+	   "Return a stencil @var{stil} rotated @var{angle} degrees around"
+	   " point (@var{x}, @var{y}), given in absolute coordinates.")
+{
+  Stencil *s = unsmob_stencil (stil);
+  LY_ASSERT_SMOB (Stencil, stil, 1);
+  LY_ASSERT_TYPE (scm_is_number, angle, 2);
+  LY_ASSERT_TYPE (scm_is_number, x, 3);
+  LY_ASSERT_TYPE (scm_is_number, y, 4);
+  Real a = scm_to_double (angle);
+  Real x_off = scm_to_double (x);
+  Real y_off = scm_to_double (y);
+
+  SCM new_s = s->smobbed_copy ();
+  Stencil *q = unsmob_stencil (new_s);
+  q->rotate_degrees_absolute (a, Offset (x_off, y_off));
   return new_s;
 }
 
@@ -317,6 +338,28 @@ LY_DEFINE (ly_round_filled_box, "ly:round-filled-box",
 
   return Lookup::round_filled_box (Box (ly_scm2interval (xext), ly_scm2interval (yext)),
 				   scm_to_double (blot)).smobbed_copy ();
+}
+
+LY_DEFINE (ly_round_filled_polygon, "ly:round-filled-polygon",
+	   2, 0, 0,
+	   (SCM points, SCM blot),
+	   "Make a @code{Stencil} object that prints a black polygon with"
+	   " corners at the points defined by @var{points} (list of coordinate"
+	   " pairs) and roundness @var{blot}.")
+{
+  SCM_ASSERT_TYPE (scm_ilength (points) > 0, points, SCM_ARG1, __FUNCTION__, "list of coordinate pairs");
+  LY_ASSERT_TYPE (scm_is_number, blot, 2);
+  vector<Offset> pts;
+  for (SCM p = points; scm_is_pair (p); p = scm_cdr (p))
+    {
+      SCM scm_pt = scm_car (p);
+      if (scm_is_pair (scm_pt)) {
+        pts.push_back (ly_scm2offset (scm_pt));
+      } else {
+        // TODO: Print out warning
+      }
+    }
+  return Lookup::round_filled_polygon (pts, scm_to_double (blot)).smobbed_copy ();
 }
 
 LY_DEFINE (ly_register_stencil_expression, "ly:register-stencil-expression",

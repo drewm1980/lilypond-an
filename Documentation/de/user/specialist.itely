@@ -1,36 +1,37 @@
 @c -*- coding: utf-8; mode: texinfo; -*-
 @ignore
-    Translation of GIT committish: 1859194a9f46a8886166cafee0e450b39fc5a963
+    Translation of GIT committish: b54fc6953a8d70a3c51e8c3d0cbf9b3fe9652d78
 
     When revising a translation, copy the HEAD committish of the
     version that you are working on.  See TRANSLATION for details.
 @end ignore
 
-@c \version "2.11.38"
+@c \version "2.11.61"
 
 @node Specialist notation
 @chapter Specialist notation
 
-This chapter explains how to create musical notation.
+This chapter explains how to create musical notation for specific
+types of instrument or in specific styles.
 
 @menu
-* Vocal music:: a
-* Chords Blah:: b
-* Piano music:: c
-* Percussion:: d
-* Guitar:: e
-* Orchestral strings::
-* Bagpipes::
-* Ancient notation:: g
+* Vocal music::
+* Keyboard and other multi-staff instruments::
+* Unfretted string instruments::
+* Fretted string instruments::
+* Percussion::
+* Wind instruments::
+* Chord notation::
+* Ancient notation::
+* World music::
 @end menu
 
 @include vocal.itely
-@include chords.itely
-@include piano.itely
+@include keyboards.itely
+@include unfretted-strings.itely
+@include fretted-strings.itely
 @include percussion.itely
-@include guitar.itely
-@include strings.itely
-@include bagpipes.itely
+@include wind.itely
+@include chords.itely
 @include ancient.itely
-
-
+@include world.itely

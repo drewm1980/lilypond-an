@@ -33,7 +33,7 @@
 
      ;; TODO FIXME
    
-     (aDueText ,string? "Text to print at a unisono passage.")
+     (aDueText ,markup? "Text to print at a unisono passage.")
      (alignBelowContext ,string? "Where to insert newly created context in
 vertiical alignment.")
      (alignAboveContext ,string? "Where to insert newly created context in
@@ -47,41 +47,43 @@ accidental.
 
 For determining when to print an accidental, several different rules
 are tried.  The rule that gives the highest number of accidentals is
-used.  Each rule consists of
+used.
+
+Each entry in the list is either a symbol or a procedure.
 
 @table @var
 
-@item context
-In which context is the rule applied.  For example, if @var{context}
-is @internalsref{Score} then all staves share accidentals, and if
-@var{context} is @internalsref{Staff} then all voices in the same staff
-share accidentals, but staves do not.
+@item symbol
+The symbol is the name of the context in which the following rules are to be
+applied. For example, if @var{context} is @rinternals{Score} then all
+staves share accidentals, and if @var{context} is @rinternals{Staff} then
+all voices in the same staff share accidentals, but staves do not.
 
-@item octavation
-Whether the accidental changes all octaves or only the current octave.
-Valid choices are 
+@item procedure
+The procedure represents an accidental rule to be applied to the previously
+specified context.
+
+The procedure takes the following arguments:
 
 @table @code
 
-@item same-octave
-This is the default algorithm.  Accidentals are typeset if the note
-changes the accidental of that note in that octave.  Accidentals lasts
-to the end of the measure and then as many measures as specified in the
-value.  This is, @code{1}@tie{}means to the end of next measure,
-@code{-1}@tie{}means to the end of previous measure (that is: no
-duration at all), etc.  @code{#t} means forever.
+@item context
+The current context to which the rule should be applied.
 
-@item any-octave
-Accidentals are typeset if the note is different from the previous note
-on the same pitch in any octave.  The value has same meaning as in
-@code{same-octave}.
+@item pitch
+The pitch of the note to be evaluated.
+
+@item barnum
+The current bar number.
+
+@item measurepos
+The current measure position.
 
 @end table
 
-@item laziness
-Over how many bar lines the accidental lasts.  If @var{laziness} is
-@code{-1} then the accidental is forgotten immediately, and if
-@var{laziness} is @code{#t} then the accidental lasts forever.
+The procedure returns a pair of booleans. The first states whether an extra
+natural should be added. The second states whether an accidental should be
+printed. @code{(#t . #f)} does not make sense.
 
 @end table")
      (autoBeamCheck ,procedure? "A procedure taking three
@@ -148,6 +150,7 @@ Values of 7 and -7 are common.")
      (clefPosition ,number? "Where should the center of the clef
 symbol go, measured in half staff spaces from the center of the
 staff.")
+     (completionBusy ,boolean? "Whether a completion-note head is playing.")
      (connectArpeggios ,boolean? "If set, connect arpeggios across
 piano staff.")
      (countPercentRepeats ,boolean? "If set, produce counters for
@@ -172,8 +175,10 @@ non-hairpin decrescendo, i.e., @samp{dim.}.")
      (defaultBarType ,string? "Set the default type of bar line.  See
 @code{whichBar} for information on available bar types.
 
-This variable is read by @internalsref{Timing_translator} at
-@internalsref{Score} level.")
+This variable is read by @rinternals{Timing_translator} at
+@rinternals{Score} level.")
+     (doubleRepeatType ,string? "Set the default bar line for double
+repeats.")
      (doubleSlurs ,boolean? "If set, two slurs are created for every
 slurred note, one above and one below the chord.")
      (drumPitchTable ,hash-table? "A table mapping percussion
@@ -231,10 +236,10 @@ for the full staff.")
 @code{GridPoint}s.")
 
 
-     (hairpinToBarline ,boolean? "If set, end a hairpin at the barline
-before the ending note.")
      (harmonicAccidentals ,boolean? "If set, harmonic notes in chords
 get accidentals.")
+     (harmonicDots ,boolean? "If set, harmonic notes in dotted chords get
+dots.")
      (highStringOne ,boolean? "Whether the first string is the string
 with highest pitch on the instrument.  This used by the automatic
 string selector for tablature notation.")
@@ -243,7 +248,7 @@ string selector for tablature notation.")
      (ignoreBarChecks ,boolean? "Ignore bar checks.")
      (ignoreFiguredBassRest ,boolean? "Don't swallow rest events.")
      (ignoreMelismata ,boolean? "Ignore melismata for this
-@internalsref{Lyrics} line.")
+@rinternals{Lyrics} line.")
      (implicitBassFigures ,list? "A list of bass figures that are not
 printed as numbers, but only as extender lines.")
      (implicitTimeSignatureVisibility ,vector? "break visibility for
@@ -279,7 +284,9 @@ containing @code{(@var{step} . @var{alter})} or @code{((@var{octave} .
 0 to@tie{}6 and @var{alter} a fraction, denoting alteration.  For
 alterations, use symbols, e.g. @code{keySignature = #`((6 . ,FLAT))}.")
 
+
      (lyricMelismaAlignment ,ly:dir? "Alignment to use for a melisma syllable.")
+
 
      (majorSevenSymbol ,markup? "How should the major 7th be formatted
 in a chord name?")
@@ -300,7 +307,7 @@ manual beams are considered.  Possible values include
 @code{melismaBusy}, @code{slurMelismaBusy}, @code{tieMelismaBusy}, and
 @code{beamMelismaBusy}.")
      (metronomeMarkFormatter ,procedure? "How to produce a metronome
-markup.  Called with two arguments, event and context.")
+markup.  Called with four arguments: text, duration, count and context.")
      (midiInstrument ,string? "Name of the MIDI instrument to use.")
      (midiMaximumVolume ,number? "Analogous to
 @code{midiMinimumVolume}.")
@@ -328,7 +335,7 @@ repeated section for a page turn to be allowed within that section.")
 Parameters: A list of note events and a list of tabstring events.")
 
 
-     (ottavation ,string? "If set, the text for an ottava spanner.
+     (ottavation ,markup? "If set, the text for an ottava spanner.
 Changing this creates a new text spanner.")
      (output ,ly:music-output? "The output produced by a score-level
 translator during music interpretation.")
@@ -344,6 +351,8 @@ the pedal.")
 sustain pedals: @code{text}, @code{bracket} or @code{mixed} (both).")
      (pedalUnaCordaStrings ,list? "See @code{pedalSustainStrings}.")
      (pedalUnaCordaStyle ,symbol? "See @code{pedalSustainStyle}.")
+     (predefinedDiagramTable ,hash-table? "The hash table of predefined
+fret diagrams to use in FretBoards.")
      (printKeyCancellation ,boolean? "Print restoration alterations
 before a key signature change.")
      (printOctaveNames ,boolean? "Print octave marks for the
@@ -362,9 +371,13 @@ context and a list of music objects.  The list of contains entries with
 start times, music objects and whether they are processed in this
 context.")
      (rehearsalMark ,integer? "The last rehearsal mark printed.")
-     (repeatCommands ,list? "This property is read to find any command
-of the form @code{(volta . @var{x})}, where @var{x} is a string or
-@code{#f}.")
+     (repeatCommands ,list? "This property is a list of commands
+of the form @code{(list 'volta @var{x})}, where @var{x} is a string or
+@code{#f}.  @code{'end-repeat} is also accepted as a command.")
+     (repeatCountVisibility ,procedure? "A procedure taking as
+arguments an integer and context, returning whether the corresponding
+percent repeat number should be printed when @code{countPercentRepeats}
+is set.")
      (restNumberThreshold ,number? "If a multimeasure rest has more
 measures than this, a number is printed.")
 
@@ -390,12 +403,12 @@ voices is preserved.
      (skipTypesetting ,boolean? "If true, no typesetting is done,
 speeding up the interpretation phase.  Useful for debugging large
 scores.")
-     (soloIIText ,string? "The text for the start of a solo for
+     (soloIIText ,markup? "The text for the start of a solo for
 voice @q{two} when part-combining.")
-     (soloText ,string? "The text for the start of a solo when
+     (soloText ,markup? "The text for the start of a solo when
 part-combining.")
      (squashedPosition ,integer? "Vertical position of squashing for
-@internalsref{Pitch_squash_engraver}.")
+@rinternals{Pitch_squash_engraver}.")
      (staff-line-layout ,procedure? "Layout of staff lines,
 @code{traditional}, or @code{semitone}.")
 (staffLineLayoutFunction ,procedure? "Layout of staff lines,
@@ -427,12 +440,14 @@ the nesting of a start delimiters.")
 
 
      (tablatureFormat ,procedure? "A function formatting a tablature
-note head; it takes a string number, a list of string tunings and a
-@code{Pitch} object.  It returns the text as a string.")
+note head.  Called with three arguments: string number, context and event.
+It returns the text as a string.")
      (tempoWholesPerMinute ,ly:moment? "The tempo in whole notes per
 minute.")
      (tempoUnitCount ,number? "Count for specifying tempo.")
      (tempoUnitDuration ,ly:duration? "Unit for specifying tempo.")
+     (tempoText ,markup? "Text for tempo marks.")
+     (tempoHideNote ,boolean? "Hide the note=count in tempo marks.")
      (tieWaitForNote ,boolean? "If true, tied notes do not have to
 follow each other directly.  This can be used for writing out
 arpeggios.")
@@ -465,8 +480,7 @@ setting this property, you can make brackets last shorter.
 
      (useBassFigureExtenders ,boolean? "Whether to use extender lines
 for repeated bass figures.")
-
-
+     
      (verticallySpacedContexts ,list? "List of symbols, containing
 context names whose vertical axis groups should be taken into account
 for vertical spacing of systems.")
@@ -488,7 +502,7 @@ Example:
 
 @noindent
 This will create a start-repeat bar in this staff only.  Valid values
-are described in @internalsref{bar-line-interface}.")
+are described in @rinternals{bar-line-interface}.")
      )))
 
 
@@ -544,8 +558,8 @@ instrument name to.")
 signature change.")
      (localKeySignature ,list? "The key signature at this point in the
 measure.  The format is the same as for @code{keySignature}, but can
-also contain @code{((@var{octave} . @var{name}) . (@var{alter} .
-@var{barnumber}))} pairs.  It is reset at every bar line.")
+also contain @code{((@var{octave} . @var{name}) . (@var{alter}
+@var{barnumber} . @var{measureposition}))} pairs.")
 
 
      (melismaBusy ,boolean? "Signifies whether a melisma is active.
@@ -583,4 +597,4 @@ and subscripts.  See @file{scm/script.scm} for more information.")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-public default-melisma-properties
-  '(melismaBusy slurMelismaBusy tieMelismaBusy beamMelismaBusy))
+  '(melismaBusy slurMelismaBusy tieMelismaBusy beamMelismaBusy completionBusy))

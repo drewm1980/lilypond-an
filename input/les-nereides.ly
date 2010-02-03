@@ -1,4 +1,4 @@
-\version "2.11.38"
+\version "2.11.61"
 
 \header {
     composer = "ARTHUR GRAY"
@@ -36,17 +36,17 @@ treble = \new Voice \relative c''{
 
     \change Staff=bass
 
-    cis,16^2(^\markup {\small \italic "m.d." }\sustainUp
+    cis,16^2(^\markup {\small \italic "m.d." }\sustainOff
     <fis fis,>8 <e! e,!>
     | %4
-    <dis, a' dis>4)\sustainDown
+    <dis, a' dis>4)\sustainOn
     
     \change Staff=treble
     
     \slurUp
     \set PianoStaff.connectArpeggios = ##t
 
-    #(set-octavation 1)
+    \ottava #1
 
     \tieUp
     cis''''4^\markup { \small \italic "m.g." }\arpeggio~
@@ -55,7 +55,7 @@ treble = \new Voice \relative c''{
 	\revert Stem #'direction
 	
 	a16[-5_( fis dis]
-	#(set-octavation 0)
+	\ottava #0
 	
 	cis32[ a-1 fis-4 dis]   cis[ a  fis)-2]
 				% the small grace in lower staff comes after us
@@ -119,7 +119,7 @@ bass = \new Voice \relative c{
     | %2
     %\override Staff.SustainPedalLineSpanner #'staff-padding = #5 %tweak
 			   
-    <cis cis,>4\sustainDown
+    <cis cis,>4\sustainOn
     \change Staff=treble
     \stemDown
     <a'' eis cis>4)\arpeggio
@@ -127,11 +127,11 @@ bass = \new Voice \relative c{
     \change Staff=bass
     \stemNeutral
     
-    r8. cis,,16(\sustainUp <fis fis,>8 <gis gis,>
+    r8. cis,,16(\sustainOff <fis fis,>8 <gis gis,>
     
     | %3
 
-    <a a,>4\sustainDown
+    <a a,>4\sustainOn
     \change Staff=treble
 			
     \stemNeutral
@@ -159,7 +159,7 @@ bass = \new Voice \relative c{
  	s32 s s
 	s s s
 	\clef bass
-	<e,,, e,>32(\sustainUp\sustainDown
+	<e,,, e,>32(\sustainOff\sustainOn
     
 	\revert Stem #'stroke-style
     }
@@ -177,18 +177,18 @@ bass = \new Voice \relative c{
     %%a,8 e'[-5(<a-2 cis-3>])
 
 			   
-    a,8\sustainDown e'[-5(<a cis>])-2-3
+    a,8\sustainOn e'[-5(<a cis>])-2-3
     %%r b,-5 <e-3 gis-5 d'>4
-    r b,-5\sustainUp\sustainDown <e gis d'>4-3-5
+    r b,-5\sustainOff\sustainOn <e gis d'>4-3-5
     \slurNeutral
-    e,8[-5(\sustainUp
+    e,8[-5(\sustainOff
     
     | %6
-    a)-2]\sustainDown
+    a)-2]\sustainOn
     \slurUp
-    e'[(<a cis>)] r b,\sustainUp\sustainDown <e gis d'>4
+    e'[(<a cis>)] r b,\sustainOff\sustainOn <e gis d'>4
     \slurNeutral
-    e,8[(\sustainUp
+    e,8[(\sustainOff
     
     | %7
     a)]

@@ -26,11 +26,11 @@ TAGS = []
 # NR 1
 TAGS.extend (['pitches', 'rhythms', 'expressive-marks',
 'repeats', 'simultaneous-notes', 'staff-notation',
-'editorial-and-educational-use', 'text'])
+'editorial-annotations', 'text'])
 # NR 2
 TAGS.extend (['vocal-music', 'chords', 'keyboards',
 'percussion', 'fretted-strings', 'unfretted-strings',
-'ancient-notation', 'winds'
+'ancient-notation', 'winds', 'world-music'
 ])
 
 # other
@@ -57,9 +57,12 @@ notags_files = []
 end_header_re = re.compile ('(\\header {.+?doctitle = ".+?})\n', re.M | re.S)
 
 def mark_verbatim_section (ly_code):
-	return end_header_re.sub ('\\1 % begin verbatim\n', ly_code, 1)
+	return end_header_re.sub ('\\1 % begin verbatim\n\n', ly_code, 1)
 
-begin_header_re = re.compile ('\\header\\s*{', re.M)
+# '% LSR' comments are to be stripped
+lsr_comment_re = re.compile (r'\s*%+\s*LSR.*')
+
+begin_header_re = re.compile (r'\\header\s*{', re.M)
 
 # add tags to ly files from LSR
 def add_tags (ly_code, tags):
@@ -76,6 +79,10 @@ def copy_ly (srcdir, name, tags):
 						  os.path.splitext (name)[0] + '.texidoc')
 	if os.path.exists (texidoc_translations_path):
 		texidoc_translations = open (texidoc_translations_path).read ()
+		# Since we want to insert the translations verbatim using a 
+		# regexp, \\ is understood as ONE escaped backslash. So we have
+		# to escape those backslashes once more...
+		texidoc_translations = texidoc_translations.replace ('\\', '\\\\')
 		s = begin_header_re.sub ('\\g<0>\n' + texidoc_translations, s, 1)
 
 	if in_dir in srcdir:
@@ -84,6 +91,7 @@ def copy_ly (srcdir, name, tags):
 		s = LY_HEADER_NEW + s
 
 	s = mark_verbatim_section (s)
+	s = lsr_comment_re.sub ('', s)
 	open (dest, 'w').write (s)
 
 	e = os.system ("convert-ly -e '%s'" % dest)
@@ -103,7 +111,7 @@ def read_source_with_dirs (src):
 		srcdir = os.path.join (src, tag)
 		l[tag] = set (map (os.path.basename, glob.glob (os.path.join (srcdir, '*.ly'))))
 		for f in l[tag]:
-			if f in s.keys ():
+			if f in s:
 				s[f][1].append (tag)
 			else:
 				s[f] = (srcdir, [tag])
@@ -147,7 +155,7 @@ for (name, (srcdir, tags)) in snippets.items ():
 	copy_ly (srcdir, name, tags)
 
 for (tag, file_set) in tag_lists.items ():
-	dump_file_list (os.path.join (DEST, tag + '.snippet-list'), file_set)
+	dump_file_list (os.path.join (DEST, tag + '.snippet-list'), sorted(file_set))
 
 if unconverted:
 	sys.stderr.write ('These files could not be converted successfully by convert-ly:\n')

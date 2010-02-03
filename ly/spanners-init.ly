@@ -1,4 +1,4 @@
-\version "2.10.0"
+\version "2.11.52"
 
 startGroup = #(make-span-event 'NoteGroupingEvent START)
 stopGroup = #(make-span-event 'NoteGroupingEvent STOP)
@@ -21,77 +21,74 @@ stopTrillSpan = #(make-span-event 'TrillSpanEvent STOP)
 % STOP: junkme!
 cresc =  {
   #(ly:export (make-event-chord (list cr)))
-  \set crescendoText = \markup { \italic "cresc." }
-  \set crescendoSpanner = #'dashed-line
+  \once \set crescendoText = \markup { \italic "cresc." }
+  \once \set crescendoSpanner = #'text
 }
 
 
 dim =  {
   #(ly:export (make-event-chord (list decr)))
-
-  \set decrescendoText = \markup { \italic "dim." }
-  \set decrescendoSpanner = #'dashed-line
+  \once \set decrescendoText = \markup { \italic "dim." }
+  \once \set decrescendoSpanner = #'text
 }
 
 enddim =  {
   #(ly:export (make-event-chord (list enddecr)))
-  \unset decrescendoText 
-  \unset decrescendoSpanner 
+%  \unset decrescendoText 
+%  \unset decrescendoSpanner 
 }
 
-% ah, this is handy: maybe drop resetting of properties in
-% dynamic-engraver ?
 endcresc =  {
   #(ly:export (make-event-chord (list endcr)))
-  \unset crescendoText 
-  \unset crescendoSpanner 
+%  \unset crescendoText 
+%  \unset crescendoSpanner 
 }
 
 %%%%%%%%%%%%%%%%
 
-setTextCresc = {
+crescTextCresc = {
     \set crescendoText = \markup { \italic "cresc." }
-    \set crescendoSpanner = #'dashed-line
+    \set crescendoSpanner = #'text
+    \override DynamicTextSpanner #'style = #'dashed-line
 }
 
-setTextDecresc = {
+dimTextDecresc = {
     \set decrescendoText = \markup { \italic "decresc." }
-    \set decrescendoSpanner = #'dashed-line
+    \set decrescendoSpanner = #'text
+    \override DynamicTextSpanner #'style = #'dashed-line
 }
 
-setTextDecr = {
+dimTextDecr = {
     \set decrescendoText = \markup { \italic "decr." }
-    \set decrescendoSpanner = #'dashed-line
+    \set decrescendoSpanner = #'text
+    \override DynamicTextSpanner #'style = #'dashed-line
 }
 
-setTextDim = {
+dimTextDim = {
     \set decrescendoText = \markup { \italic "dim." }
-    \set decrescendoSpanner = #'dashed-line
+    \set decrescendoSpanner = #'text
+    \override DynamicTextSpanner #'style = #'dashed-line
 }
-setHairpinCresc = {
+
+crescHairpin = {
     \unset crescendoText 
     \unset crescendoSpanner 
 }
-setHairpinDecresc = {
+
+dimHairpin = {
     \unset decrescendoText 
     \unset decrescendoSpanner 
 }
-setHairpinDim = {
-    \unset decrescendoText 
-    \unset decrescendoSpanner 
-}
 
 
-
-% better name sustainstart/stop? 
-sustainUp = #(make-span-event 'SustainEvent STOP)
-sustainDown = #(make-span-event 'SustainEvent START)
+sustainOff = #(make-span-event 'SustainEvent STOP)
+sustainOn = #(make-span-event 'SustainEvent START)
 
 unaCorda = #(make-span-event 'UnaCordaEvent START)
 treCorde = #(make-span-event 'UnaCordaEvent STOP)
 
-sostenutoDown = #(make-span-event 'SostenutoEvent START)
-sostenutoUp = #(make-span-event 'SostenutoEvent STOP)
+sostenutoOn = #(make-span-event 'SostenutoEvent START)
+sostenutoOff = #(make-span-event 'SostenutoEvent STOP)
 
 %crescpoco = \set crescendoText = "cresc. poco a poco"
 %decresc = \set crescendoText = "decr."

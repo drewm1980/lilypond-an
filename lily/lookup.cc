@@ -18,11 +18,9 @@ using namespace std;
 #include "warn.hh"
 #include "dimensions.hh"
 #include "bezier.hh"
-#include "string-convert.hh"
 #include "file-path.hh"
 #include "main.hh"
 #include "lily-guile.hh"
-#include "font-metric.hh"
 
 Stencil
 Lookup::dot (Offset p, Real radius)
@@ -404,6 +402,7 @@ Lookup::slur (Bezier curve, Real curvethick, Real linethick)
   b[X_AXIS].unite (back.extent (X_AXIS));
   b[Y_AXIS].unite (back.extent (Y_AXIS));
 
+  b.widen (0.5 * linethick, 0.5 * linethick);
   return Stencil (b, at);
 }
 
@@ -460,207 +459,6 @@ Lookup::bezier_sandwich (Bezier top_curve, Bezier bottom_curve)
   return Stencil (b, horizontal_bend);
 }
 
-/*
-  TODO: junk me.
-*/
-Stencil
-Lookup::accordion (SCM s, Real staff_space, Font_metric *fm)
-{
-  Stencil m;
-  string sym = ly_scm2string (scm_car (s));
-  string reg = ly_scm2string (scm_car (scm_cdr (s)));
-
-  if (sym == "Discant")
-    {
-      Stencil r = fm->find_by_name ("accordion.accDiscant");
-      m.add_stencil (r);
-      if (reg.substr (0, 1) == "F")
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (staff_space * 2.5 PT, Y_AXIS);
-	  m.add_stencil (d);
-	  reg = reg.substr (1);
-	}
-      int eflag = 0x00;
-      if (reg.substr (0, 3) == "EEE")
-	{
-	  eflag = 0x07;
-	  reg = reg.substr (3);
-	}
-      else if (reg.substr (0, 2) == "EE")
-	{
-	  eflag = 0x05;
-	  reg = reg.substr (2);
-	}
-      else if (reg.substr (0, 2) == "Eh")
-	{
-	  eflag = 0x04;
-	  reg = reg.substr (2);
-	}
-      else if (reg.substr (0, 1) == "E")
-	{
-	  eflag = 0x02;
-	  reg = reg.substr (1);
-	}
-      if (eflag & 0x02)
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (staff_space * 1.5 PT, Y_AXIS);
-	  m.add_stencil (d);
-	}
-      if (eflag & 0x04)
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (staff_space * 1.5 PT, Y_AXIS);
-	  d.translate_axis (0.8 * staff_space PT, X_AXIS);
-	  m.add_stencil (d);
-	}
-      if (eflag & 0x01)
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (staff_space * 1.5 PT, Y_AXIS);
-	  d.translate_axis (-0.8 * staff_space PT, X_AXIS);
-	  m.add_stencil (d);
-	}
-      if (reg.substr (0, 2) == "SS")
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (0.5 * staff_space PT, Y_AXIS);
-	  d.translate_axis (0.4 * staff_space PT, X_AXIS);
-	  m.add_stencil (d);
-	  d.translate_axis (-0.8 * staff_space PT, X_AXIS);
-	  m.add_stencil (d);
-	  reg = reg.substr (2);
-	}
-      if (reg.substr (0, 1) == "S")
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (0.5 * staff_space PT, Y_AXIS);
-	  m.add_stencil (d);
-	  reg = reg.substr (1);
-	}
-    }
-  else if (sym == "Freebase")
-    {
-      Stencil r = fm->find_by_name ("accordion.accFreebase");
-      m.add_stencil (r);
-      if (reg.substr (0, 1) == "F")
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (staff_space * 1.5 PT, Y_AXIS);
-	  m.add_stencil (d);
-	  reg = reg.substr (1);
-	}
-      if (reg == "E")
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (staff_space * 0.5 PT, Y_AXIS);
-	  m.add_stencil (d);
-	}
-    }
-  else if (sym == "Bayanbase")
-    {
-      Stencil r = fm->find_by_name ("accordion.accBayanbase");
-      m.add_stencil (r);
-      if (reg.substr (0, 1) == "T")
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (staff_space * 2.5 PT, Y_AXIS);
-	  m.add_stencil (d);
-	  reg = reg.substr (1);
-	}
-      /* include 4' reed just for completeness. You don't want to use this. */
-      if (reg.substr (0, 1) == "F")
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (staff_space * 1.5 PT, Y_AXIS);
-	  m.add_stencil (d);
-	  reg = reg.substr (1);
-	}
-      if (reg.substr (0, 2) == "EE")
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (staff_space * 0.5 PT, Y_AXIS);
-	  d.translate_axis (0.4 * staff_space PT, X_AXIS);
-	  m.add_stencil (d);
-	  d.translate_axis (-0.8 * staff_space PT, X_AXIS);
-	  m.add_stencil (d);
-	  reg = reg.substr (2);
-	}
-      if (reg.substr (0, 1) == "E")
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (staff_space * 0.5 PT, Y_AXIS);
-	  m.add_stencil (d);
-	  reg = reg.substr (1);
-	}
-    }
-  else if (sym == "Stdbase")
-    {
-      Stencil r = fm->find_by_name ("accordion.accStdbase");
-      m.add_stencil (r);
-      if (reg.substr (0, 1) == "T")
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (staff_space * 3.5 PT, Y_AXIS);
-	  m.add_stencil (d);
-	  reg = reg.substr (1);
-	}
-      if (reg.substr (0, 1) == "F")
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (staff_space * 2.5 PT, Y_AXIS);
-	  m.add_stencil (d);
-	  reg = reg.substr (1);
-	}
-      if (reg.substr (0, 1) == "M")
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (staff_space * 2 PT, Y_AXIS);
-	  d.translate_axis (staff_space PT, X_AXIS);
-	  m.add_stencil (d);
-	  reg = reg.substr (1);
-	}
-      if (reg.substr (0, 1) == "E")
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (staff_space * 1.5 PT, Y_AXIS);
-	  m.add_stencil (d);
-	  reg = reg.substr (1);
-	}
-      if (reg.substr (0, 1) == "S")
-	{
-	  Stencil d = fm->find_by_name ("accordion.accDot");
-	  d.translate_axis (staff_space * 0.5 PT, Y_AXIS);
-	  m.add_stencil (d);
-	  reg = reg.substr (1);
-	}
-    }
-  /* ugh maybe try to use regular font for S.B. and B.B and only use one font
-     for the rectangle */
-  else if (sym == "SB")
-    {
-      Stencil r = fm->find_by_name ("accordion.accSB");
-      m.add_stencil (r);
-    }
-  else if (sym == "BB")
-    {
-      Stencil r = fm->find_by_name ("accordion.accBB");
-      m.add_stencil (r);
-    }
-  else if (sym == "OldEE")
-    {
-      Stencil r = fm->find_by_name ("accordion.accOldEE");
-      m.add_stencil (r);
-    }
-  else if (sym == "OldEES")
-    {
-      Stencil r = fm->find_by_name ("accordion.accOldEES");
-      m.add_stencil (r);
-    }
-  return m;
-}
-
 Stencil
 Lookup::repeat_slash (Real w, Real s, Real t)
 {
@@ -687,7 +485,7 @@ Lookup::repeat_slash (Real w, Real s, Real t)
 }
 
 Stencil
-Lookup::bracket (Axis a, Interval iv, Real thick, Real protude, Real blot)
+Lookup::bracket (Axis a, Interval iv, Real thick, Real protrude, Real blot)
 {
   Box b;
   Axis other = Axis ((a + 1)%2);
@@ -697,8 +495,8 @@ Lookup::bracket (Axis a, Interval iv, Real thick, Real protude, Real blot)
   Stencil m = round_filled_box (b, blot);
 
   b[a] = Interval (iv[UP] - thick, iv[UP]);
-  Interval oi = Interval (-thick / 2, thick / 2 + fabs (protude));
-  oi *= sign (protude);
+  Interval oi = Interval (-thick / 2, thick / 2 + fabs (protrude));
+  oi *= sign (protrude);
   b[other] = oi;
   m.add_stencil (round_filled_box (b, blot));
   b[a] = Interval (iv[DOWN], iv[DOWN] + thick);
@@ -708,16 +506,16 @@ Lookup::bracket (Axis a, Interval iv, Real thick, Real protude, Real blot)
 }
 
 Stencil
-Lookup::triangle (Interval iv, Real thick, Real protude)
+Lookup::triangle (Interval iv, Real thick, Real protrude)
 {
   Box b;
   b[X_AXIS] = Interval (0, iv.length ());
-  b[Y_AXIS] = Interval (min (0., protude), max (0.0, protude));
+  b[Y_AXIS] = Interval (min (0., protrude), max (0.0, protrude));
 
   vector<Offset> points;
   points.push_back (Offset (iv[LEFT], 0));
   points.push_back (Offset (iv[RIGHT], 0));
-  points.push_back (Offset (iv.center (), protude));
+  points.push_back (Offset (iv.center (), protrude));
 
   return points_to_line_stencil (thick, points);
 

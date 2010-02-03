@@ -26,9 +26,9 @@ make_gettext = ('--gettext', '') in optlist   # --gettext    generate a node lis
 make_skeleton = ('--skeleton', '') in optlist # --skeleton   extract the node tree from a Texinfo source
 
 output_file = 'doc.pot'
-node_blurb = '''@ifhtml
-UNTRANSLATED NODE: IGNORE ME
-@end ifhtml
+
+# @untranslated should be defined as a macro in Texinfo source
+node_blurb = '''@untranslated
 '''
 doclang = ''
 head_committish = read_pipe ('git-rev-parse HEAD')
@@ -57,14 +57,15 @@ for x in optlist:
     elif x[0] == '-l': # -l ISOLANG  set documentlanguage to ISOLANG
         doclang = '; documentlanguage: ' + x[1]
 
-texinfo_with_menus_re = re.compile (r"^(\*) +([^:\n]+)::.*?$|^@(include|menu|end menu|node|(?:unnumbered|appendix)(?:(?:sub){0,2}sec)?|top|chapter|(?:sub){0,2}section|(?:major|chap|(?:sub){0,2})heading) *(.+?)$|@(rglos){(.+?)}", re.M)
+texinfo_with_menus_re = re.compile (r"^(\*) +([^:\n]+)::.*?$|^@(include|menu|end menu|node|(?:unnumbered|appendix)(?:(?:sub){0,2}sec)?|top|chapter|(?:sub){0,2}section|(?:major|chap|(?:sub){0,2})heading) *(.*?)$|@(rglos){(.+?)}", re.M)
 
 texinfo_re = re.compile (r"^@(include|node|(?:unnumbered|appendix)(?:(?:sub){0,2}sec)?|top|chapter|(?:sub){0,2}section|(?:major|chap|(?:sub){0,2})heading) *(.+?)$|@(rglos){(.+?)}", re.M)
 
-ly_string_re = re.compile (r'^([a-zA-Z]+)[\t ]*=|%+[\t ]*(.*)$')
-verbatim_ly_re = re.compile (r'@lilypond\[.*?verbatim')
+ly_string_re = re.compile (r'^([a-zA-Z]+)[\t ]*=|%+[\t ]*(.*)$|\\(?:new|context)\s+(?:[a-zA-Z]*?(?:Staff(?:Group)?|Voice|FiguredBass|FretBoards|Names|Devnull))\s+=\s+"?([a-zA-Z]+)"?\s+')
+lsr_verbatim_ly_re = re.compile (r'% begin verbatim$')
+texinfo_verbatim_ly_re = re.compile (r'^@lilypond\[.*?verbatim')
 
-def process_texi (texifilename, i_blurb, n_blurb, write_skeleton, topfile, output_file=None):
+def process_texi (texifilename, i_blurb, n_blurb, write_skeleton, topfile, output_file=None, scan_ly=False):
     try:
         f = open (texifilename, 'r')
         texifile = f.read ()
@@ -73,23 +74,32 @@ def process_texi (texifilename, i_blurb, n_blurb, write_skeleton, topfile, outpu
         includes = []
 
         # process ly var names and comments
-        if output_file:
+        if output_file and (scan_ly or texifilename.endswith ('.ly')):
             lines = texifile.splitlines ()
             i = 0
             in_verb_ly_block = False
+            if texifilename.endswith ('.ly'):
+                verbatim_ly_re = lsr_verbatim_ly_re
+            else:
+                verbatim_ly_re = texinfo_verbatim_ly_re
             for i in range (len (lines)):
-                if verbatim_ly_re.match (lines[i]):
+                if verbatim_ly_re.search (lines[i]):
                     in_verb_ly_block = True
                 elif lines[i].startswith ('@end lilypond'):
                     in_verb_ly_block = False
                 elif in_verb_ly_block:
-                    for (var, comment) in ly_string_re.findall (lines[i]):
+                    for (var, comment, context_id) in ly_string_re.findall (lines[i]):
                         if var:
                             output_file.write ('# ' + printedfilename + ':' + \
                                                str (i + 1) + ' (variable)\n_(r"' + var + '")\n')
                         elif comment:
                             output_file.write ('# ' + printedfilename + ':' + \
-                                               str (i + 1) + ' (comment)\n_(r"' + comment + '")\n')
+                                               str (i + 1) + ' (comment)\n_(r"' + \
+                                               comment.replace ('"', '\\"') + '")\n')
+                        elif context_id:
+                            output_file.write ('# ' + printedfilename + ':' + \
+                                               str (i + 1) + ' (context id)\n_(r"' + \
+                                               context_id + '")\n')
 
         # process Texinfo node names and section titles
         if write_skeleton:
@@ -104,19 +114,23 @@ def process_texi (texifilename, i_blurb, n_blurb, write_skeleton, topfile, outpu
                     g.write ('* ' + item[1] + '::\n')
                 elif output_file and item[4] == 'rglos':
                     output_file.write ('_(r"' + item[5] + '") # @rglos in ' + printedfilename + '\n')
+                elif item[2] == 'menu':
+                    g.write ('@menu\n')
+                elif item[2] == 'end menu':
+                    g.write ('@end menu\n\n')
                 else:
                     g.write ('@' + item[2] + ' ' + item[3] + '\n')
                     if node_trigger:
                         g.write (n_blurb)
                         node_trigger = False
-                    if not item[2] in ('include', 'menu', 'end menu'):
+                    elif item[2] == 'include':
+                        includes.append (item[3])
+                    else:
                         if output_file:
                             output_file.write ('# @' + item[2] + ' in ' + \
                                 printedfilename + '\n_(r"' + item[3].strip () + '")\n')
                         if item[2] == 'node':
                             node_trigger = True
-                    elif item[2] == 'include':
-                        includes.append(item[3])
             g.write (end_blurb)
             g.close ()
 
@@ -129,12 +143,13 @@ def process_texi (texifilename, i_blurb, n_blurb, write_skeleton, topfile, outpu
                     output_file.write ('# @rglos in ' + printedfilename + '\n_(r"' + item[3] + '")\n')
                 else:
                     output_file.write ('# @' + item[0] + ' in ' + printedfilename + '\n_(r"' + item[1].strip () + '")\n')
+
         if process_includes:
             dir = os.path.dirname (texifilename)
             for item in includes:
-                process_texi (os.path.join (dir, item.strip ()), i_blurb, n_blurb, write_skeleton, topfile, output_file)
+                process_texi (os.path.join (dir, item.strip ()), i_blurb, n_blurb, write_skeleton, topfile, output_file, scan_ly)
     except IOError, (errno, strerror):
-        print "I/O error(%s): %s: %s" % (errno, texifilename, strerror)
+        sys.stderr.write ("I/O error(%s): %s: %s\n" % (errno, texifilename, strerror))
 
 
 if intro_blurb != '':
@@ -146,11 +161,16 @@ if make_gettext:
     node_list = open (node_list_filename, 'w')
     node_list.write ('# -*- coding: utf-8 -*-\n')
     for texi_file in texi_files:
-        process_texi (texi_file, intro_blurb, node_blurb, make_skeleton, os.path.basename (texi_file), node_list)
+        # Urgly: scan ly comments and variable names only in English doco
+        is_english_doc = 'Documentation/user' in texi_file
+        process_texi (texi_file, intro_blurb, node_blurb, make_skeleton,
+                      os.path.basename (texi_file), node_list,
+                      scan_ly=is_english_doc)
     for word in ('Up:', 'Next:', 'Previous:', 'Appendix ', 'Footnotes', 'Table of Contents'):
         node_list.write ('_(r"' + word + '")\n')
     node_list.close ()
     os.system ('xgettext -c -L Python --no-location -o ' + output_file + ' ' + node_list_filename)
 else:
     for texi_file in texi_files:
-        process_texi (texi_file, intro_blurb, node_blurb, make_skeleton, os.path.basename (texi_file))
+        process_texi (texi_file, intro_blurb, node_blurb, make_skeleton,
+                      os.path.basename (texi_file))

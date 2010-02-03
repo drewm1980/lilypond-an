@@ -1,13 +1,13 @@
 @c -*- coding: utf-8; mode: texinfo; -*-
 @c This file is part of lilypond.tely
 @ignore
-    Translation of GIT committish: fc6469f52dc27d4b5c22067367878a5c2ff5fb45
+    Translation of GIT committish: b54fc6953a8d70a3c51e8c3d0cbf9b3fe9652d78
 
     When revising a translation, copy the HEAD committish of the
     version that you are working on.  See TRANSLATION for details.
 @end ignore
 
-@c \version "2.11.38"
+@c \version "2.11.61"
 
 
 @c TODO: add tablature.
@@ -36,7 +36,7 @@ c1 c2 c8 c16
 @tab
 @lilypond[fragment,relative=2,notime]
 \override Staff.Clef #'break-visibility = #all-invisible
-c4. c4..  
+c4. c4..
 @end lilypond
 
 @item @code{c d e f g a b }
@@ -67,7 +67,7 @@ s4_" "
 @tab Taktangaben
 @tab
 @lilypond[fragment]
-\override Staff.Clef #'transparent = ##t 
+\override Staff.Clef #'transparent = ##t
 \time 3/4
 s4_" "
 \time 4/4
@@ -98,7 +98,7 @@ d ~ d
 @lilypond[notime,fragment]
 \clef treble
 \key es \major
-s4 
+s4
 @end lilypond
 
 @item @var{note}@code{'}
@@ -212,7 +212,7 @@ a\> a a\!
 @tab
 @lilypond[fragment,relative=2]
 \set Staff.implicitTimeSignatureVisibility = #all-invisible
-<c e> 
+<c e>
 @end lilypond
 
 
@@ -263,7 +263,7 @@ twinkle
 <<
    { g'1 g }
   \new Lyrics \lyricsto "" { twin -- kle }
->> 
+>>
 @end lilypond
 
 @item @code{\chordmode @{ c:dim f:maj7 @}}
